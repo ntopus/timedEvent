@@ -1,0 +1,40 @@
+version: "2"
+services:
+  go:
+    image: golang
+    networks:
+      - back
+    expose:
+      - "9003/udp"
+    ports:
+      - "9001:9003"
+  mongo:
+    image: mongo
+    networks:
+      back:
+        aliases:
+          - "timeQueue.DB.ivanmeca"
+    expose:
+      - "27017"
+    ports:
+      - "27017:27017"
+  rabbitmq:
+    image: rabbitmq:management
+    networks:
+      back:
+        aliases:
+          - "timeQueue.Queue.ivanmeca"
+    expose:
+      - "15672"
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    environment:
+      RABBITMQ_DEFAULT_USER: randomUser
+      RABBITMQ_DEFAULT_PASS: randomPass
+      RABBITMQ_DEFAULT_VHOST: /
+    volumes:
+      - ./docker-data/rabbitmq/data:/var/lib/rabbitmq
+
+networks:
+  back:

@@ -1,0 +1,8 @@
+package: github.com/ivanmeca/timedQueue
+import:
+ - package: github.com/globalsign/mgo
+ - package: github.com/globalsign/mgo/bson
+ - package: github.com/gin-gonic/gin
+ - package: github.com/micro/go-config
+ - package: github.com/urfave/cli
+ - package: golang.org/x/oauth2
