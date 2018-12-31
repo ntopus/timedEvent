@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"github.com/ivanmeca/timedQueueService/application"
 	"github.com/ivanmeca/timedQueueService/config"
 	"github.com/urfave/cli"
 	"log"
@@ -37,12 +38,12 @@ func runGenerateConfigSample(cli *cli.Context) error {
 func runApplication(cli *cli.Context) error {
 	c := context.Background()
 	ctx, cancel := context.WithCancel(c)
-	verifyConfig(cli)
-	//appMan := application.NewApplicationManager(cli.String(flagConfig))
-	//err := appMan.RunApplication(ctx)
-	//if err != nil {
-	//	return err
-	//}
+	err := verifyConfig(cli)
+	if err != nil {
+		log.Fatal("Could not loud config file")
+		return err
+	}
+	application.RunMainApplication(ctx)
 	defer cancel()
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)

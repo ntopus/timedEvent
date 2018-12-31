@@ -8,10 +8,16 @@ import (
 var strConfig ConfigData
 
 func InitConfig(filename string) {
-	config.Load(file.NewSource(
+	err := config.Load(file.NewSource(
 		file.WithPath(filename),
 	))
-	config.Scan(&strConfig)
+	if err != nil {
+		panic(err.Error())
+	}
+	err = config.Scan(&strConfig)
+	if err != nil {
+		panic(err.Error())
+	}
 }
 
 func GetConfig() *ConfigData {
