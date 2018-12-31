@@ -13,7 +13,7 @@ services:
     networks:
       back:
         aliases:
-          - "timeQueue.DB.ivanmeca"
+          - "timeQueue.DB.ivanmeca.com.br"
     expose:
       - "27017"
     ports:
@@ -23,7 +23,7 @@ services:
     networks:
       back:
         aliases:
-          - "timeQueue.Queue.ivanmeca"
+          - "timeQueue.Queue.ivanmeca.com.br"
     expose:
       - "15672"
     ports:

@@ -1,4 +1,4 @@
-package: github.com/ivanmeca/timedQueue
+package: github.com/ivanmeca/timedQueueService
 import:
  - package: github.com/globalsign/mgo
  - package: github.com/globalsign/mgo/bson
