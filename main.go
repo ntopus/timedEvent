@@ -2,32 +2,47 @@ package main
 
 import (
 	"context"
-	"devgit.kf.com.br/comercial/fleet-management-api/application"
+	"errors"
+	"github.com/ivanmeca/timedQueueService/config"
 	"github.com/urfave/cli"
+	"log"
 	"os"
 	"os/signal"
 	"sort"
 )
 
 const (
-	flagContract = "contract"
-	flagConfig   = "config"
+	flagConfig = "config"
 )
 
-func runTokenGenerator(cli *cli.Context) error {
-	appMan := application.NewTokenApplicationManager(cli.String(flagConfig))
-	appMan.RunTokenGenerator(cli.String(flagContract))
+func verifyConfig(cli *cli.Context) error {
+	configFile := cli.String("config")
+	if len(configFile) < 3 {
+		return errors.New("Could not get config file")
+	}
+	config.InitConfig(configFile)
+	return nil
+}
+
+func runGenerateConfigSample(cli *cli.Context) error {
+	configSampleFile := cli.String(flagConfig)
+	err := config.ConfigSample(configSampleFile)
+	if err != nil {
+		log.Fatal("Could not get config sample")
+		return err
+	}
 	return nil
 }
 
 func runApplication(cli *cli.Context) error {
 	c := context.Background()
 	ctx, cancel := context.WithCancel(c)
-	appMan := application.NewApplicationManager(cli.String(flagConfig))
-	err := appMan.RunApplication(ctx)
-	if err != nil {
-		return err
-	}
+	verifyConfig(cli)
+	//appMan := application.NewApplicationManager(cli.String(flagConfig))
+	//err := appMan.RunApplication(ctx)
+	//if err != nil {
+	//	return err
+	//}
 	defer cancel()
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)
@@ -47,23 +62,20 @@ func main() {
 	app.Version = Version + "(" + GitCommit + ")"
 	app.Name = ApplicationName
 	app.Usage = ""
-	app.Description = ""
-	app.Copyright = "nTopus© - n Possibilities..."
+	app.Description = "Service for support timed queue"
 	app.EnableBashCompletion = true
 	app.Action = runApplication
 	app.Commands = []cli.Command{
 		{
-			Name:    "token-generator",
-			Aliases: []string{"tg"},
-			Action:  runTokenGenerator,
+			Name:    "config-sample",
+			Usage:   "generate config application file sample",
+			Aliases: []string{"cfg-sample"},
+			Action:  runGenerateConfigSample,
 			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name: flagContract + ", cnt",
-				},
 				cli.StringFlag{
 					Name:  flagConfig + ", c",
 					Value: "./config/config.json",
-					Usage: "Path to config file",
+					Usage: "Path to config sample file",
 				},
 			},
 		},

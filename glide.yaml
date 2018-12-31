@@ -6,3 +6,4 @@ import:
  - package: github.com/micro/go-config
  - package: github.com/urfave/cli
  - package: golang.org/x/oauth2
+ - package: github.com/onsi/gomega
