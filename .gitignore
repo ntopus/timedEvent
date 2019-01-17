@@ -16,3 +16,4 @@
 .idea/
 /docker-data/
 /glide.lock
+/Gopkg.lock
