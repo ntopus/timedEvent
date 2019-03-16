@@ -2,8 +2,8 @@ version: "2"
 services:
   go:
     image: golang
-    links:
-      - "rabbitmq:srvqueue.ivanmeca.com.br"
+    networks:
+      - back
     expose:
       - "9003"
     ports:
@@ -13,6 +13,10 @@ services:
 
   rabbitmq:
     image: rabbitmq:management
+    networks:
+      back:
+        aliases:
+          - "queue.interno.ivanmeca.com.br"
     ports:
       - "15672:15672"
       - "5672:5672"
@@ -21,4 +25,20 @@ services:
       RABBITMQ_DEFAULT_PASS: testPass
       RABBITMQ_DEFAULT_VHOST: /
     volumes:
-      - ./rabbitmq/data:/var/lib/rabbitmq
+      - ./docker-data/rabbitmq/data:/var/lib/rabbitmq
+  mongo:
+    image: mongo
+    networks:
+      back:
+        aliases:
+          - "db.interno.ivanmeca.com.br"
+    expose:
+      - "27017"
+    ports:
+      - "27017:27017"
+  #    restart: always
+  #    environment:
+  #      MONGO_INITDB_ROOT_USERNAME: root
+  #      MONGO_INITDB_ROOT_PASSWORD: example-
+networks:
+  back:
