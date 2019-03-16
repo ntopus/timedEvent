@@ -26,19 +26,17 @@ services:
       RABBITMQ_DEFAULT_VHOST: /
     volumes:
       - ./docker-data/rabbitmq/data:/var/lib/rabbitmq
-  mongo:
-    image: mongo
+  arangodb:
+    image: arangodb:3.4.0
     networks:
       back:
         aliases:
           - "db.interno.ivanmeca.com.br"
-    expose:
-      - "27017"
     ports:
-      - "27017:27017"
-  #    restart: always
-  #    environment:
-  #      MONGO_INITDB_ROOT_USERNAME: root
-  #      MONGO_INITDB_ROOT_PASSWORD: example-
+      - 8529:8529
+    volumes:
+      - ./docker-data/arango/:/var/lib/arangodb-apps/_db
+    environment:
+      - ARANGO_NO_AUTH=1
 networks:
   back:
