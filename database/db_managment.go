@@ -1,9 +1,6 @@
 package database
 
 import (
-	"devgit.kf.com.br/border/location-api/config"
-	"devgit.kf.com.br/border/location-api/routes/helpers/constants"
-	"devgit.kf.com.br/border/location-api/structs"
 	"errors"
 	"fmt"
 	"github.com/arangodb/go-driver"

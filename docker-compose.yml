@@ -2,39 +2,23 @@ version: "2"
 services:
   go:
     image: golang
-    networks:
-      - back
+    links:
+      - "rabbitmq:srvqueue.ivanmeca.com.br"
     expose:
-      - "9003/udp"
+      - "9003"
     ports:
       - "9001:9003"
-  arango:
-    image: arangodb:3.3
-    ports:
-      - "8529:8529"
     volumes:
-      - ./docker-data/arangodb:/var/lib/arangodb3
-    environment:
-      #      ARANGO_RANDOM_ROOT_PASSWORD: 1
-      ARANGO_ROOT_PASSWORD: "nN7aCgKSjO5G0gSc"
-      ARANGO_STORAGE_ENGINE: rocksdb
+      - ../:/go/src/github.com/ivanmeca/timedQueueService
+
   rabbitmq:
     image: rabbitmq:management
-    networks:
-      back:
-        aliases:
-          - "timeQueue.Queue.ivanmeca.com.br"
-    expose:
-      - "15672"
     ports:
       - "15672:15672"
       - "5672:5672"
     environment:
-      RABBITMQ_DEFAULT_USER: randomUser
-      RABBITMQ_DEFAULT_PASS: randomPass
+      RABBITMQ_DEFAULT_USER: testuser
+      RABBITMQ_DEFAULT_PASS: testPass
       RABBITMQ_DEFAULT_VHOST: /
     volumes:
-      - ./docker-data/rabbitmq/data:/var/lib/rabbitmq
-
-networks:
-  back:
+      - ./rabbitmq/data:/var/lib/rabbitmq

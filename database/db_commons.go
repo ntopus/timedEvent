@@ -12,25 +12,9 @@ import (
 var dbSession *mgo.Session
 var once sync.Once
 
-const FleetDBName = "fleet-management"
+const FleetDBName = "timed-queue-service"
 
 func EnsureIndex() error {
-	err := DriverEnsureIndex()
-	if err != nil {
-		return err
-	}
-	err = GsmEnsureIndex()
-	if err != nil {
-		return err
-	}
-	err = TrackingDeviceEnsureIndex()
-	if err != nil {
-		return err
-	}
-	err = VehicleEnsureIndex()
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
