@@ -1,6 +1,6 @@
 package main
 
-const ApplicationName = "timed-queue-service"
+const ApplicationName = "timed-event"
 
 // The git commit that was compiled. This will be filled in by the compiler.
 var GitCommit string

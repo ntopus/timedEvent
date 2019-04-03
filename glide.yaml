@@ -1,4 +1,4 @@
-package: github.com/ivanmeca/timedQueueService
+package: github.com/ivanmeca/timedEvent
 import:
  - package: github.com/globalsign/mgo
  - package: github.com/globalsign/mgo/bson
@@ -7,3 +7,8 @@ import:
  - package: github.com/urfave/cli
  - package: golang.org/x/oauth2
  - package: github.com/onsi/gomega
+ - package: github.com/arangodb/go-driver
+ - package: github.com/cloudevents/sdk-go
+ - package: github.com/pborman/uuid
+   version: 0.2.0
+

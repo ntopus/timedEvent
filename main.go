@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"errors"
-	"github.com/ivanmeca/timedQueueService/application"
-	"github.com/ivanmeca/timedQueueService/config"
+	"github.com/ivanmeca/timedEvent/application"
+	"github.com/ivanmeca/timedEvent/config"
 	"github.com/urfave/cli"
 	"log"
 	"os"
