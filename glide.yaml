@@ -10,5 +10,4 @@ import:
  - package: github.com/arangodb/go-driver
  - package: github.com/cloudevents/sdk-go
  - package: github.com/pborman/uuid
-   version: 0.2.0
 

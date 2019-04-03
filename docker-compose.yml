@@ -13,7 +13,7 @@ services:
     ports:
       - "8529:8529"
     volumes:
-      - ./data/arangodb:/var/lib/arangodb3
+      - ./docker-data/arangodb:/var/lib/arangodb3
     environment:
       #      ARANGO_RANDOM_ROOT_PASSWORD: 1
       ARANGO_ROOT_PASSWORD: "nN7aCgKSjO5G0gSc"

@@ -9,6 +9,9 @@ import (
 
 const (
 	ApplicationJson = "application/json"
+	DestinationPath = "destPath"
+	DestinationType = "destType"
+	DestinationTime = "destTime"
 )
 
 type ServiceEntry struct {
