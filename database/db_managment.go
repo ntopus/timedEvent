@@ -1,9 +1,12 @@
 package database
 
 import (
+	"devgit.kf.com.br/border/location-api/routes/helpers/constants"
+	"devgit.kf.com.br/border/location-api/structs"
 	"errors"
 	"fmt"
 	"github.com/arangodb/go-driver"
+	"github.com/ivanmeca/timedEvent/config"
 	"strconv"
 	"time"
 )
@@ -28,7 +31,7 @@ const (
 	statusCollection   = "statusCollection"
 )
 
-func NewDbManagement(config *config.AppConfig) (Management, error) {
+func NewDbManagement(config *config.ConfigData) (Management, error) {
 	client, err := NewClientDB(config)
 	if err != nil {
 		return nil, err

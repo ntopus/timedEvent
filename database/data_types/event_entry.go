@@ -14,11 +14,11 @@ const (
 	DestinationTime = "destTime"
 )
 
-type ServiceEntry struct {
+type EventEntry struct {
 	v02.Event
 }
 
-func NewCloudEventJsonV02(eventType string, data string) *ServiceEntry {
+func NewCloudEventJsonV02(eventType string, data string) *EventEntry {
 	now := time.Now()
 	e := &v02.Event{
 		ContentType: ApplicationJson,
@@ -28,29 +28,29 @@ func NewCloudEventJsonV02(eventType string, data string) *ServiceEntry {
 		SpecVersion: cloudevents.Version02,
 		Data:        data,
 	}
-	return &ServiceEntry{*e}
+	return &EventEntry{*e}
 }
 
-func (e *ServiceEntry) GetData() interface{} {
+func (e *EventEntry) GetData() interface{} {
 	return e.Data
 }
 
-func (e *ServiceEntry) GetType() string {
+func (e *EventEntry) GetType() string {
 	return e.Type
 }
 
-func (e *ServiceEntry) GetContentType() string {
+func (e *EventEntry) GetContentType() string {
 	return e.ContentType
 }
 
-func (e *ServiceEntry) GetSpecVersion() string {
+func (e *EventEntry) GetSpecVersion() string {
 	return e.SpecVersion
 }
 
-func (e *ServiceEntry) UnmarshalJSON(b []byte) error {
+func (e *EventEntry) UnmarshalJSON(b []byte) error {
 	return e.Event.UnmarshalJSON(b)
 }
 
-func (e *ServiceEntry) MarshalJSON() ([]byte, error) {
+func (e *EventEntry) MarshalJSON() ([]byte, error) {
 	return e.Event.MarshalJSON()
 }
