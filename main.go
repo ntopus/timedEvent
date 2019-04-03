@@ -2,8 +2,9 @@ package main
 
 import (
 	"context"
-	"github.com/gin-gonic/gin"
-	"github.com/ivanmeca/timedQueueService/application"
+	"errors"
+	"github.com/ivanmeca/timedEvent/application"
+	"github.com/ivanmeca/timedEvent/config"
 	"github.com/urfave/cli"
 	"os"
 	"os/signal"

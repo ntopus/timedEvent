@@ -2,7 +2,7 @@ package database
 
 import (
 	"github.com/globalsign/mgo"
-	"github.com/ivanmeca/timedQueueService/config"
+	"github.com/ivanmeca/timedEvent/config"
 	"net/http"
 	"regexp"
 	"strings"
