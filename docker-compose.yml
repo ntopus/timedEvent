@@ -15,8 +15,7 @@ services:
     volumes:
       - ./docker-data/arangodb:/var/lib/arangodb3
     environment:
-      #      ARANGO_RANDOM_ROOT_PASSWORD: 1
-      ARANGO_ROOT_PASSWORD: "nN7aCgKSjO5G0gSc"
+      ARANGO_ROOT_PASSWORD: "rootpass"
       ARANGO_STORAGE_ENGINE: rocksdb
   rabbitmq:
     image: rabbitmq:management
