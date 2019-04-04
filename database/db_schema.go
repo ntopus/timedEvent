@@ -4,6 +4,8 @@ import (
 	"github.com/arangodb/go-driver"
 )
 
+const dbName = "teste"
+
 func schema(client driver.Client, collections []string) (driver.Database, map[string]driver.Collection, error) {
 	db, err := checkDatabase(client)
 	if err != nil {

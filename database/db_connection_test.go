@@ -15,7 +15,7 @@ func TestConnection(test *testing.T) {
 		ServerHost:     "timedEvent.db.ivanmeca.com.br",
 		ServerPort:     "8529",
 		ServerUser:     "root",
-		ServerPassword: " rootpass",
+		ServerPassword: "rootpass",
 		DbName:         "testDb",
 	}
 	_, err := NewClientDB(&connArgs)
