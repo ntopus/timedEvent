@@ -1,13 +1,21 @@
 package: github.com/ivanmeca/timedEvent
 import:
- - package: github.com/globalsign/mgo
- - package: github.com/globalsign/mgo/bson
- - package: github.com/gin-gonic/gin
- - package: github.com/micro/go-config
- - package: github.com/urfave/cli
- - package: golang.org/x/oauth2
- - package: github.com/onsi/gomega
- - package: github.com/arangodb/go-driver
- - package: github.com/cloudevents/sdk-go
- - package: github.com/pborman/uuid
-
+- package: github.com/arangodb/go-driver
+  subpackages:
+  - http
+- package: github.com/cloudevents/sdk-go
+  version: ~0.4.4
+  subpackages:
+  - v02
+- package: github.com/micro/go-config
+  version: ~1.1.0
+  subpackages:
+  - source/file
+- package: github.com/pborman/uuid
+  version: ~1.2.0
+- package: github.com/streadway/amqp
+- package: github.com/urfave/cli
+  version: ~1.20.0
+testImport:
+- package: github.com/onsi/gomega
+  version: ~1.5.0

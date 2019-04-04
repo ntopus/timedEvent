@@ -1,7 +1,7 @@
 package queue_repository
 
 import (
-	"github.com/ivanmeca/timedQueueService/libs/queue"
+	"github.com/ivanmeca/timedEvent/libs/queue"
 	"github.com/streadway/amqp"
 	"strconv"
 )

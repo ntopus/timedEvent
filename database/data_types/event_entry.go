@@ -1,8 +1,6 @@
 package data_types
 
 import (
-	"github.com/cloudevents/sdk-go"
-	"github.com/cloudevents/sdk-go/v02"
 	"github.com/pborman/uuid"
 	"time"
 )
