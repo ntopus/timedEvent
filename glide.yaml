@@ -4,18 +4,19 @@ import:
   subpackages:
   - http
 - package: github.com/cloudevents/sdk-go
-  version: ~0.4.4
+  version: 0.4.4
   subpackages:
   - v02
 - package: github.com/micro/go-config
-  version: ~1.1.0
+  version: v1.1.0
   subpackages:
   - source/file
 - package: github.com/pborman/uuid
-  version: ~1.2.0
-- package: github.com/streadway/amqp
+  version: v1.2
 - package: github.com/urfave/cli
-  version: ~1.20.0
+  version: v1.20.0
+- package: github.com/kofre/lib-queue
+  version: 1.0.0
 testImport:
 - package: github.com/onsi/gomega
-  version: ~1.5.0
+  version: v1.5.0

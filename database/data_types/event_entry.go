@@ -1,6 +1,7 @@
 package data_types
 
 import (
+	"github.com/cloudevents/sdk-go/pkg/cloudevents"
 	"github.com/pborman/uuid"
 	"time"
 )
@@ -13,12 +14,12 @@ const (
 )
 
 type EventEntry struct {
-	v02.Event
+	cloudevents.EventContextV02
 }
 
 func NewCloudEventJsonV02(eventType string, data string) *EventEntry {
 	now := time.Now()
-	e := &v02.Event{
+	e := &EventEntry{
 		ContentType: ApplicationJson,
 		Type:        eventType,
 		ID:          uuid.NewUUID().String(),
