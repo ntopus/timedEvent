@@ -1,6 +1,8 @@
 package data_types
 
 import (
+	"encoding/json"
+	"errors"
 	"github.com/cloudevents/sdk-go/pkg/cloudevents"
 	"github.com/cloudevents/sdk-go/pkg/cloudevents/types"
 	"github.com/pborman/uuid"
@@ -18,16 +20,23 @@ type EventEntry struct {
 	cloudevents.Event
 }
 
-func NewCloudEventJsonV02(eventType string, data string) *EventEntry {
-	now := types.ParseTimestamp(time.Now().String())
+func NewCloudEventJsonV02(eventType string, data []byte) (*EventEntry, error) {
+	now := types.ParseTimestamp(time.Now().UTC().Format(time.RFC3339Nano))
 	e := EventEntry{}
 	e.Context = cloudevents.EventContextV02{
 		ID:          uuid.NewUUID().String(),
 		Type:        eventType,
 		Time:        now,
+		Source:      *types.ParseURLRef("http://localhost:8080/"),
 		SpecVersion: cloudevents.CloudEventsVersionV02,
 	}.AsV02()
-	return &e
+
+	validJson := json.Valid(data)
+	if !validJson {
+		return nil, errors.New("invalid input data json")
+	}
+	e.Data = data
+	return &e, nil
 }
 
 func (e *EventEntry) GetData() interface{} {
@@ -46,10 +55,10 @@ func (e *EventEntry) GetSpecVersion() string {
 	return e.Context.GetSpecVersion()
 }
 
-func (e *EventEntry) UnmarshalJSON(b []byte) error {
-	return e.UnmarshalJSON(b)
-}
-
-func (e *EventEntry) MarshalJSON() ([]byte, error) {
-	return e.MarshalJSON()
-}
+//func (e *EventEntry) UnmarshalJSON(b []byte) error {
+//	return e.UnmarshalJSON(b)
+//}
+//
+//func (e *EventEntry) MarshalJSON() ([]byte, error) {
+//	return e.MarshalJSON()
+//}
