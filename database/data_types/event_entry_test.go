@@ -6,12 +6,18 @@ import (
 	"testing"
 )
 
-func TestEvbentEntry(test *testing.T) {
+func TestEventEntry(test *testing.T) {
 	RegisterTestingT(test)
-
 	fmt.Println("Trying to generate a event entry")
+	event, err := NewCloudEventJsonV02(ApplicationJson, []byte(`"Teste"`), nil)
+	Expect(err).ShouldNot(HaveOccurred())
+	fmt.Println(event.String())
+}
 
-	event, err := NewCloudEventJsonV02(ApplicationJson, []byte(`"Teste"`))
+func TestEventEntryWithExtensions(test *testing.T) {
+	RegisterTestingT(test)
+	fmt.Println("Trying to generate a event entry with extensions")
+	event, err := NewCloudEventJsonV02(ApplicationJson, []byte(`"Teste"`), map[string]interface{}{"DestPath": "teste"})
 	Expect(err).ShouldNot(HaveOccurred())
 	fmt.Println(event.String())
 }

@@ -1,37 +1,28 @@
 package database
 
-//
-//import (
-//	"devgit.kf.com.br/border/location-api/routes/helpers/constants"
-//	"devgit.kf.com.br/border/location-api/structs"
-//	"errors"
-//	"fmt"
-//	"github.com/arangodb/go-driver"
-//	"github.com/ivanmeca/timedEvent/config"
-//	"strconv"
-//	"time"
-//)
-//
-//type Management interface {
-//	InsertLocation(location *structs.Location) (bool, error)
-//	ReadLocation(key string, location *structs.Location) (bool, error)
-//	UpdateLocation(patch map[string]interface{}, key string) (bool, error)
-//	HealthCheck() (bool, error)
-//	ReadLocationWithFilters(location structs.Location) (structs.Location, error)
-//	ReadLocations(filters map[string]string) ([]structs.Location, error)
-//}
-//
-//type LocationDB struct {
-//	db   driver.Database
-//	coll map[string]driver.Collection
-//}
-//
-//const (
-//	dbName             = "location"
-//	locationCollection = "locationCollection"
-//	statusCollection   = "statusCollection"
-//)
-//
+import (
+	"github.com/arangodb/go-driver"
+	"github.com/ivanmeca/timedEvent/database/data_types"
+)
+
+type Management interface {
+	Insert(item *data_types.EventEntry) (bool, error)
+	ReadItem(key string, item *data_types.EventEntry) (bool, error)
+	Update(patch map[string]interface{}, key string) (bool, error)
+	HealthCheck() (bool, error)
+	ReadCollection(filters map[string]string) ([]data_types.EventEntry, error)
+}
+
+type EventDB struct {
+	db   driver.Database
+	coll map[string]data_types.EventEntry
+}
+
+const (
+	dbName           = "timedEvent"
+	eventsCollection = "timedEventCollection"
+)
+
 //func NewDbManagement(config *config.ConfigData) (Management, error) {
 //	client, err := NewClientDB(config)
 //	if err != nil {

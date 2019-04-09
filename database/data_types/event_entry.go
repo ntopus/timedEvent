@@ -20,7 +20,7 @@ type EventEntry struct {
 	cloudevents.Event
 }
 
-func NewCloudEventJsonV02(eventType string, data []byte) (*EventEntry, error) {
+func NewCloudEventJsonV02(eventType string, data []byte, extensions map[string]interface{}) (*EventEntry, error) {
 	now := types.ParseTimestamp(time.Now().UTC().Format(time.RFC3339Nano))
 	e := EventEntry{}
 	e.Context = cloudevents.EventContextV02{
@@ -29,6 +29,7 @@ func NewCloudEventJsonV02(eventType string, data []byte) (*EventEntry, error) {
 		Time:        now,
 		Source:      *types.ParseURLRef("http://localhost:8080/"),
 		SpecVersion: cloudevents.CloudEventsVersionV02,
+		Extensions:  extensions,
 	}.AsV02()
 
 	validJson := json.Valid(data)

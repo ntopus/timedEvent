@@ -9,10 +9,10 @@ func configSample() *ConfigData {
 	var config ConfigData
 
 	config.DataBase.DbName = "time-queue"
-	config.DataBase.ServerHost = "timeQueue.DB.ivanmeca.com.br"
-	config.DataBase.ServerPort = "9003"
-	config.DataBase.ServerUser = ""
-	config.DataBase.ServerPassword = ""
+	config.DataBase.ServerHost = "timedEvent.db.ivanmeca.com.br"
+	config.DataBase.ServerPort = "8529"
+	config.DataBase.ServerUser = "root"
+	config.DataBase.ServerPassword = "rootpass"
 	return &config
 }
 
