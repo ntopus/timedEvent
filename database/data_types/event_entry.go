@@ -54,11 +54,3 @@ func (e *EventEntry) GetContentType() string {
 func (e *EventEntry) GetSpecVersion() string {
 	return e.Context.GetSpecVersion()
 }
-
-//func (e *EventEntry) UnmarshalJSON(b []byte) error {
-//	return e.UnmarshalJSON(b)
-//}
-//
-//func (e *EventEntry) MarshalJSON() ([]byte, error) {
-//	return e.MarshalJSON()
-//}

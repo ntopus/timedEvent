@@ -11,7 +11,7 @@ func TestEvbentEntry(test *testing.T) {
 
 	fmt.Println("Trying to generate a event entry")
 
-	event, err := NewCloudEventJsonV02(ApplicationJson, []byte(`{"name":"Teste"}`))
+	event, err := NewCloudEventJsonV02(ApplicationJson, []byte(`"Teste"`))
 	Expect(err).ShouldNot(HaveOccurred())
 	fmt.Println(event.String())
 }
