@@ -9,7 +9,7 @@ func schema(client driver.Client, dbName string, collections []string) (driver.D
 	if err != nil {
 		return nil, nil, err
 	}
-	collMap, err := checkCollection(db, collections)
+	collMap, err := checkCollections(db, collections)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -36,7 +36,7 @@ func checkDatabase(client driver.Client, dbName string) (driver.Database, error)
 	return db, nil
 }
 
-func checkCollection(db driver.Database, collections []string) (map[string]driver.Collection, error) {
+func checkCollections(db driver.Database, collections []string) (map[string]driver.Collection, error) {
 	collMap := make(map[string]driver.Collection)
 	for _, collection := range collections {
 		exist, err := db.CollectionExists(nil, collection)

@@ -5,24 +5,24 @@ import (
 	"github.com/arangodb/go-driver/http"
 )
 
-type ArangoDBConnection struct {
-	ServerHost     string
-	ServerPort     string
-	ServerUser     string
-	ServerPassword string
-	DbName         string
+type DatabaseConfigurationReader interface {
+	GetServerHost() string
+	GetServerPort() string
+	GetServerUser() string
+	GetServerPassword() string
+	GetDbName() string
 }
 
-func NewClientDB(configuration *ArangoDBConnection) (*driver.Client, error) {
+func NewClientDB(configuration DatabaseConfigurationReader) (*driver.Client, error) {
 	conn, err := http.NewConnection(http.ConnectionConfig{
-		Endpoints: []string{configuration.ServerHost + ":" + configuration.ServerPort},
+		Endpoints: []string{configuration.GetServerHost() + ":" + configuration.GetServerPort()},
 	})
 	if err != nil {
 		return nil, err
 	}
 	c, err := driver.NewClient(driver.ClientConfig{
 		Connection:     conn,
-		Authentication: driver.BasicAuthentication(configuration.ServerUser, configuration.ServerPassword),
+		Authentication: driver.BasicAuthentication(configuration.GetServerUser(), configuration.GetServerPassword()),
 	})
 	if err != nil {
 		return nil, err
