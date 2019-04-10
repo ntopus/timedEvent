@@ -23,7 +23,7 @@ func checkDatabase(client driver.Client, dbName string) (driver.Database, error)
 	}
 	var db driver.Database
 	if !exist {
-		db, err = client.CreateDatabase(nil, dbName, nil)
+		db, err := client.CreateDatabase(nil, dbName, nil)
 		if err != nil {
 			return nil, err
 		}

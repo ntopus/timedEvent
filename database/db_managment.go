@@ -1,14 +1,10 @@
 package database
 
 import (
-	"devgit.kf.com.br/border/location-api/routes/helpers/constants"
-	"devgit.kf.com.br/border/location-api/structs"
 	"errors"
 	"fmt"
 	"github.com/arangodb/go-driver"
 	"github.com/ivanmeca/timedEvent/database/data_types"
-	"strconv"
-	"time"
 )
 
 type Management interface {
@@ -16,7 +12,7 @@ type Management interface {
 	ReadItem(key string, item *data_types.EventEntry) (bool, error)
 	Update(patch map[string]interface{}, key string) (bool, error)
 	HealthCheck() (bool, error)
-	ReadCollection(filters map[string]string) ([]data_types.EventEntry, error)
+	ReadCollection(collection string, filters map[string]interface{}) ([]data_types.EventEntry, error)
 }
 
 type EventDB struct {
@@ -25,7 +21,6 @@ type EventDB struct {
 }
 
 const (
-	dbName           = "timedEvent"
 	eventsCollection = "timedEvents"
 )
 
@@ -35,7 +30,7 @@ func NewDbManagement(config DatabaseConfigurationReader) (Management, error) {
 		return nil, err
 	}
 	collections := []string{eventsCollection}
-	db, collMap, err := schema(*client, dbName, collections)
+	db, collMap, err := schema(*client, config.GetDbName(), collections)
 	if err != nil {
 		return nil, err
 	}
@@ -46,34 +41,29 @@ func NewDbManagement(config DatabaseConfigurationReader) (Management, error) {
 }
 
 func (db *EventDB) Insert(item *data_types.EventEntry) (bool, error) {
-	return false, nil
-}
-func (db *EventDB) ReadItem(key string, item *data_types.EventEntry) (bool, error) {
-	return false, nil
-}
-func (db *EventDB) Update(patch map[string]interface{}, key string) (bool, error) {
-	return false, nil
-}
-func (db *EventDB) HealthCheck() (bool, error) {
-	return false, nil
-}
-func (db *EventDB) ReadCollection(filters map[string]string) ([]data_types.EventEntry, error) {
-
-}
-
-func (l *LocationDB) ReadLocation(key string, location *structs.Location) (bool, error) {
-	coll, ok := l.coll["locationCollection"]
+	coll, ok := db.coll[eventsCollection]
 	if !ok {
 		return false, errors.New("database collection error")
 	}
-	_, err := coll.ReadDocument(nil, key, location)
+	_, err := coll.CreateDocument(nil, item)
 	if err != nil {
 		return false, err
 	}
 	return true, nil
 }
-func (l *LocationDB) UpdateLocation(patch map[string]interface{}, key string) (bool, error) {
-	coll, ok := l.coll["locationCollection"]
+func (db *EventDB) ReadItem(key string, item *data_types.EventEntry) (bool, error) {
+	coll, ok := db.coll[eventsCollection]
+	if !ok {
+		return false, errors.New("database collection error")
+	}
+	_, err := coll.ReadDocument(nil, key, item)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+func (db *EventDB) Update(patch map[string]interface{}, key string) (bool, error) {
+	coll, ok := db.coll[eventsCollection]
 	if !ok {
 		return false, errors.New("database collection error")
 	}
@@ -83,161 +73,90 @@ func (l *LocationDB) UpdateLocation(patch map[string]interface{}, key string) (b
 	}
 	return true, nil
 }
-
-func (l *LocationDB) HealthCheck() (bool, error) {
-	_, err := l.db.Info(nil)
+func (db *EventDB) HealthCheck() (bool, error) {
+	_, err := db.db.Info(nil)
 	if err != nil {
 		return false, err
 	}
 	return true, nil
 }
-
-func (l *LocationDB) InsertLocation(location *structs.Location) (bool, error) {
-	coll, ok := l.coll["locationCollection"]
-	if !ok {
-		return false, errors.New("database collection error")
-	}
-	_, err := coll.CreateDocument(nil, location)
-	if err != nil {
-		return false, err
-	}
-	return true, nil
-}
-
-func (l *LocationDB) ReadLocations(filters map[string]string) ([]structs.Location, error) {
-	bindVars := map[string]interface{}{}
-	for i, value := range filters {
-		switch i {
-		case constants.Device:
-			bindVars["deviceId"] = value
-		case constants.Speed:
-			number, err := strconv.ParseFloat(value, 64)
-			if err != nil {
-				return nil, err
-			}
-			bindVars["velocity"] = number
-		case constants.Contract:
-			number, err := strconv.Atoi(value)
-			if err != nil {
-				return nil, err
-			}
-			bindVars["contractId"] = number
-		case constants.Fence:
-			number, err := strconv.Atoi(value)
-			if err != nil {
-				return nil, err
-			}
-			bindVars[constants.Fence] = number
-		case constants.Driver:
-			bindVars[constants.Driver] = value
-		case constants.InitialDate:
-			layout := checkDateLayout(value)
-			dateTime, err := time.Parse(layout, value)
-			if err != nil {
-				return nil, err
-			}
-			bindVars[constants.InitialDate] = dateTime
-		case constants.FinalDate:
-			layout := checkDateLayout(value)
-			dateTime, err := time.Parse(layout, value)
-			if err != nil {
-				return nil, err
-			}
-			bindVars[constants.FinalDate] = dateTime
-		}
-	}
-	query := "FOR l IN locationCollection FILTER "
+func (db *EventDB) ReadCollection(collection string, filters map[string]interface{}) ([]data_types.EventEntry, error) {
+	query := fmt.Sprintf("FOR item IN %s FILTER", collection)
 	glueStr := ""
-	for key := range bindVars {
-		switch key {
-		case constants.Fence:
-			query += fmt.Sprintf("%s @%s IN l.%ss[*].fenceId", glueStr, key, key)
-			break
-		case constants.Driver:
-			query += fmt.Sprintf("%sl.%s.id == @%s", glueStr, key, key)
-			break
-		case constants.InitialDate:
-			query += fmt.Sprintf("%sl.locationDate >= @%s", glueStr, key)
-			break
-		case constants.FinalDate:
-			query += fmt.Sprintf("%sl.locationDate <= @%s", glueStr, key)
-			break
-		default:
-			query += fmt.Sprintf("%sl.%s == @%s", glueStr, key, key)
-			break
-		}
-		glueStr = " AND "
+	for key, value := range filters {
+		query += fmt.Sprintf(" %s item.%s == @%s", glueStr, key, value)
+		glueStr = "AND"
 	}
-	query += " SORT l.locationDate DESC RETURN l"
-	cursor, err := l.db.Query(nil, query, bindVars)
+	query += fmt.Sprintf("SORT item.Context.Time DESC RETURN l")
+	cursor, err := db.db.Query(nil, query, filters)
 	if err != nil {
-		return []structs.Location{}, errors.New("internal error")
+		return []data_types.EventEntry{}, errors.New("internal error")
 	}
-	var object []structs.Location
+	var object []data_types.EventEntry
 	for cursor.HasMore() == true {
-		loc := structs.Location{}
-		cursor.ReadDocument(nil, &loc)
-		object = append(object, loc)
+		var item data_types.EventEntry
+		cursor.ReadDocument(nil, &item)
+		object = append(object, item)
 	}
 	defer cursor.Close()
 	return object, nil
 }
 
-func (l *LocationDB) ReadLocationWithFilters(location structs.Location) (structs.Location, error) {
-	bindVars := map[string]interface{}{
-		"_key":                  location.Key,
-		"deviceId":              location.DeviceId,
-		"systemType":            location.SystemType,
-		"system":                location.System,
-		"source":                location.Source,
-		"creationDate":          location.CreationDate,
-		"locationDate":          location.LocationDate,
-		"coordinates":           location.Coordinates,
-		"velocity":              location.Velocity,
-		"precision":             location.Precision,
-		"userId":                location.UserId,
-		"userDescription":       location.UserDescription,
-		"contractId":            location.ContractId,
-		"deviceUniqueId":        location.DeviceUniqueId,
-		"userTypeId":            location.UserTypeId,
-		"userTypeDescription":   location.UserTypeDescription,
-		"contractCode":          location.ContractCode,
-		"enterpriseId":          location.EnterpriseId,
-		"enterpriseDescription": location.EnterpriseDescription,
-		"systemId":              location.SystemId,
-		"systemDescription":     location.SystemDescription,
-		"systemTypeId":          location.SystemTypeId,
-		"systemTypeDescription": location.SystemTypeDescription,
-		"timeLapse":             location.TimeLapse,
-		"precisionQualifier":    location.PrecisionQualifier,
-		"reason":                location.Reason,
-		"version":               location.Version,
-		"odometer":              location.Odometer,
-		"horimetre":             location.HourMeter,
-		"batteryLevel":          location.BatteryLevel,
-		"extraFields":           location.ExtraFields,
-		"integrator":            location.Integrator,
-		"systemIntegrator":      location.SystemIntegrator,
-	}
-	query := "FOR l IN locationCollection FILTER "
-	glueStr := ""
-	for key := range bindVars {
-		query += fmt.Sprintf("%sl.%s == @%s", glueStr, key, key)
-		glueStr = " AND "
-	}
-	query += " RETURN l"
-	cursor, err := l.db.Query(nil, query, bindVars)
-	if err != nil {
-		return structs.Location{}, errors.New("internal error")
-	}
-	object := structs.Location{}
-	_, err = cursor.ReadDocument(nil, &object)
-	if err != nil {
-		return structs.Location{}, err
-	}
-	defer cursor.Close()
-	return object, nil
-}
+//func (l *LocationDB) ReadLocationWithFilters(location structs.Location) (structs.Location, error) {
+//	bindVars := map[string]interface{}{
+//		"_key":                  location.Key,
+//		"deviceId":              location.DeviceId,
+//		"systemType":            location.SystemType,
+//		"system":                location.System,
+//		"source":                location.Source,
+//		"creationDate":          location.CreationDate,
+//		"locationDate":          location.LocationDate,
+//		"coordinates":           location.Coordinates,
+//		"velocity":              location.Velocity,
+//		"precision":             location.Precision,
+//		"userId":                location.UserId,
+//		"userDescription":       location.UserDescription,
+//		"contractId":            location.ContractId,
+//		"deviceUniqueId":        location.DeviceUniqueId,
+//		"userTypeId":            location.UserTypeId,
+//		"userTypeDescription":   location.UserTypeDescription,
+//		"contractCode":          location.ContractCode,
+//		"enterpriseId":          location.EnterpriseId,
+//		"enterpriseDescription": location.EnterpriseDescription,
+//		"systemId":              location.SystemId,
+//		"systemDescription":     location.SystemDescription,
+//		"systemTypeId":          location.SystemTypeId,
+//		"systemTypeDescription": location.SystemTypeDescription,
+//		"timeLapse":             location.TimeLapse,
+//		"precisionQualifier":    location.PrecisionQualifier,
+//		"reason":                location.Reason,
+//		"version":               location.Version,
+//		"odometer":              location.Odometer,
+//		"horimetre":             location.HourMeter,
+//		"batteryLevel":          location.BatteryLevel,
+//		"extraFields":           location.ExtraFields,
+//		"integrator":            location.Integrator,
+//		"systemIntegrator":      location.SystemIntegrator,
+//	}
+//	query := "FOR l IN locationCollection FILTER "
+//	glueStr := ""
+//	for key := range bindVars {
+//		query += fmt.Sprintf("%sl.%s == @%s", glueStr, key, key)
+//		glueStr = " AND "
+//	}
+//	query += " RETURN l"
+//	cursor, err := l.db.Query(nil, query, bindVars)
+//	if err != nil {
+//		return structs.Location{}, errors.New("internal error")
+//	}
+//	object := structs.Location{}
+//	_, err = cursor.ReadDocument(nil, &object)
+//	if err != nil {
+//		return structs.Location{}, err
+//	}
+//	defer cursor.Close()
+//	return object, nil
+//}
 
 func checkDateLayout(value string) string {
 	var layout string
