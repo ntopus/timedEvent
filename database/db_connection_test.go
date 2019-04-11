@@ -19,8 +19,8 @@ func TestConnection(test *testing.T) {
 		DataBase: config.ConfigDB{
 			ServerHost:     "http://localhost",
 			ServerPort:     "8529",
-			ServerUser:     "root",
-			ServerPassword: "rootpass1",
+			ServerUser:     "testUser",
+			ServerPassword: "123456",
 			DbName:         "testDb",
 		}}
 	_, err := NewClientDB(&connArgs.DataBase)
