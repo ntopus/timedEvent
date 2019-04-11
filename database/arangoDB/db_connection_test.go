@@ -1,4 +1,4 @@
-package database
+package arangoDB
 
 import (
 	"context"
@@ -44,15 +44,19 @@ func TestLibConnection(test *testing.T) {
 
 	exist, err := c.DatabaseExists(ctx, "dbTeste")
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+	gomega.Expect(exist).Should(gomega.BeFalse())
 
-	if !exist {
-		_, err = c.CreateDatabase(nil, "dbTeste", nil)
-		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-	}
+	_, err = c.CreateDatabase(nil, "dbTeste", nil)
+	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 
 	db, err := c.Database(ctx, "dbTeste")
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 
 	err = db.Remove(ctx)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+
+	exist, err = c.DatabaseExists(ctx, "dbTeste")
+	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+	gomega.Expect(exist).Should(gomega.BeFalse())
+
 }

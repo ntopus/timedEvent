@@ -1,4 +1,4 @@
-package database
+package arangoDB
 
 import (
 	"github.com/arangodb/go-driver"

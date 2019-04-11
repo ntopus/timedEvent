@@ -1,4 +1,4 @@
-package database
+package arangoDB
 
 import (
 	"fmt"
@@ -21,8 +21,8 @@ func getDbInstance() Management {
 		DataBase: config.ConfigDB{
 			ServerHost:     "http://127.0.0.1",
 			ServerPort:     "8529",
-			ServerUser:     "root",
-			ServerPassword: "rootpass",
+			ServerUser:     "testUser",
+			ServerPassword: "123456",
 			DbName:         "testDb",
 		}}
 	db, err := NewDbManagement(&connArgs.DataBase)

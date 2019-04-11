@@ -11,3 +11,13 @@ func parseData(data time.Time) string {
 	}
 	return auxData
 }
+
+func checkDateLayout(value string) string {
+	var layout string
+	if value[len(value)-1] == 'Z' {
+		layout = "2006-01-02 15:04:05Z"
+	} else {
+		layout = "2006-01-02 15:04:05"
+	}
+	return layout
+}

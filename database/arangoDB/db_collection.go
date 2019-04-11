@@ -1,4 +1,4 @@
-package database
+package arangoDB
 
 import (
 	"errors"
@@ -8,11 +8,65 @@ import (
 )
 
 type Management interface {
-	Insert(item *data_types.EventEntry) (bool, error)
-	ReadItem(key string, item *data_types.EventEntry) (bool, error)
+	Insert(item interface{}) (bool, error)
+	ReadItem(key string, item interface{}) (bool, error)
 	Update(patch map[string]interface{}, key string) (bool, error)
 	HealthCheck() (bool, error)
-	ReadCollection(collection string, filters map[string]interface{}) ([]data_types.EventEntry, error)
+	ReadCollection(collection string, filters map[string]interface{}, items interface{}) error
+}
+
+type ArangoDbCollection struct {
+	db               driver.Database
+	collection       string
+	collectionDriver driver.Collection
+}
+
+func (coll *ArangoDbCollection) Insert(item interface{}) (bool, error) {
+	_, err := coll.collectionDriver.CreateDocument(nil, item)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (coll *ArangoDbCollection) Update(patch map[string]interface{}, key string) (bool, error) {
+	_, err := coll.collectionDriver.UpdateDocument(nil, key, patch)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (coll *ArangoDbCollection) Read(filters map[string]interface{}, items interface{}) error {
+
+	query := fmt.Sprintf("FOR item IN %s ", collection)
+	glueStr := "FILTER"
+	for key, value := range filters {
+		query += fmt.Sprintf(" %s item.%s == @%s", glueStr, key, value)
+		glueStr = "AND"
+	}
+	query += fmt.Sprintf(" SORT item.Context.Time DESC RETURN item")
+	cursor, err := db.db.Query(nil, query, filters)
+	if err != nil {
+		return []data_types.EventEntry{}, errors.New("internal error")
+	}
+	var object []data_types.EventEntry
+	for cursor.HasMore() == true {
+		var item data_types.EventEntry
+		cursor.ReadDocument(nil, &item)
+		object = append(object, item)
+	}
+	defer cursor.Close()
+	return object, nil
+	panic("implement me")
+}
+
+func (coll *ArangoDbCollection) ReadItem(key string, item interface{}) error {
+	_, err := coll.collectionDriver.ReadDocument(nil, key, item)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 type EventDB struct {
@@ -40,7 +94,7 @@ func NewDbManagement(config DatabaseConfigurationReader) (Management, error) {
 	}, nil
 }
 
-func (db *EventDB) Insert(item *data_types.EventEntry) (bool, error) {
+func (db *EventDB) Insert(item interface{}) (bool, error) {
 	coll, ok := db.coll[eventsCollection]
 	if !ok {
 		return false, errors.New("database collection error")
@@ -81,13 +135,13 @@ func (db *EventDB) HealthCheck() (bool, error) {
 	return true, nil
 }
 func (db *EventDB) ReadCollection(collection string, filters map[string]interface{}) ([]data_types.EventEntry, error) {
-	query := fmt.Sprintf("FOR item IN %s FILTER", collection)
-	glueStr := ""
+	query := fmt.Sprintf("FOR item IN %s ", collection)
+	glueStr := "FILTER"
 	for key, value := range filters {
 		query += fmt.Sprintf(" %s item.%s == @%s", glueStr, key, value)
 		glueStr = "AND"
 	}
-	query += fmt.Sprintf("SORT item.Context.Time DESC RETURN l")
+	query += fmt.Sprintf(" SORT item.Context.Time DESC RETURN item")
 	cursor, err := db.db.Query(nil, query, filters)
 	if err != nil {
 		return []data_types.EventEntry{}, errors.New("internal error")
@@ -157,13 +211,3 @@ func (db *EventDB) ReadCollection(collection string, filters map[string]interfac
 //	defer cursor.Close()
 //	return object, nil
 //}
-
-func checkDateLayout(value string) string {
-	var layout string
-	if value[len(value)-1] == 'Z' {
-		layout = "2006-01-02 15:04:05Z"
-	} else {
-		layout = "2006-01-02 15:04:05"
-	}
-	return layout
-}
