@@ -21,9 +21,8 @@ type DataBaseManagment interface {
 
 type CollectionManagment interface {
 	Insert(item interface{}) (bool, error)
-	Delete(filters map[string]interface{}) (bool, error)
-	DeleteItem(key string) (bool, error)
+	DeleteItem(keyList []string) (bool, error)
 	Update(patch map[string]interface{}, key string) (bool, error)
-	Read(filters map[string]interface{}, items interface{}) error
+	Read(filters map[string]interface{}, items []interface{}) error
 	ReadItem(key string, item interface{}) error
 }
