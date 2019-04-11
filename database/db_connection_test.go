@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"fmt"
 	"github.com/arangodb/go-driver"
 	"github.com/arangodb/go-driver/http"
@@ -36,37 +37,22 @@ func TestLibConnection(test *testing.T) {
 
 	c, err := driver.NewClient(driver.ClientConfig{
 		Connection:     conn,
-		Authentication: driver.BasicAuthentication("root", "rootpass"),
+		Authentication: driver.BasicAuthentication("testUser", "123456"),
 	})
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+	ctx := context.Background()
 
-	exist, err := c.DatabaseExists(nil, "dbTeste")
-	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-	gomega.Expect(exist).Should(gomega.BeFalse())
-
-	_, err = c.CreateDatabase(nil, "dbTeste", nil)
+	exist, err := c.DatabaseExists(ctx, "dbTeste")
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 
-	//db, err := c.Database(nil, "_system")
-	//if err != nil {
-	//	// Handle error
-	//}
-	//
-	//// Open "books" collection
-	//col, err := db.Collection(nil, "books")
-	//if err != nil {
-	//	// Handle error
-	//}
+	if !exist {
+		_, err = c.CreateDatabase(nil, "dbTeste", nil)
+		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+	}
 
-	//// Create document
-	//book := Book{
-	//	Title:   "ArangoDB Cookbook",
-	//	NoPages: 257,
-	//}
-	//meta, err := col.CreateDocument(nil, book)
-	//if err != nil {
-	//	// Handle error
-	//}
-	//fmt.Printf("Created document in collection '%s' in database '%s'\n", col.Name(), db.Name())
+	db, err := c.Database(ctx, "dbTeste")
+	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 
+	err = db.Remove(ctx)
+	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 }
