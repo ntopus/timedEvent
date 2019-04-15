@@ -3,8 +3,7 @@ package data_types
 import (
 	"encoding/json"
 	"errors"
-	"github.com/cloudevents/sdk-go/pkg/cloudevents"
-	"github.com/cloudevents/sdk-go/pkg/cloudevents/types"
+	"github.com/cloudevents/sdk-go"
 	"github.com/pborman/uuid"
 	"time"
 )
@@ -17,49 +16,63 @@ const (
 )
 
 type EventEntry struct {
-	*cloudevents.Event
+	ev cloudevents.Event
 }
 
 func NewCloudEventJsonV02(eventType string, data []byte, extensions map[string]interface{}) (*EventEntry, error) {
-	now := types.ParseTimestamp(time.Now().UTC().Format(time.RFC3339Nano))
-	e := EventEntry{}
-	e.Context = cloudevents.EventContextV02{
-		ID:          uuid.NewUUID().String(),
-		Type:        eventType,
-		Time:        now,
-		Source:      *types.ParseURLRef("http://localhost:8080/"),
-		SpecVersion: cloudevents.CloudEventsVersionV02,
-		Extensions:  extensions,
-	}.AsV02()
+
+	e := cloudevents.NewEvent(cloudevents.VersionV02)
+	e.SetID(uuid.NewUUID().String())
+	e.SetType(eventType)
+	e.SetTime(time.Now())
+
+	for key, value := range extensions {
+		e.SetExtension(key, value)
+	}
 
 	validJson := json.Valid(data)
 	if !validJson {
 		return nil, errors.New("invalid input data json")
 	}
 	e.Data = data
-	return &e, nil
+
+	event := EventEntry{
+		ev: e,
+	}
+
+	return &event, nil
 }
 
 func (e *EventEntry) GetData() interface{} {
-	return e.Data
+	return e.ev.Data
 }
 
 func (e *EventEntry) GetType() string {
-	return e.Context.GetType()
+	return e.ev.Context.GetType()
 }
 
 func (e *EventEntry) GetContentType() string {
-	return e.Context.GetDataContentType()
+	return e.ev.Context.GetDataContentType()
 }
 
 func (e *EventEntry) GetSpecVersion() string {
-	return e.Context.GetSpecVersion()
+	return e.ev.Context.GetSpecVersion()
 }
 
-func (e *EventEntry) UnmarshalJSON(b []byte) error {
-	return e.Event.UnmarshalJSON(b)
+func (e *EventEntry) String() string {
+	return e.ev.String()
 }
 
-func (e *EventEntry) MarshalJSON() ([]byte, error) {
-	return e.MarshalJSON()
-}
+//func (e *EventEntry) UnmarshalJSON(b []byte) error {
+//	var Event cloudevents.Event
+//	err:= json.Unmarshal(b,Event)
+//	if err != nil{
+//		return err
+//	}
+//	e.ev = Event
+//	return nil
+//}
+//
+//func (e *EventEntry) MarshalJSON() ([]byte, error) {
+//	return json.Marshal(e.ev)
+//}

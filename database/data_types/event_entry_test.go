@@ -39,7 +39,6 @@ func TestEventUnMarshal(test *testing.T) {
 	data := `{"Context":{"specversion":"0.2","type":"application/json","source":"http://localhost:8080/","id":"97a58e52-5faa-11e9-a9ab-54bf64f7912d","time":"2019-04-15T18:16:30.479499099Z","-":{"DestPath":"teste"}},"Data":"IlRlc3RlIg=="}`
 	var event EventEntry
 	err := json.Unmarshal([]byte(data), &event)
-	fmt.Println(json.Marshal(event))
 	Expect(err).ShouldNot(HaveOccurred())
 	fmt.Println(event.String())
 }
