@@ -16,7 +16,7 @@ const (
 )
 
 type EventEntry struct {
-	ev cloudevents.Event
+	ev *cloudevents.Event
 }
 
 func NewCloudEventJsonV02(eventType string, data []byte, extensions map[string]interface{}) (*EventEntry, error) {
@@ -37,7 +37,7 @@ func NewCloudEventJsonV02(eventType string, data []byte, extensions map[string]i
 	e.Data = data
 
 	event := EventEntry{
-		ev: e,
+		ev: &e,
 	}
 
 	return &event, nil
@@ -63,16 +63,16 @@ func (e *EventEntry) String() string {
 	return e.ev.String()
 }
 
-//func (e *EventEntry) UnmarshalJSON(b []byte) error {
-//	var Event cloudevents.Event
-//	err:= json.Unmarshal(b,Event)
-//	if err != nil{
-//		return err
-//	}
-//	e.ev = Event
-//	return nil
-//}
-//
-//func (e *EventEntry) MarshalJSON() ([]byte, error) {
-//	return json.Marshal(e.ev)
-//}
+func (e *EventEntry) UnmarshalJSON(b []byte) error {
+	var Event cloudevents.Event
+	err := json.Unmarshal(b, &Event)
+	if err != nil {
+		return err
+	}
+	e.ev = &Event
+	return nil
+}
+
+func (e *EventEntry) MarshalJSON() ([]byte, error) {
+	return json.Marshal(e.ev)
+}
