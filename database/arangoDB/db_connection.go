@@ -7,7 +7,7 @@ import (
 	"github.com/ivanmeca/timedEvent/database"
 )
 
-func NewClientDB(configuration database.DatabaseConfigurationReader) (database.DataBaseConnector, error) {
+func NewDBClient(configuration database.DatabaseConfigurationReader) (database.DataBaseConnector, error) {
 	conn, err := http.NewConnection(http.ConnectionConfig{
 		Endpoints: []string{configuration.GetServerHost() + ":" + configuration.GetServerPort()},
 	})

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/arangodb/go-driver"
+	"github.com/ivanmeca/timedEvent/database/data_types"
 )
 
 type ArangoDbCollection struct {
@@ -38,7 +39,10 @@ func (coll *ArangoDbCollection) Update(patch map[string]interface{}, key string)
 	return true, nil
 }
 
-func (coll *ArangoDbCollection) Read(filters map[string]interface{}, items []interface{}) error {
+func (coll *ArangoDbCollection) Read(filters map[string]interface{}) ([]data_types.EventEntry, error) {
+	var item data_types.EventEntry
+	var list []data_types.EventEntry
+
 	query := fmt.Sprintf("FOR item IN %s ", coll.collection)
 	glueStr := "FILTER"
 	for key, value := range filters {
@@ -48,26 +52,26 @@ func (coll *ArangoDbCollection) Read(filters map[string]interface{}, items []int
 	query += fmt.Sprintf(" SORT item.Context.Time DESC RETURN item")
 	cursor, err := coll.db.Query(nil, query, filters)
 	if err != nil {
-		return errors.New("internal error: " + err.Error())
+		return nil, errors.New("internal error: " + err.Error())
 	}
 	for cursor.HasMore() == true {
-		var item interface{}
 		_, err = cursor.ReadDocument(nil, &item)
 		if err != nil {
-			return errors.New("internal error: " + err.Error())
+			return nil, errors.New("internal error: " + err.Error())
 		}
-		items = append(items, item)
+		list = append(list, item)
 	}
 	defer cursor.Close()
-	return nil
+	return list, nil
 }
 
-func (coll *ArangoDbCollection) ReadItem(key string, item interface{}) error {
-	_, err := coll.collectionDriver.ReadDocument(nil, key, item)
+func (coll *ArangoDbCollection) ReadItem(key string) (*data_types.EventEntry, error) {
+	var item data_types.EventEntry
+	_, err := coll.collectionDriver.ReadDocument(nil, key, &item)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return &item, nil
 }
 
 //func (db *EventDB) ReadCollection(collection string, filters map[string]interface{}) ([]data_types.EventEntry, error) {

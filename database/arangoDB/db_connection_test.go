@@ -15,15 +15,7 @@ func TestConnection(test *testing.T) {
 
 	fmt.Println("Trying to connect to a database server")
 
-	connArgs := config.ConfigData{
-		DataBase: config.ConfigDB{
-			ServerHost:     "http://localhost",
-			ServerPort:     "8529",
-			ServerUser:     "testUser",
-			ServerPassword: "123456",
-			DbName:         "testDb",
-		}}
-	_, err := NewClientDB(&connArgs.DataBase)
+	_, err := NewDBClient(GetTestDatabase())
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 }
 
@@ -59,4 +51,14 @@ func TestLibConnection(test *testing.T) {
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	gomega.Expect(exist).Should(gomega.BeFalse())
 
+}
+
+func GetTestDatabase() *config.ConfigDB {
+	return &config.ConfigDB{
+		ServerHost:     "http://localhost",
+		ServerPort:     "8529",
+		ServerUser:     "testUser",
+		ServerPassword: "123456",
+		DbName:         "testDb",
+	}
 }

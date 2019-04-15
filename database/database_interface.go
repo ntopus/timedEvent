@@ -1,5 +1,7 @@
 package database
 
+import "github.com/ivanmeca/timedEvent/database/data_types"
+
 type DatabaseConfigurationReader interface {
 	GetServerHost() string
 	GetServerPort() string
@@ -23,6 +25,6 @@ type CollectionManagment interface {
 	Insert(item interface{}) (bool, error)
 	DeleteItem(keyList []string) (bool, error)
 	Update(patch map[string]interface{}, key string) (bool, error)
-	Read(filters map[string]interface{}, items []interface{}) error
-	ReadItem(key string, item interface{}) error
+	Read(filters map[string]interface{}) ([]data_types.EventEntry, error)
+	ReadItem(key string) (data_types.EventEntry, error)
 }
