@@ -23,7 +23,7 @@ func (coll *ArangoDbCollection) DeleteItem(keyList []string) (bool, error) {
 	return true, nil
 }
 
-func (coll *ArangoDbCollection) Insert(item data_types.EventEntry) (bool, error) {
+func (coll *ArangoDbCollection) Insert(item *data_types.EventEntry) (bool, error) {
 	_, err := coll.collectionDriver.CreateDocument(nil, item)
 	if err != nil {
 		return false, err

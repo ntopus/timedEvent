@@ -17,7 +17,7 @@ const (
 )
 
 type EventEntry struct {
-	cloudevents.Event
+	*cloudevents.Event
 }
 
 func NewCloudEventJsonV02(eventType string, data []byte, extensions map[string]interface{}) (*EventEntry, error) {
@@ -54,4 +54,12 @@ func (e *EventEntry) GetContentType() string {
 
 func (e *EventEntry) GetSpecVersion() string {
 	return e.Context.GetSpecVersion()
+}
+
+func (e *EventEntry) UnmarshalJSON(b []byte) error {
+	return e.Event.UnmarshalJSON(b)
+}
+
+func (e *EventEntry) MarshalJSON() ([]byte, error) {
+	return e.MarshalJSON()
 }

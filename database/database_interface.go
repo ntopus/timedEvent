@@ -22,7 +22,7 @@ type DataBaseManagment interface {
 }
 
 type CollectionManagment interface {
-	Insert(item data_types.EventEntry) (bool, error)
+	Insert(item *data_types.EventEntry) (bool, error)
 	DeleteItem(keyList []string) (bool, error)
 	Update(patch map[string]interface{}, key string) (bool, error)
 	Read(filters map[string]interface{}) ([]data_types.EventEntry, error)

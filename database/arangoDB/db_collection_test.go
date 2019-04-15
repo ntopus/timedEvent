@@ -23,7 +23,7 @@ func TestInsertDocument(test *testing.T) {
 	fmt.Println("Trying insert into read collection")
 	coll := getTestCollectionInstance("testeCollection")
 
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 10; i++ {
 		data := fmt.Sprintf(`"Teste data %d"`, i)
 		event, err := data_types.NewCloudEventJsonV02("TestEvent", []byte(data), nil)
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
