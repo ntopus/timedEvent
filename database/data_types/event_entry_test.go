@@ -3,6 +3,7 @@ package data_types
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/cloudevents/sdk-go"
 	. "github.com/onsi/gomega"
 	"testing"
 )
@@ -33,6 +34,16 @@ func TestEventMarshal(test *testing.T) {
 	Expect(err).ShouldNot(HaveOccurred())
 }
 
+func TestNativeEventUnMarshal(test *testing.T) {
+	RegisterTestingT(test)
+	fmt.Println("Trying to UnmarshalJSON a event entry")
+	data := `{"Context":{"specversion":"0.2","type":"application/json","source":"http://localhost:8080/","id":"97a58e52-5faa-11e9-a9ab-54bf64f7912d","time":"2019-04-15T18:16:30.479499099Z","-":{"DestPath":"teste"}},"Data":"IlRlc3RlIg=="}`
+	var event cloudevents.Event
+	err := json.Unmarshal([]byte(data), &event)
+	Expect(err).ShouldNot(HaveOccurred())
+	fmt.Println(event.String())
+}
+
 func TestEventUnMarshal(test *testing.T) {
 	RegisterTestingT(test)
 	fmt.Println("Trying to UnmarshalJSON a event entry")
@@ -40,5 +51,6 @@ func TestEventUnMarshal(test *testing.T) {
 	var event EventEntry
 	err := json.Unmarshal([]byte(data), &event)
 	Expect(err).ShouldNot(HaveOccurred())
+	fmt.Println(event)
 	fmt.Println(event.String())
 }
