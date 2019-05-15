@@ -13,9 +13,8 @@ func TestReadDocuments(test *testing.T) {
 	gomega.RegisterTestingT(test)
 	fmt.Println("Trying to a read collection")
 	coll := getTestCollectionInstance("testeCollection")
-
-	//horaAtual := time.Now().AddDate(0, 0, 3)
-	list, err := coll.Read(map[string]interface{}{"Context.id": "c7cde974-7709-11e9-ab9c-54bf64f7912d"})
+	horaAtual := time.Now().AddDate(0, 0, 3)
+	list, err := coll.Read([]database.AQLComparator{{Field: "Context.time", Comparator: ">=", Value: horaAtual}})
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	fmt.Println(list)
 }
@@ -25,7 +24,7 @@ func TestReadDocumentsWithFilter(test *testing.T) {
 	fmt.Println("Trying to a read collection")
 	coll := getTestCollectionInstance("testeCollection")
 
-	list, err := coll.Read(map[string]interface{}{})
+	list, err := coll.Read(nil)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	fmt.Println(list)
 }
@@ -55,7 +54,7 @@ func TestReadCollection(test *testing.T) {
 	fmt.Println("Trying to a read collection")
 	coll := getTestCollectionInstance("testeCollection")
 
-	list, err := coll.Read(map[string]interface{}{})
+	list, err := coll.Read(nil)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	fmt.Println(list)
 }

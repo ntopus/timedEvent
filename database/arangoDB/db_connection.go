@@ -48,7 +48,7 @@ func (db *ArangoDBConnector) GetDatabase(databaseName string, createIfNotExists 
 	if err != nil {
 		return nil, errors.New("could not create database: " + err.Error())
 	}
-	return &ArangoDbManager{
+	return &Manager{
 		client: db.client,
 		conn:   db.conn,
 		db:     d,

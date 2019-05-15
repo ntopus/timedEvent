@@ -1,6 +1,14 @@
 package database
 
-import "github.com/ivanmeca/timedEvent/database/data_types"
+import (
+	"github.com/ivanmeca/timedEvent/database/data_types"
+)
+
+type AQLComparator struct {
+	Comparator string
+	Field      string
+	Value      interface{}
+}
 
 type DatabaseConfigurationReader interface {
 	GetServerHost() string
@@ -25,6 +33,6 @@ type CollectionManagment interface {
 	Insert(item *data_types.CloudEvent) (bool, error)
 	DeleteItem(keyList []string) (bool, error)
 	Update(patch map[string]interface{}, key string) (bool, error)
-	Read(filters map[string]interface{}) ([]data_types.CloudEvent, error)
+	Read(filters []AQLComparator) ([]data_types.CloudEvent, error)
 	ReadItem(key string) (*data_types.CloudEvent, error)
 }

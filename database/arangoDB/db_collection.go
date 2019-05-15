@@ -4,16 +4,17 @@ import (
 	"errors"
 	"fmt"
 	"github.com/arangodb/go-driver"
+	"github.com/ivanmeca/timedEvent/database"
 	"github.com/ivanmeca/timedEvent/database/data_types"
 )
 
-type ArangoDbCollection struct {
+type Collection struct {
 	db               driver.Database
 	collection       string
 	collectionDriver driver.Collection
 }
 
-func (coll *ArangoDbCollection) DeleteItem(keyList []string) (bool, error) {
+func (coll *Collection) DeleteItem(keyList []string) (bool, error) {
 	for _, key := range keyList {
 		_, err := coll.collectionDriver.RemoveDocument(nil, key)
 		if err != nil {
@@ -23,7 +24,7 @@ func (coll *ArangoDbCollection) DeleteItem(keyList []string) (bool, error) {
 	return true, nil
 }
 
-func (coll *ArangoDbCollection) Insert(item *data_types.CloudEvent) (bool, error) {
+func (coll *Collection) Insert(item *data_types.CloudEvent) (bool, error) {
 	_, err := coll.collectionDriver.CreateDocument(nil, item)
 	if err != nil {
 		return false, err
@@ -31,7 +32,7 @@ func (coll *ArangoDbCollection) Insert(item *data_types.CloudEvent) (bool, error
 	return true, nil
 }
 
-func (coll *ArangoDbCollection) Update(patch map[string]interface{}, key string) (bool, error) {
+func (coll *Collection) Update(patch map[string]interface{}, key string) (bool, error) {
 	_, err := coll.collectionDriver.UpdateDocument(nil, key, patch)
 	if err != nil {
 		return false, err
@@ -39,7 +40,7 @@ func (coll *ArangoDbCollection) Update(patch map[string]interface{}, key string)
 	return true, nil
 }
 
-func (coll *ArangoDbCollection) Read(filters map[string]interface{}) ([]data_types.CloudEvent, error) {
+func (coll *Collection) Read(filters []database.AQLComparator) ([]data_types.CloudEvent, error) {
 	var item data_types.CloudEvent
 	var list []data_types.CloudEvent
 
@@ -47,9 +48,9 @@ func (coll *ArangoDbCollection) Read(filters map[string]interface{}) ([]data_typ
 	query := fmt.Sprintf("FOR item IN %s ", coll.collection)
 	glueStr := "FILTER"
 	bindVarsNames := 0
-	for key, value := range filters {
-		bindVars[string('A'+bindVarsNames)] = value
-		query += fmt.Sprintf(" %s item.%s == @%s", glueStr, key, string('A'+bindVarsNames))
+	for _, filter := range filters {
+		bindVars[string('A'+bindVarsNames)] = filter.Value
+		query += fmt.Sprintf(" %s item.%s %s @%s", glueStr, filter.Field, filter.Comparator, string('A'+bindVarsNames))
 		glueStr = "AND"
 		bindVarsNames++
 	}
@@ -69,7 +70,7 @@ func (coll *ArangoDbCollection) Read(filters map[string]interface{}) ([]data_typ
 	return list, nil
 }
 
-func (coll *ArangoDbCollection) ReadItem(key string) (*data_types.CloudEvent, error) {
+func (coll *Collection) ReadItem(key string) (*data_types.CloudEvent, error) {
 	var item data_types.CloudEvent
 	_, err := coll.collectionDriver.ReadDocument(nil, key, &item)
 	if err != nil {
