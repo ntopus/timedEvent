@@ -22,7 +22,7 @@ type CloudEvent struct {
 func NewCloudEventV02(eventType string, data string, extensions map[string]interface{}) (*CloudEvent, error) {
 	e := &CloudEvent{}
 	e.Context.AsV02()
-	err := e.Context.SetSpecVersion(CloudEventsVersionV02)
+	err := e.Context.SetSpecVersion(cloudevents.CloudEventsVersionV02)
 	if err != nil {
 		return nil, err
 	}
