@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func TestReadDocuments(test *testing.T) {
+func TestReadDocumentsWithFilter(test *testing.T) {
 	gomega.RegisterTestingT(test)
 	fmt.Println("Trying to a read collection")
 	coll := getTestCollectionInstance("testeCollection")
@@ -19,7 +19,7 @@ func TestReadDocuments(test *testing.T) {
 	fmt.Println(list)
 }
 
-func TestReadDocumentsWithFilter(test *testing.T) {
+func TestReadDocuments(test *testing.T) {
 	gomega.RegisterTestingT(test)
 	fmt.Println("Trying to a read collection")
 	coll := getTestCollectionInstance("testeCollection")
