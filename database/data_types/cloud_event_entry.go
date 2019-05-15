@@ -13,7 +13,7 @@ import (
 // Event represents the canonical representation of a CloudEvent.
 type CloudEvent struct {
 	Context     cloudevents.EventContextV02
-	Data        string
+	Data        interface{}
 	DataEncoded bool
 }
 
@@ -84,16 +84,15 @@ func (e *CloudEvent) String() string {
 		b.WriteString("Data,\n  ")
 		if strings.HasPrefix(e.Context.GetDataContentType(), "application/json") {
 			var prettyJSON bytes.Buffer
-
-			data := []byte(e.Data)
+			data := e.Data.([]byte)
 			err := json.Indent(&prettyJSON, data, "  ", "  ")
 			if err != nil {
-				b.Write([]byte(e.Data))
+				b.Write([]byte(fmt.Sprintf("%s", e.Data)))
 			} else {
 				b.Write(prettyJSON.Bytes())
 			}
 		} else {
-			b.Write([]byte(e.Data))
+			b.Write([]byte(fmt.Sprintf("%s", e.Data)))
 		}
 		b.WriteString("\n")
 	}
