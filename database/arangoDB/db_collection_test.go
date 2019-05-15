@@ -6,9 +6,22 @@ import (
 	"github.com/ivanmeca/timedEvent/database/data_types"
 	"github.com/onsi/gomega"
 	"testing"
+	"time"
 )
 
 func TestReadDocuments(test *testing.T) {
+	gomega.RegisterTestingT(test)
+	fmt.Println("Trying to a read collection")
+	coll := getTestCollectionInstance("testeCollection")
+
+	horaAtual := time.Now().AddDate(0, 0, 3)
+
+	list, err := coll.Read(map[string]interface{}{"Context.time": horaAtual})
+	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+	fmt.Println(list)
+}
+
+func TestReadDocumentsWithFilter(test *testing.T) {
 	gomega.RegisterTestingT(test)
 	fmt.Println("Trying to a read collection")
 	coll := getTestCollectionInstance("testeCollection")
@@ -23,10 +36,14 @@ func TestInsertDocument(test *testing.T) {
 	fmt.Println("Trying insert into read collection")
 	coll := getTestCollectionInstance("testeCollection")
 
+	horaAtual := time.Now()
+
 	for i := 0; i < 10; i++ {
 		data := fmt.Sprintf(`"Teste data %d"`, i)
 		event, err := data_types.NewCloudEventJsonV02("TestEvent", []byte(data), nil)
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+		eventTime := horaAtual.AddDate(0, 0, i)
+		event.Context.Time = &eventTime
 		ok, err := coll.Insert(event)
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		gomega.Expect(ok).Should(gomega.BeTrue())

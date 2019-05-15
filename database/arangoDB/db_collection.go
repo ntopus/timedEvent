@@ -43,14 +43,16 @@ func (coll *ArangoDbCollection) Read(filters map[string]interface{}) ([]data_typ
 	var item data_types.EventEntry
 	var list []data_types.EventEntry
 
+	bindVars := map[string]interface{}{}
 	query := fmt.Sprintf("FOR item IN %s ", coll.collection)
 	glueStr := "FILTER"
 	for key, value := range filters {
-		query += fmt.Sprintf(" %s item.%s == @%s", glueStr, key, value)
+		bindVars[key] = value
+		query += fmt.Sprintf(" %s item.%s == @%s", glueStr, key, key)
 		glueStr = "AND"
 	}
-	query += fmt.Sprintf(" SORT item.Context.Time DESC RETURN item")
-	cursor, err := coll.db.Query(nil, query, filters)
+	query += fmt.Sprintf(" SORT item.Context.time DESC RETURN item")
+	cursor, err := coll.db.Query(nil, query, bindVars)
 	if err != nil {
 		return nil, errors.New("internal error: " + err.Error())
 	}
