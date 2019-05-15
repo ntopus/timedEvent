@@ -14,9 +14,8 @@ func TestReadDocuments(test *testing.T) {
 	fmt.Println("Trying to a read collection")
 	coll := getTestCollectionInstance("testeCollection")
 
-	horaAtual := time.Now().AddDate(0, 0, 3)
-
-	list, err := coll.Read(map[string]interface{}{"Context.time": horaAtual})
+	//horaAtual := time.Now().AddDate(0, 0, 3)
+	list, err := coll.Read(map[string]interface{}{"Context.id": "c7cde974-7709-11e9-ab9c-54bf64f7912d"})
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	fmt.Println(list)
 }
@@ -40,10 +39,10 @@ func TestInsertDocument(test *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		data := fmt.Sprintf(`"Teste data %d"`, i)
-		event, err := data_types.NewCloudEventJsonV02("TestEvent", []byte(data), nil)
+		event, err := data_types.NewCloudEventV02("TestEvent", data, nil)
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		eventTime := horaAtual.AddDate(0, 0, i)
-		event.Context.Time = &eventTime
+		event.Context.SetTime(eventTime)
 		ok, err := coll.Insert(event)
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		gomega.Expect(ok).Should(gomega.BeTrue())

@@ -23,7 +23,7 @@ func (coll *ArangoDbCollection) DeleteItem(keyList []string) (bool, error) {
 	return true, nil
 }
 
-func (coll *ArangoDbCollection) Insert(item *data_types.EventEntry) (bool, error) {
+func (coll *ArangoDbCollection) Insert(item *data_types.CloudEvent) (bool, error) {
 	_, err := coll.collectionDriver.CreateDocument(nil, item)
 	if err != nil {
 		return false, err
@@ -39,17 +39,19 @@ func (coll *ArangoDbCollection) Update(patch map[string]interface{}, key string)
 	return true, nil
 }
 
-func (coll *ArangoDbCollection) Read(filters map[string]interface{}) ([]data_types.EventEntry, error) {
-	var item data_types.EventEntry
-	var list []data_types.EventEntry
+func (coll *ArangoDbCollection) Read(filters map[string]interface{}) ([]data_types.CloudEvent, error) {
+	var item data_types.CloudEvent
+	var list []data_types.CloudEvent
 
 	bindVars := map[string]interface{}{}
 	query := fmt.Sprintf("FOR item IN %s ", coll.collection)
 	glueStr := "FILTER"
+	bindVarsNames := 0
 	for key, value := range filters {
-		bindVars[key] = value
-		query += fmt.Sprintf(" %s item.%s == @%s", glueStr, key, key)
+		bindVars[string('A'+bindVarsNames)] = value
+		query += fmt.Sprintf(" %s item.%s == @%s", glueStr, key, string('A'+bindVarsNames))
 		glueStr = "AND"
+		bindVarsNames++
 	}
 	query += fmt.Sprintf(" SORT item.Context.time DESC RETURN item")
 	cursor, err := coll.db.Query(nil, query, bindVars)
@@ -67,8 +69,8 @@ func (coll *ArangoDbCollection) Read(filters map[string]interface{}) ([]data_typ
 	return list, nil
 }
 
-func (coll *ArangoDbCollection) ReadItem(key string) (*data_types.EventEntry, error) {
-	var item data_types.EventEntry
+func (coll *ArangoDbCollection) ReadItem(key string) (*data_types.CloudEvent, error) {
+	var item data_types.CloudEvent
 	_, err := coll.collectionDriver.ReadDocument(nil, key, &item)
 	if err != nil {
 		return nil, err
