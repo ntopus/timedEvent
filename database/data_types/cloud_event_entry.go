@@ -21,7 +21,6 @@ type CloudEvent struct {
 // default spec version from 0.2 to the provided version.
 func NewCloudEventV02(eventType string, data string, extensions map[string]interface{}) (*CloudEvent, error) {
 	e := &CloudEvent{}
-	e.Context.AsV02()
 	err := e.Context.SetSpecVersion(cloudevents.CloudEventsVersionV02)
 	if err != nil {
 		return nil, err
