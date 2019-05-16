@@ -3,7 +3,6 @@ package application
 import (
 	"context"
 	"fmt"
-	"github.com/ivanmeca/timedEvent/application/modules/authenticate"
 	"github.com/ivanmeca/timedEvent/application/modules/config/file_config"
 	"github.com/ivanmeca/timedEvent/application/modules/server"
 	"strconv"
@@ -11,7 +10,6 @@ import (
 
 type ApplicationManager struct {
 	configPath string
-	auth       authenticate.IAuthenticate
 }
 
 func NewApplicationManager(configPath string) *ApplicationManager {
@@ -41,14 +39,14 @@ func (app *ApplicationManager) initializeConfig() error {
 }
 
 func initializeDB() {
-	err := fleetDB.EnsureIndex()
-	if err != nil {
-		panic(err.Error())
-	}
+	//err := fleetDB.EnsureIndex()
+	//if err != nil {
+	//	panic(err.Error())
+	//}
 }
 
 func (app *ApplicationManager) initializeServer() context.CancelFunc {
-	s := server.NewHttpServer(strconv.Itoa(file_config.GetConfig().Port), app.auth)
+	s := server.NewHttpServer(strconv.Itoa(file_config.GetConfig().Port))
 	ctxServer := context.Background()
 	ctxServer, cancelServer := context.WithCancel(ctxServer)
 	s.RunServer(ctxServer)

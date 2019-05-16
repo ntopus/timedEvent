@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/ivanmeca/timedEvent/application/modules/authenticate"
 	"github.com/ivanmeca/timedEvent/application/modules/routes/event"
 	"log"
 	"net/http"
@@ -12,10 +11,9 @@ import (
 type HttpServer struct {
 	engine *gin.Engine
 	server *http.Server
-	auth   authenticate.IAuthenticate
 }
 
-func NewHttpServer(port string, auth authenticate.IAuthenticate) *HttpServer {
+func NewHttpServer(port string) *HttpServer {
 	engine := gin.Default()
 	engine.HandleMethodNotAllowed = true
 	srv := &http.Server{
@@ -25,7 +23,6 @@ func NewHttpServer(port string, auth authenticate.IAuthenticate) *HttpServer {
 	httpServer := &HttpServer{
 		server: srv,
 		engine: engine,
-		auth:   auth,
 	}
 	return httpServer
 }
