@@ -7,7 +7,7 @@ import (
 
 var strConfig ConfigData
 
-func InitConfig(filename string) {
+func InitConfigOld(filename string) {
 	err := config.Load(file.NewSource(
 		file.WithPath(filename),
 	))

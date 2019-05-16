@@ -1,20 +1,11 @@
 package event
 
 import (
-	"devgit.kf.com.br/comercial/fleet-management-api/application/modules/fleetDB"
 	"github.com/gin-gonic/gin"
 	"github.com/globalsign/mgo/bson"
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
 	"github.com/ivanmeca/timedEvent/application/modules/routes"
 	"net/http"
-)
-
-package driver
-
-import (
-"github.com/gin-gonic/gin"
-"github.com/globalsign/mgo/bson"
-"net/http"
 )
 
 func bindEventInformation(context *gin.Context) (*data_types.CloudEvent, error) {
