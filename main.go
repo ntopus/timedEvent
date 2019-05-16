@@ -26,8 +26,6 @@ func runApplication(cli *cli.Context) error {
 	case <-quit:
 		cancel()
 		return nil
-	case <-appMan.Done():
-		return nil
 	}
 }
 

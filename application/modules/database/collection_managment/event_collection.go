@@ -5,11 +5,17 @@ import (
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
 )
 
+const EventCollectionName = "testeCollection"
+
 type EventCollection struct {
 }
 
 func (e *EventCollection) Insert(item *data_types.CloudEvent) (bool, error) {
-	return true, nil
+	coll, err := GetDBSession().GetCollection(EventCollectionName)
+	if err != nil {
+		return false, err
+	}
+	return coll.Insert(item)
 }
 func (e *EventCollection) DeleteItem(keyList []string) (bool, error) {
 	return true, nil

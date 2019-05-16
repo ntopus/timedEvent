@@ -3,6 +3,8 @@ package event
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/globalsign/mgo/bson"
+	"github.com/ivanmeca/timedEvent/application/modules/database"
+	"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
 	"github.com/ivanmeca/timedEvent/application/modules/routes"
 	"net/http"
@@ -18,19 +20,11 @@ func bindEventInformation(context *gin.Context) (*data_types.CloudEvent, error) 
 }
 
 func bindQueryFilterParams(context *gin.Context) interface{} {
-	filter := make(map[string]interface{})
+	var filter []database.AQLComparator
 	for i, value := range context.Request.URL.Query() {
 		switch i {
-		case "contract":
-			filter["contract"] = map[string]interface{}{"$in": value}
-		case "customer_code":
-			filter["customercode"] = value[0]
-		case "personaltag":
-			filter["personaltag.number"] = value[0]
-		case "category":
-			filter["category.name"] = value[0]
 		default:
-			filter[i] = value[0]
+			filter = append(filter, database.AQLComparator{Field: i, Comparator: "==", Value: value})
 		}
 	}
 	return filter
@@ -45,10 +39,15 @@ func HTTPCreateEvent(context *gin.Context) {
 		context.JSON(int(response.Status()), &response)
 		return
 	}
-	event.Id = bson.NewObjectId()
-	err = fleetDB.CreateDriver(*event)
+	err = event.Context.SetID(bson.NewObjectId().String())
 	if err != nil {
-		response = fleetDB.DefaultErrorHandler(err)
+		response.SetMessage(err.Error())
+		context.JSON(int(response.Status()), &response)
+		return
+	}
+	_, err = collection_managment.EventCollection{}.Insert(event)
+	if err != nil {
+		response = collection_managment.DefaultErrorHandler(err)
 		context.JSON(int(response.Status()), &response)
 		return
 	}
@@ -100,7 +99,7 @@ func HTTPGetEvent(context *gin.Context) {
 }
 
 func HTTPGetAllEvent(context *gin.Context) {
-	data := fleetDB.GetDriverCollection(bindQueryFilterParams(context))
+	data, err := collection_managment.EventCollection{}.Read(bindQueryFilterParams(context))
 	response := routes.JsendMessage{}
 	response.SetStatus(http.StatusOK)
 	response.SetData(data)
