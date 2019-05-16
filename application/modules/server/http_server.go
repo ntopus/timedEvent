@@ -5,6 +5,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/ivanmeca/timedEvent/application/modules/authenticate"
+	"github.com/ivanmeca/timedEvent/application/modules/routes/event"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -118,70 +120,15 @@ func (httpServer *HttpServer) RunServer(ctx context.Context) error {
 	v1 := httpServer.engine.Group("/v1")
 	{
 		v1.Use(httpServer.MiddlewareApiHandler)
-		driverGroup := v1.Group("/driver")
+		eventGroup := v1.Group("/driver")
 		{
-			driverGroup.GET("", driver.HTTPGetAllDrivers)
-			driverGroup.POST("", driver.HTTPCreateDriver)
-			driverCRUD := driverGroup.Group("/:driver_id")
+			eventGroup.GET("", event.HTTPGetAllEvent)
+			eventGroup.POST("", event.HTTPCreateEvent)
+			eventCRUD := eventGroup.Group("/:event_id")
 			{
-				driverCRUD.GET("", driver.HTTPGetDriver)
-				driverCRUD.PUT("", driver.HTTPUpdateDriver)
-				driverCRUD.DELETE("", driver.HTTPDeleteDriver)
-			}
-		}
-		categoryGroup := v1.Group("/driver_category")
-		{
-			categoryGroup.GET("", driver.HTTPGetAllDriverCategories)
-			categoryGroup.POST("", driver.HTTPCreateDriverCategory)
-			categoryCRUD := categoryGroup.Group("/:category_id")
-			{
-				categoryCRUD.GET("", driver.HTTPGetDriverCategory)
-				categoryCRUD.PUT("", driver.HTTPUpdateDriverCategory)
-				categoryCRUD.DELETE("", driver.HTTPDeleteDriverCategory)
-			}
-		}
-		vehicleGroup := v1.Group("/vehicle")
-		{
-			vehicleGroup.GET("", vehicle.HTTPGetAllVehicles)
-			vehicleGroup.POST("", vehicle.HTTPCreateVehicle)
-			vehicleCRUD := vehicleGroup.Group("/:vehicle_id")
-			{
-				vehicleCRUD.GET("", vehicle.HTTPGetVehicle)
-				vehicleCRUD.PUT("", vehicle.HTTPUpdateVehicle)
-				vehicleCRUD.DELETE("", vehicle.HTTPDeleteVehicle)
-			}
-		}
-		gsmSimGroup := v1.Group("/gsm_sim")
-		{
-			gsmSimGroup.GET("", gsm_sim.HTTPGetAllGsmSIM)
-			gsmSimGroup.POST("", gsm_sim.HTTPCreateGsmSIM)
-			gsmSimCRUD := gsmSimGroup.Group("/:gsmsim_id")
-			{
-				gsmSimCRUD.GET("", gsm_sim.HTTPGetGsmSIM)
-				gsmSimCRUD.PUT("", gsm_sim.HTTPUpdateGsmSIM)
-				gsmSimCRUD.DELETE("", gsm_sim.HTTPDeleteGsmSIM)
-			}
-		}
-		trackingDeviceGroup := v1.Group("/tracking_device")
-		{
-			trackingDeviceGroup.GET("", tracking_device.HTTPGetAllTrackingDevice)
-			trackingDeviceGroup.POST("", tracking_device.HTTPCreateTrackingDevice)
-			trackingDeviceCRUD := trackingDeviceGroup.Group("/:device_id")
-			{
-				trackingDeviceCRUD.GET("", tracking_device.HTTPGetTrackingDevice)
-				trackingDeviceCRUD.PUT("", tracking_device.HTTPUpdateTrackingDevice)
-				trackingDeviceCRUD.DELETE("", tracking_device.HTTPDeleteTrackingDevice)
-			}
-		}
-		refuelGroup := v1.Group("/refuel")
-		{
-			refuelGroup.GET("", refuel.HTTPGetAllRefuel)
-			refuelGroup.POST("", refuel.HTTPCreateRefuel)
-			refuelCRUD := refuelGroup.Group("/:refuel_id")
-			{
-				refuelCRUD.GET("", refuel.HTTPGetRefuel)
-				refuelCRUD.PUT("", refuel.HTTPUpdateRefuel)
-				refuelCRUD.DELETE("", refuel.HTTPDeleteRefuel)
+				eventCRUD.GET("", event.HTTPGetEvent)
+				eventCRUD.PUT("", event.HTTPUpdateEvent)
+				eventCRUD.DELETE("", event.HTTPDeleteEvent)
 			}
 		}
 	}

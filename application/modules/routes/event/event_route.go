@@ -38,22 +38,22 @@ func bindQueryFilterParams(context *gin.Context) interface{} {
 
 func HTTPCreateEvent(context *gin.Context) {
 	response := routes.JsendMessage{}
-	driver, err := bindEventInformation(context)
+	event, err := bindEventInformation(context)
 	if err != nil {
 		response.SetStatus(http.StatusBadRequest)
 		response.SetMessage(err.Error())
 		context.JSON(int(response.Status()), &response)
 		return
 	}
-	driver.Id = bson.NewObjectId()
-	err = fleetDB.CreateDriver(*driver)
+	event.Id = bson.NewObjectId()
+	err = fleetDB.CreateDriver(*event)
 	if err != nil {
 		response = fleetDB.DefaultErrorHandler(err)
 		context.JSON(int(response.Status()), &response)
 		return
 	}
 	response.SetStatus(http.StatusCreated)
-	response.SetData(driver)
+	response.SetData(event)
 	context.JSON(int(response.Status()), &response)
 }
 
@@ -72,14 +72,14 @@ func HTTPDeleteEvent(context *gin.Context) {
 func HTTPUpdateEvent(context *gin.Context) {
 	id := context.Param("driver_id")
 	response := routes.JsendMessage{}
-	driver, err := bindEventInformation(context)
+	event, err := bindEventInformation(context)
 	if err != nil {
 		response.SetStatus(http.StatusBadRequest)
 		response.SetMessage(err.Error())
 		context.JSON(int(response.Status()), &response)
 		return
 	}
-	err = fleetDB.UpdateDriver(id, *driver)
+	err = fleetDB.UpdateDriver(id, *event)
 	response.SetStatus(http.StatusOK)
 	response.SetData("OK")
 	if err != nil {
@@ -92,10 +92,10 @@ func HTTPUpdateEvent(context *gin.Context) {
 
 func HTTPGetEvent(context *gin.Context) {
 	id := context.Param("driver_id")
-	driver := fleetDB.GetDriverById(id)
+	event := fleetDB.GetDriverById(id)
 	response := routes.JsendMessage{}
 	response.SetStatus(http.StatusOK)
-	response.SetData(driver)
+	response.SetData(event)
 	context.JSON(int(response.Status()), &response)
 }
 
