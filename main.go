@@ -2,9 +2,7 @@ package main
 
 import (
 	"context"
-	"errors"
 	"github.com/ivanmeca/timedEvent/application"
-	"github.com/ivanmeca/timedEvent/config"
 	"github.com/urfave/cli"
 	"os"
 	"os/signal"
@@ -43,11 +41,6 @@ func main() {
 		},
 	}
 	app.Version = Version + "(" + GitCommit + ")"
-	gin.SetMode(gin.ReleaseMode)
-	if VersionPrerelease != "" {
-		app.Version += " - " + VersionPrerelease
-		gin.SetMode(gin.DebugMode)
-	}
 	app.Name = ApplicationName
 	app.Usage = ""
 	app.Description = ""

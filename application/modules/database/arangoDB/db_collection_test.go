@@ -2,8 +2,8 @@ package arangoDB
 
 import (
 	"fmt"
-	"github.com/ivanmeca/timedEvent/database"
-	"github.com/ivanmeca/timedEvent/database/data_types"
+	"github.com/ivanmeca/timedEvent/application/modules/database"
+	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
 	"github.com/onsi/gomega"
 	"testing"
 	"time"

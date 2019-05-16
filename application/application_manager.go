@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"devgit.kf.com.br/comercial/fleet-management-api/application/modules/fleetDB"
 	"fmt"
 	"github.com/ivanmeca/timedEvent/application/modules/authenticate"
 	"github.com/ivanmeca/timedEvent/application/modules/config/file_config"

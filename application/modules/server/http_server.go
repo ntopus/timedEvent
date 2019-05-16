@@ -3,12 +3,6 @@ package server
 import (
 	"bytes"
 	"context"
-	"devgit.kf.com.br/comercial/fleet-management-api/application/modules/authenticate"
-	"devgit.kf.com.br/comercial/fleet-management-api/application/modules/routes/driver"
-	"devgit.kf.com.br/comercial/fleet-management-api/application/modules/routes/gsm_sim"
-	"devgit.kf.com.br/comercial/fleet-management-api/application/modules/routes/refuel"
-	"devgit.kf.com.br/comercial/fleet-management-api/application/modules/routes/tracking_device"
-	"devgit.kf.com.br/comercial/fleet-management-api/application/modules/routes/vehicle"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"

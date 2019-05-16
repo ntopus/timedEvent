@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/arangodb/go-driver"
 	"github.com/arangodb/go-driver/http"
-	"github.com/ivanmeca/timedEvent/config"
+	"github.com/ivanmeca/timedEvent/application/modules/config"
 	"github.com/onsi/gomega"
 	"testing"
 )

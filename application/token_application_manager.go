@@ -1,11 +1,6 @@
 package application
 
 import (
-	"devgit.kf.com.br/comercial/fleet-management-api/application/modules/authenticate"
-	"devgit.kf.com.br/comercial/fleet-management-api/application/modules/authenticate/session_file"
-	"devgit.kf.com.br/comercial/fleet-management-api/application/modules/authenticate/token"
-	"devgit.kf.com.br/comercial/fleet-management-api/application/modules/config"
-	"devgit.kf.com.br/comercial/fleet-management-api/application/modules/config/file_config"
 	"fmt"
 	"github.com/pkg/errors"
 	"strings"

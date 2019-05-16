@@ -1,5 +1,7 @@
 package: github.com/ivanmeca/timedEvent
 import:
+- package: github.com/gin-gonic/gin
+  version: v1.3.0
 - package: github.com/arangodb/go-driver
   subpackages:
   - http

@@ -1,21 +1,29 @@
-package gsm_sim
+package event
 
 import (
 	"devgit.kf.com.br/comercial/fleet-management-api/application/modules/fleetDB"
-	"devgit.kf.com.br/comercial/fleet-management-api/application/modules/fleetDB/data_types"
-	"devgit.kf.com.br/comercial/fleet-management-api/application/modules/routes"
 	"github.com/gin-gonic/gin"
 	"github.com/globalsign/mgo/bson"
+	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
+	"github.com/ivanmeca/timedEvent/application/modules/routes"
 	"net/http"
 )
 
-func bindGsmSimInformation(context *gin.Context) (*data_types.GsmSIM, error) {
-	var gsmSim data_types.GsmSIM
-	err := context.ShouldBind(&gsmSim)
+package driver
+
+import (
+"github.com/gin-gonic/gin"
+"github.com/globalsign/mgo/bson"
+"net/http"
+)
+
+func bindEventInformation(context *gin.Context) (*data_types.CloudEvent, error) {
+	var event data_types.CloudEvent
+	err := context.ShouldBind(&event)
 	if err != nil {
 		return nil, err
 	}
-	return &gsmSim, nil
+	return &event, nil
 }
 
 func bindQueryFilterParams(context *gin.Context) interface{} {
@@ -24,6 +32,12 @@ func bindQueryFilterParams(context *gin.Context) interface{} {
 		switch i {
 		case "contract":
 			filter["contract"] = map[string]interface{}{"$in": value}
+		case "customer_code":
+			filter["customercode"] = value[0]
+		case "personaltag":
+			filter["personaltag.number"] = value[0]
+		case "category":
+			filter["category.name"] = value[0]
 		default:
 			filter[i] = value[0]
 		}
@@ -31,30 +45,30 @@ func bindQueryFilterParams(context *gin.Context) interface{} {
 	return filter
 }
 
-func HTTPCreateGsmSIM(context *gin.Context) {
+func HTTPCreateEvent(context *gin.Context) {
 	response := routes.JsendMessage{}
-	gsmSim, err := bindGsmSimInformation(context)
+	driver, err := bindEventInformation(context)
 	if err != nil {
 		response.SetStatus(http.StatusBadRequest)
 		response.SetMessage(err.Error())
 		context.JSON(int(response.Status()), &response)
 		return
 	}
-	gsmSim.Id = bson.NewObjectId()
-	err = fleetDB.CreateGsmSim(*gsmSim)
+	driver.Id = bson.NewObjectId()
+	err = fleetDB.CreateDriver(*driver)
 	if err != nil {
 		response = fleetDB.DefaultErrorHandler(err)
 		context.JSON(int(response.Status()), &response)
 		return
 	}
 	response.SetStatus(http.StatusCreated)
-	response.SetData(gsmSim)
+	response.SetData(driver)
 	context.JSON(int(response.Status()), &response)
 }
 
-func HTTPDeleteGsmSIM(context *gin.Context) {
-	id := context.Param("gsmsim_id")
-	err := fleetDB.DeleteGsmSim(id)
+func HTTPDeleteEvent(context *gin.Context) {
+	id := context.Param("driver_id")
+	err := fleetDB.DeleteDriver(id)
 	response := routes.JsendMessage{}
 	response.SetStatus(http.StatusOK)
 	response.SetData("OK")
@@ -64,36 +78,38 @@ func HTTPDeleteGsmSIM(context *gin.Context) {
 	context.JSON(int(response.Status()), &response)
 }
 
-func HTTPUpdateGsmSIM(context *gin.Context) {
-	id := context.Param("gsmsim_id")
+func HTTPUpdateEvent(context *gin.Context) {
+	id := context.Param("driver_id")
 	response := routes.JsendMessage{}
-	gsmSim, err := bindGsmSimInformation(context)
+	driver, err := bindEventInformation(context)
 	if err != nil {
 		response.SetStatus(http.StatusBadRequest)
 		response.SetMessage(err.Error())
 		context.JSON(int(response.Status()), &response)
 		return
 	}
-	err = fleetDB.UpdateGsmSim(id, *gsmSim)
+	err = fleetDB.UpdateDriver(id, *driver)
 	response.SetStatus(http.StatusOK)
 	response.SetData("OK")
 	if err != nil {
 		response = fleetDB.DefaultErrorHandler(err)
+		context.JSON(int(response.Status()), &response)
+		return
 	}
 	context.JSON(int(response.Status()), &response)
 }
 
-func HTTPGetGsmSIM(context *gin.Context) {
-	id := context.Param("gsmsim_id")
-	gsmSim := fleetDB.GetGsmSimById(id)
+func HTTPGetEvent(context *gin.Context) {
+	id := context.Param("driver_id")
+	driver := fleetDB.GetDriverById(id)
 	response := routes.JsendMessage{}
 	response.SetStatus(http.StatusOK)
-	response.SetData(gsmSim)
+	response.SetData(driver)
 	context.JSON(int(response.Status()), &response)
 }
 
-func HTTPGetAllGsmSIM(context *gin.Context) {
-	data := fleetDB.GetGsmSimCollection(bindQueryFilterParams(context))
+func HTTPGetAllEvent(context *gin.Context) {
+	data := fleetDB.GetDriverCollection(bindQueryFilterParams(context))
 	response := routes.JsendMessage{}
 	response.SetStatus(http.StatusOK)
 	response.SetData(data)

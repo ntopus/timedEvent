@@ -1,8 +1,6 @@
 package authenticate
 
 import (
-	"devgit.kf.com.br/comercial/fleet-management-api/application/modules/authenticate/session_file"
-	"devgit.kf.com.br/comercial/fleet-management-api/application/modules/authenticate/token"
 	"errors"
 )
 

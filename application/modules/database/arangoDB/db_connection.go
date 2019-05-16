@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/arangodb/go-driver"
 	"github.com/arangodb/go-driver/http"
-	"github.com/ivanmeca/timedEvent/database"
+	"github.com/ivanmeca/timedEvent/application/modules/database"
 )
 
 func NewDBClient(configuration database.DatabaseConfigurationReader) (database.DataBaseConnector, error) {

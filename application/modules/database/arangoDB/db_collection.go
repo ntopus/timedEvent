@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/arangodb/go-driver"
-	"github.com/ivanmeca/timedEvent/database"
-	"github.com/ivanmeca/timedEvent/database/data_types"
+	"github.com/ivanmeca/timedEvent/application/modules/database"
+	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
 )
 
 type Collection struct {

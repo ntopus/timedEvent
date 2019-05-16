@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/ivanmeca/timedEvent/database/data_types"
+	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
 )
 
 type AQLComparator struct {

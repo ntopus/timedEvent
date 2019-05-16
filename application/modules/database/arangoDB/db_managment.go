@@ -2,7 +2,7 @@ package arangoDB
 
 import (
 	"github.com/arangodb/go-driver"
-	"github.com/ivanmeca/timedEvent/database"
+	"github.com/ivanmeca/timedEvent/application/modules/database"
 )
 
 type Manager struct {
