@@ -7,6 +7,10 @@ import (
 
 const EventCollectionName = "testeCollection"
 
+func NewEventCollection() *EventCollection {
+	return &EventCollection{}
+}
+
 type EventCollection struct {
 }
 
@@ -24,7 +28,11 @@ func (e *EventCollection) Update(patch map[string]interface{}, key string) (bool
 	return true, nil
 }
 func (e *EventCollection) Read(filters []database.AQLComparator) ([]data_types.CloudEvent, error) {
-	return nil, nil
+	coll, err := GetDBSession().GetCollection(EventCollectionName)
+	if err != nil {
+		return nil, err
+	}
+	return coll.Read(filters)
 }
 func (e *EventCollection) ReadItem(key string) (*data_types.CloudEvent, error) {
 	return nil, nil

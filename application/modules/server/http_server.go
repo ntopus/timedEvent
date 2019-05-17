@@ -30,7 +30,7 @@ func NewHttpServer(port string) *HttpServer {
 func (httpServer *HttpServer) RunServer(ctx context.Context) error {
 	v1 := httpServer.engine.Group("/v1")
 	{
-		eventGroup := v1.Group("/driver")
+		eventGroup := v1.Group("/event")
 		{
 			eventGroup.GET("", event.HTTPGetAllEvent)
 			eventGroup.POST("", event.HTTPCreateEvent)

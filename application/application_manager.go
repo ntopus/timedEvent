@@ -35,7 +35,8 @@ func (app *ApplicationManager) initializeConfig() error {
 		return err
 	}
 	file_config.SetConfig(appConfig)
-	return config.InitConfig()
+	//return config.InitConfig()
+	return nil
 }
 
 func initializeDB() {
@@ -46,7 +47,8 @@ func initializeDB() {
 }
 
 func (app *ApplicationManager) initializeServer() context.CancelFunc {
-	s := server.NewHttpServer(strconv.Itoa(file_config.GetConfig().Port))
+	//s := server.NewHttpServer(strconv.Itoa(file_config.GetConfig().Port))
+	s := server.NewHttpServer(strconv.Itoa(9010))
 	ctxServer := context.Background()
 	ctxServer, cancelServer := context.WithCancel(ctxServer)
 	s.RunServer(ctxServer)
