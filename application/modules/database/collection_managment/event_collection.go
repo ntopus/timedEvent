@@ -5,7 +5,7 @@ import (
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
 )
 
-const EventCollectionName = "testeCollection"
+const EventCollectionName = "TesteColl"
 
 func NewEventCollection() *EventCollection {
 	return &EventCollection{}
