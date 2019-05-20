@@ -19,7 +19,12 @@ func (e *EventCollection) Insert(item *data_types.CloudEvent) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return coll.Insert(item)
+	event := data_types.ArangoCloudEvent{}
+	event.ArangoId = item.Context.GetID()
+	event.Context = item.Context
+	event.Data = item.Data
+	event.DataEncoded = item.DataEncoded
+	return coll.Insert(&event)
 }
 func (e *EventCollection) DeleteItem(keyList []string) (bool, error) {
 	coll, err := GetDBSession().GetCollection(EventCollectionName)
@@ -36,7 +41,15 @@ func (e *EventCollection) Read(filters []database.AQLComparator) ([]data_types.C
 	if err != nil {
 		return nil, err
 	}
-	return coll.Read(filters)
+	collectionData, err := coll.Read(filters)
+	if err != nil {
+		return nil, err
+	}
+	var returnData []data_types.CloudEvent
+	for _, value := range collectionData {
+		returnData = append(returnData, value.CloudEvent)
+	}
+	return returnData, nil
 }
 func (e *EventCollection) ReadItem(key string) (*data_types.CloudEvent, error) {
 	data, err := e.Read([]database.AQLComparator{{Field: "Context.id", Comparator: "==", Value: key}})
