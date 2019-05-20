@@ -12,9 +12,9 @@ import (
 
 // Event represents the canonical representation of a CloudEvent.
 type CloudEvent struct {
-	Context     cloudevents.EventContextV02
-	Data        interface{}
-	DataEncoded bool
+	Context     cloudevents.EventContextV02 `json:"context"`
+	Data        interface{}                 `json:"data"`
+	DataEncoded bool                        `json:"dataencoded"`
 }
 
 // New returns a new Event, an optional version can be passed to change the
