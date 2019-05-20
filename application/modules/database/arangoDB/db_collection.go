@@ -1,6 +1,7 @@
 package arangoDB
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/arangodb/go-driver"
@@ -15,8 +16,10 @@ type Collection struct {
 }
 
 func (coll *Collection) DeleteItem(keyList []string) (bool, error) {
+	var oldDocs []data_types.ArangoCloudEvent
+	ctx := driver.WithReturnOld(context.Background(), oldDocs)
 	for _, key := range keyList {
-		_, err := coll.collectionDriver.RemoveDocument(nil, key)
+		_, err := coll.collectionDriver.RemoveDocument(ctx, key)
 		if err != nil {
 			return false, err
 		}
