@@ -96,12 +96,17 @@ func HTTPUpdateEvent(context *gin.Context) {
 }
 
 func HTTPGetEvent(context *gin.Context) {
-	//id := context.Param("driver_id")
-	//event := fleetDB.GetDriverById(id)
-	//response := routes.JsendMessage{}
-	//response.SetStatus(http.StatusOK)
-	//response.SetData(event)
-	//context.JSON(int(response.Status()), &response)
+	id := context.Param("event_id")
+	response := routes.JsendMessage{}
+	data, err := collection_managment.NewEventCollection().ReadItem(id)
+	if err != nil {
+		response.SetMessage(err.Error())
+		context.JSON(int(response.Status()), &response)
+		return
+	}
+	response.SetStatus(http.StatusOK)
+	response.SetData(data)
+	context.JSON(int(response.Status()), &response)
 }
 
 func HTTPGetAllEvent(context *gin.Context) {
