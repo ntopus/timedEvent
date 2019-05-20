@@ -24,13 +24,13 @@ func bindQueryFilterParams(context *gin.Context) []database.AQLComparator {
 	for i, value := range context.Request.URL.Query() {
 		switch i {
 		case "id":
-			filter = append(filter, database.AQLComparator{Field: "Context.id", Comparator: "==", Value: value})
+			filter = append(filter, database.AQLComparator{Field: "Context.id", Comparator: "==", Value: value[0]})
 		case "initialDate":
-			filter = append(filter, database.AQLComparator{Field: "Context.time", Comparator: ">=", Value: value})
+			filter = append(filter, database.AQLComparator{Field: "Context.time", Comparator: ">=", Value: value[0]})
 		case "finalDate":
-			filter = append(filter, database.AQLComparator{Field: "Context.time", Comparator: "<=", Value: value})
+			filter = append(filter, database.AQLComparator{Field: "Context.time", Comparator: "<=", Value: value[0]})
 		default:
-			filter = append(filter, database.AQLComparator{Field: i, Comparator: "==", Value: value})
+			filter = append(filter, database.AQLComparator{Field: i, Comparator: "==", Value: value[0]})
 		}
 	}
 	return filter
