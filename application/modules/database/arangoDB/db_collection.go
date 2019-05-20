@@ -24,7 +24,7 @@ func (coll *Collection) DeleteItem(keyList []string) (bool, error) {
 	return true, nil
 }
 
-func (coll *Collection) Insert(item *data_types.CloudEvent) (bool, error) {
+func (coll *Collection) Insert(item *data_types.ArangoCloudEvent) (bool, error) {
 	_, err := coll.collectionDriver.CreateDocument(nil, item)
 	if err != nil {
 		return false, err
@@ -40,9 +40,9 @@ func (coll *Collection) Update(patch map[string]interface{}, key string) (bool, 
 	return true, nil
 }
 
-func (coll *Collection) Read(filters []database.AQLComparator) ([]data_types.CloudEvent, error) {
-	var item data_types.CloudEvent
-	var list []data_types.CloudEvent
+func (coll *Collection) Read(filters []database.AQLComparator) ([]data_types.ArangoCloudEvent, error) {
+	var item data_types.ArangoCloudEvent
+	var list []data_types.ArangoCloudEvent
 
 	bindVars := map[string]interface{}{}
 	query := fmt.Sprintf("FOR item IN %s ", coll.collection)
@@ -70,8 +70,8 @@ func (coll *Collection) Read(filters []database.AQLComparator) ([]data_types.Clo
 	return list, nil
 }
 
-func (coll *Collection) ReadItem(key string) (*data_types.CloudEvent, error) {
-	var item data_types.CloudEvent
+func (coll *Collection) ReadItem(key string) (*data_types.ArangoCloudEvent, error) {
+	var item data_types.ArangoCloudEvent
 	_, err := coll.collectionDriver.ReadDocument(nil, key, &item)
 	if err != nil {
 		return nil, err

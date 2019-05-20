@@ -30,9 +30,9 @@ type DataBaseManagment interface {
 }
 
 type CollectionManagment interface {
-	Insert(item *data_types.CloudEvent) (bool, error)
+	Insert(item *data_types.ArangoCloudEvent) (bool, error)
 	DeleteItem(keyList []string) (bool, error)
 	Update(patch map[string]interface{}, key string) (bool, error)
-	Read(filters []AQLComparator) ([]data_types.CloudEvent, error)
-	ReadItem(key string) (*data_types.CloudEvent, error)
+	Read(filters []AQLComparator) ([]data_types.ArangoCloudEvent, error)
+	ReadItem(key string) (*data_types.ArangoCloudEvent, error)
 }
