@@ -22,7 +22,11 @@ func (e *EventCollection) Insert(item *data_types.CloudEvent) (bool, error) {
 	return coll.Insert(item)
 }
 func (e *EventCollection) DeleteItem(keyList []string) (bool, error) {
-	return true, nil
+	coll, err := GetDBSession().GetCollection(EventCollectionName)
+	if err != nil {
+		return false, err
+	}
+	return coll.DeleteItem(keyList)
 }
 func (e *EventCollection) Update(patch map[string]interface{}, key string) (bool, error) {
 	return true, nil

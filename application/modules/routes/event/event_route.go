@@ -63,6 +63,17 @@ func HTTPCreateEvent(context *gin.Context) {
 }
 
 func HTTPDeleteEvent(context *gin.Context) {
+	id := context.Param("event_id")
+	response := routes.JsendMessage{}
+	data, err := collection_managment.NewEventCollection().DeleteItem([]string{id})
+	if err != nil {
+		response.SetMessage(err.Error())
+		context.JSON(int(response.Status()), &response)
+		return
+	}
+	response.SetStatus(http.StatusOK)
+	response.SetData(data)
+	context.JSON(int(response.Status()), &response)
 	//id := context.Param("driver_id")
 	//err := fleetDB.DeleteDriver(id)
 	//response := routes.JsendMessage{}
