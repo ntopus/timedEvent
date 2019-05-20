@@ -104,6 +104,12 @@ func HTTPGetEvent(context *gin.Context) {
 		context.JSON(int(response.Status()), &response)
 		return
 	}
+	if data == nil {
+		response.SetStatus(http.StatusNotFound)
+		response.SetMessage("event not found")
+		context.JSON(int(response.Status()), &response)
+		return
+	}
 	response.SetStatus(http.StatusOK)
 	response.SetData(data)
 	context.JSON(int(response.Status()), &response)
