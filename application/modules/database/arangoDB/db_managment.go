@@ -3,6 +3,7 @@ package arangoDB
 import (
 	"github.com/arangodb/go-driver"
 	"github.com/ivanmeca/timedEvent/application/modules/database"
+	"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
 )
 
 type Manager struct {
@@ -36,7 +37,7 @@ func (dbm *Manager) GetCollection(collectionName string) (database.CollectionMan
 	if err != nil {
 		return nil, err
 	}
-	return &Collection{
+	return &collection_managment.Collection{
 		db:               dbm.db,
 		collection:       collectionName,
 		collectionDriver: coll,

@@ -7,9 +7,9 @@ import (
 )
 
 type ArangoCloudEvent struct {
-	ArangoId  string `json:"_id"`
-	ArangoKey string `json:"_key"`
-	ArangoRev string `json:"_rev"`
+	ArangoId  string `json:"_id,omitempty"`
+	ArangoKey string `json:"_key,omitempty"`
+	ArangoRev string `json:"_rev,omitempty"`
 	CloudEvent
 }
 

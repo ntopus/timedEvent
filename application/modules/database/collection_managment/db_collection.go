@@ -1,4 +1,4 @@
-package arangoDB
+package collection_managment
 
 import (
 	"context"
@@ -15,24 +15,26 @@ type Collection struct {
 	collectionDriver driver.Collection
 }
 
-func (coll *Collection) DeleteItem(keyList []string) (bool, error) {
+func (coll *Collection) DeleteItem(keyList []string) ([]data_types.ArangoCloudEvent, error) {
 	var oldDocs []data_types.ArangoCloudEvent
 	ctx := driver.WithReturnOld(context.Background(), oldDocs)
 	for _, key := range keyList {
 		_, err := coll.collectionDriver.RemoveDocument(ctx, key)
 		if err != nil {
-			return false, err
+			return nil, err
 		}
 	}
-	return true, nil
+	return oldDocs, nil
 }
 
-func (coll *Collection) Insert(item *data_types.ArangoCloudEvent) (bool, error) {
-	_, err := coll.collectionDriver.CreateDocument(nil, item)
+func (coll *Collection) Insert(item *data_types.ArangoCloudEvent) (*data_types.ArangoCloudEvent, error) {
+	var newDoc data_types.ArangoCloudEvent
+	ctx := driver.WithReturnNew(context.Background(), newDoc)
+	_, err := coll.collectionDriver.CreateDocument(ctx, item)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
-	return true, nil
+	return &newDoc, nil
 }
 
 func (coll *Collection) Update(patch map[string]interface{}, key string) (bool, error) {
@@ -59,6 +61,7 @@ func (coll *Collection) Read(filters []database.AQLComparator) ([]data_types.Ara
 	}
 	query += fmt.Sprintf(" SORT item.Context.time DESC RETURN item")
 	cursor, err := coll.db.Query(nil, query, bindVars)
+	defer cursor.Close()
 	if err != nil {
 		return nil, errors.New("internal error: " + err.Error())
 	}
@@ -69,7 +72,6 @@ func (coll *Collection) Read(filters []database.AQLComparator) ([]data_types.Ara
 		}
 		list = append(list, item)
 	}
-	defer cursor.Close()
 	return list, nil
 }
 

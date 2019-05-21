@@ -31,9 +31,19 @@ func (e *EventCollection) DeleteItem(keyList []string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	data, err := e.Read([]database.AQLComparator{{Field: "Context.id", Comparator: "==", Value: key}})
+	if err != nil {
+		return nil, err
+	}
+	if len(data) == 0 {
+		return nil, nil
+	}
+	return &data[0], nil
+
 	return coll.DeleteItem(keyList)
 }
 func (e *EventCollection) Update(patch map[string]interface{}, key string) (bool, error) {
+
 	return true, nil
 }
 func (e *EventCollection) Read(filters []database.AQLComparator) ([]data_types.CloudEvent, error) {

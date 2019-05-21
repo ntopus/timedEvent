@@ -1,4 +1,4 @@
-package arangoDB
+package collection_managment
 
 import (
 	"fmt"
