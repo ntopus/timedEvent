@@ -20,7 +20,7 @@ func (e *EventCollection) Insert(item *data_types.CloudEvent) (*data_types.Arang
 		return nil, err
 	}
 	event := data_types.ArangoCloudEvent{}
-	event.ArangoId = item.Context.GetID()
+	event.ArangoKey = item.Context.GetID()
 	event.Context = item.Context
 	event.Data = item.Data
 	event.DataEncoded = item.DataEncoded
