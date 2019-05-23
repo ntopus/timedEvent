@@ -50,9 +50,8 @@ func TestInsertDocument(test *testing.T) {
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		eventTime := horaAtual.AddDate(0, 0, i)
 		event.Context.SetTime(eventTime)
-		ok, err := coll.Insert(event)
+		_, err = coll.Insert(event)
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-		gomega.Expect(ok).Should(gomega.BeTrue())
 	}
 
 }
@@ -67,10 +66,8 @@ func TestInsertDocumentComplete(test *testing.T) {
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	eventTime := horaAtual.AddDate(0, 0, 10)
 	event.Context.SetTime(eventTime)
-	ok, err := coll.Insert(event)
+	_, err = coll.Insert(event)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-	gomega.Expect(ok).Should(gomega.BeTrue())
-
 }
 
 func TestReadCollection(test *testing.T) {

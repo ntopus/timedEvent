@@ -29,7 +29,7 @@ func (coll *Collection) DeleteItem(keyList []string) ([]data_types.ArangoCloudEv
 
 func (coll *Collection) Insert(item *data_types.ArangoCloudEvent) (*data_types.ArangoCloudEvent, error) {
 	var newDoc data_types.ArangoCloudEvent
-	ctx := driver.WithReturnNew(context.Background(), newDoc)
+	ctx := driver.WithReturnNew(context.Background(), &newDoc)
 	_, err := coll.collectionDriver.CreateDocument(ctx, item)
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func (coll *Collection) Insert(item *data_types.ArangoCloudEvent) (*data_types.A
 
 func (coll *Collection) Update(patch map[string]interface{}, key string) (*data_types.ArangoCloudEvent, error) {
 	var newDoc data_types.ArangoCloudEvent
-	ctx := driver.WithReturnNew(context.Background(), newDoc)
+	ctx := driver.WithReturnNew(context.Background(), &newDoc)
 	_, err := coll.collectionDriver.UpdateDocument(ctx, key, patch)
 	if err != nil {
 		return nil, err

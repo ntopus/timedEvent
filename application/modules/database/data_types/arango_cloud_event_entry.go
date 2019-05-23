@@ -37,6 +37,7 @@ func NewArangoCloudEventV02(eventType string, data string, extensions map[string
 			return nil, err
 		}
 	}
+	e.ArangoKey = e.Context.ID
 	e.Data = data
 	return e, nil
 }
