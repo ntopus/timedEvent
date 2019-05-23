@@ -1,4 +1,4 @@
-package collection_managment
+package arangoDB
 
 import (
 	"context"
@@ -10,16 +10,16 @@ import (
 )
 
 type Collection struct {
-	Db               driver.Database
-	Collection       string
-	CollectionDriver driver.Collection
+	db               driver.Database
+	collection       string
+	collectionDriver driver.Collection
 }
 
 func (coll *Collection) DeleteItem(keyList []string) ([]data_types.ArangoCloudEvent, error) {
 	var oldDocs []data_types.ArangoCloudEvent
 	ctx := driver.WithReturnOld(context.Background(), oldDocs)
 	for _, key := range keyList {
-		_, err := coll.CollectionDriver.RemoveDocument(ctx, key)
+		_, err := coll.collectionDriver.RemoveDocument(ctx, key)
 		if err != nil {
 			return nil, err
 		}
@@ -30,7 +30,7 @@ func (coll *Collection) DeleteItem(keyList []string) ([]data_types.ArangoCloudEv
 func (coll *Collection) Insert(item *data_types.ArangoCloudEvent) (*data_types.ArangoCloudEvent, error) {
 	var newDoc data_types.ArangoCloudEvent
 	ctx := driver.WithReturnNew(context.Background(), newDoc)
-	_, err := coll.CollectionDriver.CreateDocument(ctx, item)
+	_, err := coll.collectionDriver.CreateDocument(ctx, item)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (coll *Collection) Insert(item *data_types.ArangoCloudEvent) (*data_types.A
 func (coll *Collection) Update(patch map[string]interface{}, key string) (*data_types.ArangoCloudEvent, error) {
 	var newDoc data_types.ArangoCloudEvent
 	ctx := driver.WithReturnNew(context.Background(), newDoc)
-	_, err := coll.CollectionDriver.UpdateDocument(ctx, key, patch)
+	_, err := coll.collectionDriver.UpdateDocument(ctx, key, patch)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (coll *Collection) Read(filters []database.AQLComparator) ([]data_types.Ara
 	var list []data_types.ArangoCloudEvent
 
 	bindVars := map[string]interface{}{}
-	query := fmt.Sprintf("FOR item IN %s ", coll.Collection)
+	query := fmt.Sprintf("FOR item IN %s ", coll.collection)
 	glueStr := "FILTER"
 	bindVarsNames := 0
 	for _, filter := range filters {
@@ -62,7 +62,7 @@ func (coll *Collection) Read(filters []database.AQLComparator) ([]data_types.Ara
 		bindVarsNames++
 	}
 	query += fmt.Sprintf(" SORT item.Context.time DESC RETURN item")
-	cursor, err := coll.Db.Query(nil, query, bindVars)
+	cursor, err := coll.db.Query(nil, query, bindVars)
 	defer cursor.Close()
 	if err != nil {
 		return nil, errors.New("internal error: " + err.Error())
@@ -79,7 +79,7 @@ func (coll *Collection) Read(filters []database.AQLComparator) ([]data_types.Ara
 
 func (coll *Collection) ReadItem(key string) (*data_types.ArangoCloudEvent, error) {
 	var item data_types.ArangoCloudEvent
-	_, err := coll.CollectionDriver.ReadDocument(nil, key, &item)
+	_, err := coll.collectionDriver.ReadDocument(nil, key, &item)
 	if err != nil {
 		return nil, err
 	}
