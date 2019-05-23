@@ -57,12 +57,13 @@ func (e *EventCollection) Read(filters []database.AQLComparator) ([]data_types.C
 	return returnData, nil
 }
 func (e *EventCollection) ReadItem(key string) (*data_types.CloudEvent, error) {
-	data, err := e.Read([]database.AQLComparator{{Field: "Context.id", Comparator: "==", Value: key}})
+	coll, err := GetDBSession().GetCollection(EventCollectionName)
 	if err != nil {
 		return nil, err
 	}
-	if len(data) == 0 {
-		return nil, nil
+	item, err := coll.ReadItem(key)
+	if err != nil {
+		return nil, err
 	}
-	return &data[0], nil
+	return &item.CloudEvent, nil
 }
