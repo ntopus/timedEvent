@@ -19,15 +19,6 @@ func TestReadDocumentsWithFilter(test *testing.T) {
 	fmt.Println(list)
 }
 
-func TestReadDocumentById(test *testing.T) {
-	gomega.RegisterTestingT(test)
-	fmt.Println("Trying to a read collection by id")
-	coll := getTestCollectionInstance("testeCollection")
-	list, err := coll.Read([]database.AQLComparator{{Field: "Context.id", Comparator: "==", Value: "e45ad907-77d7-11e9-aeaf-54bf64f7912d"}})
-	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-	fmt.Println(list)
-}
-
 func TestReadDocuments(test *testing.T) {
 	gomega.RegisterTestingT(test)
 	fmt.Println("Trying to a read collection")
@@ -36,6 +27,14 @@ func TestReadDocuments(test *testing.T) {
 	list, err := coll.Read(nil)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	fmt.Println(list)
+}
+
+func readDocument(id string) {
+	fmt.Println("Trying to a read collection by id")
+	coll := getTestCollectionInstance("testeCollection")
+	item, err := coll.ReadItem(id)
+	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+	fmt.Println(item)
 }
 
 func TestInsertDocument(test *testing.T) {
@@ -50,10 +49,10 @@ func TestInsertDocument(test *testing.T) {
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		eventTime := horaAtual.AddDate(0, 0, i)
 		event.Context.SetTime(eventTime)
-		_, err = coll.Insert(event)
+		newDoc, err := coll.Insert(event)
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+		readDocument(newDoc.Context.GetID())
 	}
-
 }
 
 func TestInsertDocumentComplete(test *testing.T) {

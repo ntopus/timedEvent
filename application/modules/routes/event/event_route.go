@@ -45,20 +45,27 @@ func HTTPCreateEvent(context *gin.Context) {
 		context.JSON(int(response.Status()), &response)
 		return
 	}
-	err = event.Context.SetID(bson.NewObjectId().String())
-	if err != nil {
-		response.SetMessage(err.Error())
+	if event.Context.GetID() == "" {
+		err = event.Context.SetID(bson.NewObjectId().String())
+		if err != nil {
+			response.SetMessage(err.Error())
+			context.JSON(int(response.Status()), &response)
+			return
+		}
+	}
+	if event.Validate() != nil {
+		response = collection_managment.DefaultErrorHandler(err)
 		context.JSON(int(response.Status()), &response)
 		return
 	}
-	_, err = collection_managment.NewEventCollection().Insert(event)
+	insertedItem, err := collection_managment.NewEventCollection().Insert(event)
 	if err != nil {
 		response = collection_managment.DefaultErrorHandler(err)
 		context.JSON(int(response.Status()), &response)
 		return
 	}
 	response.SetStatus(http.StatusCreated)
-	response.SetData(event)
+	response.SetData(insertedItem)
 	context.JSON(int(response.Status()), &response)
 }
 
