@@ -13,7 +13,7 @@ type ArangoCloudEvent struct {
 	CloudEvent
 }
 
-func NewArangoCloudEventV02(eventType string, data string, extensions map[string]interface{}) (*ArangoCloudEvent, error) {
+func NewArangoCloudEventV02(eventType string, data interface{}, extensions map[string]interface{}) (*ArangoCloudEvent, error) {
 	e := &ArangoCloudEvent{}
 	err := e.Context.SetSpecVersion(cloudevents.CloudEventsVersionV02)
 	if err != nil {

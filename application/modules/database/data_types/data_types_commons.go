@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-func parseData(data time.Time) string {
+func ParseData(data time.Time) string {
 	auxData := data.Format("2006-01-02")
 	if auxData == "0001-01-01" {
 		return ""
@@ -12,7 +12,16 @@ func parseData(data time.Time) string {
 	return auxData
 }
 
-func checkDateLayout(value string) string {
+func GetTime(data string) (*time.Time, error) {
+	const shortForm = "2006-01-02 15:04:05Z"
+	t, err := time.Parse(shortForm, "1983-10-19")
+	if err != nil {
+		return nil, err
+	}
+	return &t, nil
+}
+
+func CheckDateLayout(value string) string {
 	var layout string
 	if value[len(value)-1] == 'Z' {
 		layout = "2006-01-02 15:04:05Z"

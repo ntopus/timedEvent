@@ -1,13 +1,16 @@
 package event
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/globalsign/mgo/bson"
 	"github.com/ivanmeca/timedEvent/application/modules/database"
 	"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
 	"github.com/ivanmeca/timedEvent/application/modules/routes"
+	"io/ioutil"
 	"net/http"
+	"testegoget/gateway-lib/generics"
 )
 
 func bindEventInformation(context *gin.Context) (*data_types.CloudEvent, error) {
@@ -38,12 +41,80 @@ func bindQueryFilterParams(context *gin.Context) []database.AQLComparator {
 
 func HTTPCreateEvent(context *gin.Context) {
 	response := routes.JsendMessage{}
-	event, err := bindEventInformation(context)
+	data, err := ioutil.ReadAll(context.Request.Body)
 	if err != nil {
-		response.SetStatus(http.StatusBadRequest)
-		response.SetMessage(err.Error())
+		response.SetMessage("could not read request data: " + err.Error())
 		context.JSON(int(response.Status()), &response)
 		return
+	}
+	event := data_types.ArangoCloudEvent{}
+	event.Data = data
+	headers := context.Request.Header
+	for name, value := range headers {
+		switch name {
+		case "specversion":
+			err := event.Context.SetSpecVersion(value[0])
+			if err != nil {
+				response.SetMessage(err.Error())
+				context.JSON(int(response.Status()), &response)
+				return
+			}
+		case "type":
+			err = event.Context.SetType(value[0])
+			if err != nil {
+				response.SetMessage(err.Error())
+				context.JSON(int(response.Status()), &response)
+				return
+			}
+		case "source":
+			err = event.Context.SetSource(value[0])
+			if err != nil {
+				response.SetMessage(err.Error())
+				context.JSON(int(response.Status()), &response)
+				return
+			}
+		case "id":
+			err = event.Context.SetID(value[0])
+			if err != nil {
+				response.SetMessage(err.Error())
+				context.JSON(int(response.Status()), &response)
+				return
+			}
+		case "time":
+			time, err := data_types.GetTime(value[0])
+			if err != nil {
+				response.SetMessage(err.Error())
+				context.JSON(int(response.Status()), &response)
+				return
+			}
+			err = event.Context.SetTime(*time)
+			if err != nil {
+				response.SetMessage(err.Error())
+				context.JSON(int(response.Status()), &response)
+				return
+			}
+		case "schemaurl":
+			err = event.Context.SetSchemaURL(value[0])
+			if err != nil {
+				response.SetMessage(err.Error())
+				context.JSON(int(response.Status()), &response)
+				return
+			}
+		case "contenttype":
+			err = event.Context.SetDataContentType(value[0])
+			if err != nil {
+				response.SetMessage(err.Error())
+				context.JSON(int(response.Status()), &response)
+				return
+			}
+		default:
+			err := event.Context.SetExtension(name, value)
+			if err != nil {
+				response.SetMessage(err.Error())
+				context.JSON(int(response.Status()), &response)
+				return
+			}
+		}
 	}
 	if event.Context.GetID() == "" {
 		err = event.Context.SetID(bson.NewObjectId().String())
@@ -53,8 +124,9 @@ func HTTPCreateEvent(context *gin.Context) {
 			return
 		}
 	}
-	if event.Validate() != nil {
-		response = collection_managment.DefaultErrorHandler(err)
+	validationError := event.Validate()
+	if validationError != nil {
+		response = collection_managment.DefaultErrorHandler(validationError)
 		context.JSON(int(response.Status()), &response)
 		return
 	}
