@@ -1,7 +1,6 @@
 package event
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/globalsign/mgo/bson"
 	"github.com/ivanmeca/timedEvent/application/modules/database"
@@ -10,7 +9,6 @@ import (
 	"github.com/ivanmeca/timedEvent/application/modules/routes"
 	"io/ioutil"
 	"net/http"
-	"testegoget/gateway-lib/generics"
 )
 
 func bindEventInformation(context *gin.Context) (*data_types.CloudEvent, error) {
