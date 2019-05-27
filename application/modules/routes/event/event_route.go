@@ -45,7 +45,7 @@ func HTTPCreateEvent(context *gin.Context) {
 		context.JSON(int(response.Status()), &response)
 		return
 	}
-	event := data_types.ArangoCloudEvent{}
+	event := data_types.CloudEvent{}
 	event.Data = data
 	headers := context.Request.Header
 	for name, value := range headers {
@@ -64,7 +64,7 @@ func HTTPCreateEvent(context *gin.Context) {
 				context.JSON(int(response.Status()), &response)
 				return
 			}
-		case "source":
+		case "Source":
 			err = event.Context.SetSource(value[0])
 			if err != nil {
 				response.SetMessage(err.Error())
@@ -78,7 +78,7 @@ func HTTPCreateEvent(context *gin.Context) {
 				context.JSON(int(response.Status()), &response)
 				return
 			}
-		case "time":
+		case "Expires":
 			time, err := data_types.GetTime(value[0])
 			if err != nil {
 				response.SetMessage(err.Error())
@@ -98,7 +98,7 @@ func HTTPCreateEvent(context *gin.Context) {
 				context.JSON(int(response.Status()), &response)
 				return
 			}
-		case "contenttype":
+		case "Content-Type":
 			err = event.Context.SetDataContentType(value[0])
 			if err != nil {
 				response.SetMessage(err.Error())
@@ -128,7 +128,7 @@ func HTTPCreateEvent(context *gin.Context) {
 		context.JSON(int(response.Status()), &response)
 		return
 	}
-	insertedItem, err := collection_managment.NewEventCollection().Insert(event)
+	insertedItem, err := collection_managment.NewEventCollection().Insert(&event)
 	if err != nil {
 		response = collection_managment.DefaultErrorHandler(err)
 		context.JSON(int(response.Status()), &response)
