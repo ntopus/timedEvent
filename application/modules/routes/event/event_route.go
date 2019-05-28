@@ -153,27 +153,6 @@ func HTTPDeleteEvent(context *gin.Context) {
 	context.JSON(int(response.Status()), &response)
 }
 
-func HTTPUpdateEvent(context *gin.Context) {
-	//id := context.Param("driver_id")
-	//response := routes.JsendMessage{}
-	//event, err := bindEventInformation(context)
-	//if err != nil {
-	//	response.SetStatus(http.StatusBadRequest)
-	//	response.SetMessage(err.Error())
-	//	context.JSON(int(response.Status()), &response)
-	//	return
-	//}
-	//err = fleetDB.UpdateDriver(id, *event)
-	//response.SetStatus(http.StatusOK)
-	//response.SetData("OK")
-	//if err != nil {
-	//	response = fleetDB.DefaultErrorHandler(err)
-	//	context.JSON(int(response.Status()), &response)
-	//	return
-	//}
-	//context.JSON(int(response.Status()), &response)
-}
-
 func HTTPGetEvent(context *gin.Context) {
 	id := context.Param("event_id")
 	response := routes.JsendMessage{}

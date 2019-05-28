@@ -37,7 +37,6 @@ func (httpServer *HttpServer) RunServer(ctx context.Context) error {
 			eventCRUD := eventGroup.Group("/:event_id")
 			{
 				eventCRUD.GET("", event.HTTPGetEvent)
-				eventCRUD.PUT("", event.HTTPUpdateEvent)
 				eventCRUD.DELETE("", event.HTTPDeleteEvent)
 			}
 		}
