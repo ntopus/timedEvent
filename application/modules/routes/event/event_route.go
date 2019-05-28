@@ -2,9 +2,7 @@ package event
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/globalsign/mgo/bson"
 	"github.com/ivanmeca/timedEvent/application/modules/database"
 	"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
@@ -134,14 +132,14 @@ func HTTPCreateEvent(context *gin.Context) {
 	//["eventPublishQueue"]=>
 	//string(22) "Timer.Resource.ThrowAt"
 
-	insertedItem, err := collection_managment.NewEventCollection().Insert(event)
-	if err != nil {
-		response = collection_managment.DefaultErrorHandler(err)
-		context.JSON(int(response.Status()), &response)
-		return
-	}
+	//insertedItem, err := collection_managment.NewEventCollection().Insert(event)
+	//if err != nil {
+	//	response = collection_managment.DefaultErrorHandler(err)
+	//	context.JSON(int(response.Status()), &response)
+	//	return
+	//}
 	response.SetStatus(http.StatusCreated)
-	response.SetData(insertedItem.CloudEvent)
+	//response.SetData(insertedItem.CloudEvent)
 	context.JSON(int(response.Status()), &response)
 }
 
