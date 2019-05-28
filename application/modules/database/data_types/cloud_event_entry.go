@@ -12,33 +12,33 @@ import (
 
 // Event represents the canonical representation of a CloudEvent.
 type CloudEvent struct {
-	Context     cloudevents.EventContextV02 `json:"context"`
-	Data        interface{}                 `json:"data"`
-	DataEncoded bool                        `json:"dataencoded"`
+	cloudevents.EventContextV02
+	Data        interface{} `json:"data"`
+	DataEncoded bool        `json:"dataencoded"`
 }
 
 // New returns a new Event, an optional version can be passed to change the
 // default spec version from 0.2 to the provided version.
 func NewCloudEventV02(eventType string, data interface{}, extensions map[string]interface{}) (*CloudEvent, error) {
 	e := &CloudEvent{}
-	err := e.Context.SetSpecVersion(cloudevents.CloudEventsVersionV02)
+	err := e.SetSpecVersion(cloudevents.CloudEventsVersionV02)
 	if err != nil {
 		return nil, err
 	}
-	err = e.Context.SetID(uuid.NewUUID().String())
+	err = e.SetID(uuid.NewUUID().String())
 	if err != nil {
 		return nil, err
 	}
-	err = e.Context.SetType(eventType)
+	err = e.SetType(eventType)
 	if err != nil {
 		return nil, err
 	}
-	err = e.Context.SetTime(time.Now())
+	err = e.SetTime(time.Now())
 	if err != nil {
 		return nil, err
 	}
 	for key, value := range extensions {
-		err = e.Context.SetExtension(key, value)
+		err = e.SetExtension(key, value)
 		if err != nil {
 			return nil, err
 		}
@@ -49,13 +49,13 @@ func NewCloudEventV02(eventType string, data interface{}, extensions map[string]
 
 // ExtensionAs returns Context.ExtensionAs(name, obj)
 func (e *CloudEvent) ExtensionAs(name string, obj interface{}) error {
-	return e.Context.ExtensionAs(name, obj)
+	return e.EventContextV02.ExtensionAs(name, obj)
 }
 
 // Validate performs a spec based validation on this event.
 // Validation is dependent on the spec version specified in the event context.
 func (e *CloudEvent) Validate() error {
-	if err := e.Context.Validate(); err != nil {
+	if err := e.EventContextV02.Validate(); err != nil {
 		return err
 	}
 	return nil
@@ -77,11 +77,11 @@ func (e *CloudEvent) String() string {
 		b.WriteString(fmt.Sprintf("Validation Error: \n%s\n", valid.Error()))
 	}
 
-	b.WriteString(e.Context.String())
+	b.WriteString(e.EventContextV02.String())
 
 	if e.Data != "" {
 		b.WriteString("Data,\n  ")
-		if strings.HasPrefix(e.Context.GetDataContentType(), "application/json") {
+		if strings.HasPrefix(e.GetDataContentType(), "application/json") {
 			var prettyJSON bytes.Buffer
 			data := e.Data.([]byte)
 			err := json.Indent(&prettyJSON, data, "  ", "  ")
