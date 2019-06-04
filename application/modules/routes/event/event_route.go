@@ -11,6 +11,11 @@ import (
 	"net/http"
 )
 
+const (
+	EVENT_WHEN  = "when"
+	EVENT_WHERE = "where"
+)
+
 func bindEventInformation(context *gin.Context) (*data_types.CloudEvent, error) {
 	var event data_types.CloudEvent
 	err := context.ShouldBind(&event)
@@ -44,7 +49,11 @@ func ceHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 	}
 	validationError := event.Validate()
 	if validationError != nil {
-		return nil, errors.New("could not read validate data: " + err.Error())
+		return nil, errors.New("could not read validate data: " + validationError.Error())
+	}
+	eventValidation := validateEvent(event)
+	if eventValidation != nil {
+		return nil, errors.New("could not validate event: " + eventValidation.Error())
 	}
 	return event, nil
 }
@@ -88,11 +97,6 @@ func jsonHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 			if err != nil {
 				return nil, errors.New("could not get time: " + err.Error())
 			}
-		case "schemaurl":
-			err = event.SetSchemaURL(value[0])
-			if err != nil {
-				return nil, errors.New("could not get schemaURL: " + err.Error())
-			}
 		case "Content-Type":
 			err = event.SetDataContentType(value[0])
 			if err != nil {
@@ -105,42 +109,68 @@ func jsonHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 			}
 		}
 	}
+	eventValidation := validateEvent(&event)
+	if eventValidation != nil {
+		return nil, errors.New(`could not validate event: ` + eventValidation.Error())
+	}
 	return &event, nil
+}
+
+func validateEvent(event *data_types.CloudEvent) error {
+	var PublishWhen string
+	err := event.ExtensionAs(EVENT_WHEN, PublishWhen)
+	if err != nil {
+		return errors.New(`could not get publish date: ` + err.Error())
+	}
+	var PublishWhere string
+	err = event.ExtensionAs(EVENT_WHERE, PublishWhere)
+	if err != nil {
+		return errors.New(`could not get publish queue: ` + err.Error())
+	}
+	return nil
 }
 
 func HTTPCreateEvent(context *gin.Context) {
 	response := routes.JsendMessage{}
+	switch context.Request.Header.Get("Content-Type") {
+	case "application/cloudevents":
+		event, err := ceHttpCreate(context)
+		if err != nil {
+			response = collection_managment.DefaultErrorHandler(err)
 
-	//switch context.Request.Header.Get("Content-Type") {
-	//	case "application/cloudevents":
-	//		event,err := ceHttpCreate(context)
-	//	case "application/json":
-	//		event,err := jsonHttpCreate(context)
-	//	default:
-	//
-	//}
-
-	//
-	//["eventId"]=>
-	//string(44) "timeout:location-expires:Tetra:724-1121:5000"
-	//["eventSource"]=>
-	//string(22) "Native.Location.Expire"
-	//["eventDate"]=>
-	//string(27) "2019-05-15T14:38:48.000000Z"
-	//["eventPublishDate"]=>
-	//string(27) "2019-05-15T14:38:52.000000Z"
-	//["eventPublishQueue"]=>
-	//string(22) "Timer.Resource.ThrowAt"
-
-	//insertedItem, err := collection_managment.NewEventCollection().Insert(event)
-	//if err != nil {
-	//	response = collection_managment.DefaultErrorHandler(err)
-	//	context.JSON(int(response.Status()), &response)
-	//	return
-	//}
-	response.SetStatus(http.StatusCreated)
-	//response.SetData(insertedItem.CloudEvent)
-	context.JSON(int(response.Status()), &response)
+		}
+		insertedItem, err := collection_managment.NewEventCollection().Insert(event)
+		if err != nil {
+			response = collection_managment.DefaultErrorHandler(err)
+			context.JSON(int(response.Status()), &response)
+			return
+		}
+		response.SetStatus(http.StatusCreated)
+		response.SetData(insertedItem.CloudEvent)
+		context.JSON(int(response.Status()), &response)
+		return
+	case "application/json":
+		event, err := jsonHttpCreate(context)
+		if err != nil {
+			response = collection_managment.DefaultErrorHandler(err)
+			context.JSON(int(response.Status()), &response)
+			return
+		}
+		insertedItem, err := collection_managment.NewEventCollection().Insert(event)
+		if err != nil {
+			response = collection_managment.DefaultErrorHandler(err)
+			context.JSON(int(response.Status()), &response)
+			return
+		}
+		response.SetStatus(http.StatusCreated)
+		response.SetData(insertedItem.CloudEvent)
+		context.JSON(int(response.Status()), &response)
+		return
+	default:
+		response.SetStatus(http.StatusBadRequest)
+		response.SetMessage("unknown Content-Type")
+		return
+	}
 }
 
 func HTTPDeleteEvent(context *gin.Context) {

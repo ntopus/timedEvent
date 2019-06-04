@@ -6,7 +6,7 @@ import:
   subpackages:
   - http
 - package: github.com/cloudevents/sdk-go
-  version: v0.6.0
+  version: v0.7.0
   subpackages:
   - v02
 - package: github.com/micro/go-config
