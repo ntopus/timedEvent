@@ -114,15 +114,8 @@ func jsonHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 }
 
 func validateEvent(event *data_types.CloudEvent) error {
-	var PublishWhen string
-	err := event.ExtensionAs(EVENT_WHEN, PublishWhen)
-	if err != nil {
-		return errors.New(`could not get publish date: ` + err.Error())
-	}
-	var PublishWhere string
-	err = event.ExtensionAs(EVENT_WHERE, PublishWhere)
-	if err != nil {
-		return errors.New(`could not get publish queue: ` + err.Error())
+	if event.PublishQueue == "" {
+		return errors.New(`could not validate publish queue`)
 	}
 	return nil
 }
