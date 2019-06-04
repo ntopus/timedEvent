@@ -12,11 +12,6 @@ import (
 	"net/http"
 )
 
-const (
-	EVENT_WHEN  = "publishData"
-	EVENT_WHERE = "publishQueue"
-)
-
 func bindQueryFilterParams(context *gin.Context) []database.AQLComparator {
 	var filter []database.AQLComparator
 	for i, value := range context.Request.URL.Query() {
