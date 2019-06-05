@@ -32,11 +32,11 @@ func GetDBSession() database.DataBaseManagment {
 
 func DefaultErrorHandler(err error) routes.JsendMessage {
 	errMsg := routes.JsendMessage{}
-	if strings.Contains(err.Error(), "E11000") {
-		dupKey := regexp.MustCompile("dup key:\\s*\\{([\\w\\W]+)\\}")
+	if strings.Contains(err.Error(), "unique constraint violated ") {
+		dupKey := regexp.MustCompile("conflicting key:\\s*([\\w\\W]+)")
 		matches := dupKey.FindStringSubmatch(err.Error())
 		if len(matches) > 0 {
-			errMsg.SetMessage("Duplicated key " + matches[1])
+			errMsg.SetMessage("duplicated id " + matches[1])
 		} else {
 			errMsg.SetMessage(err.Error())
 		}

@@ -13,7 +13,7 @@ import (
 // Event represents the canonical representation of a CloudEvent.
 type CloudEvent struct {
 	cloudevents.EventContextV02
-	PublishDate  time.Time   `json:"publishdate"`
+	PublishDate  string      `json:"publishdate"`
 	PublishQueue string      `json:"publishqueue"`
 	Data         interface{} `json:"data"`
 	DataEncoded  bool        `json:"dataencoded"`
