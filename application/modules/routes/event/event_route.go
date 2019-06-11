@@ -3,6 +3,7 @@ package event
 import (
 	"encoding/json"
 	"errors"
+	"github.com/cloudevents/sdk-go/pkg/cloudevents"
 	"github.com/gin-gonic/gin"
 	"github.com/ivanmeca/timedEvent/application/modules/database"
 	"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
@@ -10,6 +11,14 @@ import (
 	"github.com/ivanmeca/timedEvent/application/modules/routes"
 	"io/ioutil"
 	"net/http"
+)
+
+const (
+	F_ID            = 1
+	F_SPEC_VERSION  = 2
+	F_SOURCE        = 4
+	F_PUBLISH_DATE  = 8
+	F_PUBLISH_QUEUE = 16
 )
 
 func bindQueryFilterParams(context *gin.Context) []database.AQLComparator {
@@ -58,42 +67,62 @@ func jsonHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 	event := data_types.CloudEvent{}
 	event.Data = data
 	headers := context.Request.Header
+
+	if value, ok := headers["specversion"]; ok {
+		err := event.SetSpecVersion(value[0])
+		if err != nil {
+			return nil, errors.New("could not get spec version: " + err.Error())
+		}
+	} else {
+		event.SetSpecVersion(cloudevents.CloudEventsVersionV02)
+	}
+	if value, ok := headers["type"]; ok {
+		err = event.SetType(value[0])
+		if err != nil {
+			return nil, errors.New("could not get type: " + err.Error())
+		}
+	}
+	if value, ok := headers["source"]; ok {
+		err = event.SetSource(value[0])
+		if err != nil {
+			return nil, errors.New("could not get source: " + err.Error())
+		}
+	} else {
+		event.SetSource(context.ClientIP())
+	}
+	if value, ok := headers["id"]; ok {
+		err = event.SetID(value[0])
+		if err != nil {
+			return nil, errors.New("could not get id: " + err.Error())
+		}
+	}
+	if value, ok := headers["Content-Type"]; ok {
+		err = event.SetDataContentType(value[0])
+		if err != nil {
+			return nil, errors.New("could not get content type: " + err.Error())
+		}
+	}
+	if value, ok := headers["publishDate"]; ok {
+		time, err := data_types.GetTime(value[0])
+		if err != nil {
+			return nil, errors.New("could not get time: " + err.Error())
+		}
+		event.PublishDate = time.String()
+	}
+	if value, ok := headers["publishQueue"]; ok {
+		event.PublishQueue = value[0]
+	}
+
 	for name, value := range headers {
 		switch name {
 		case "specversion":
-			err := event.SetSpecVersion(value[0])
-			if err != nil {
-				return nil, errors.New("could not get spec version: " + err.Error())
-			}
 		case "type":
-			err = event.SetType(value[0])
-			if err != nil {
-				return nil, errors.New("could not get type: " + err.Error())
-			}
-		case "Source":
-			err = event.SetSource(value[0])
-			if err != nil {
-				return nil, errors.New("could not get source: " + err.Error())
-			}
+		case "source":
 		case "id":
-			err = event.SetID(value[0])
-			if err != nil {
-				return nil, errors.New("could not get id: " + err.Error())
-			}
 		case "Expires":
-			time, err := data_types.GetTime(value[0])
-			if err != nil {
-				return nil, errors.New("could not get time: " + err.Error())
-			}
-			err = event.SetTime(*time)
-			if err != nil {
-				return nil, errors.New("could not get time: " + err.Error())
-			}
 		case "Content-Type":
-			err = event.SetDataContentType(value[0])
-			if err != nil {
-				return nil, errors.New("could not get content type: " + err.Error())
-			}
+		case "publishDate":
+		case "publishQueue":
 		default:
 			err := event.SetExtension(name, value)
 			if err != nil {
@@ -101,10 +130,14 @@ func jsonHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 			}
 		}
 	}
-	eventValidation := validateEvent(&event)
-	if eventValidation != nil {
-		return nil, errors.New(`could not validate event: ` + eventValidation.Error())
+	validationError := event.Validate()
+	if validationError != nil {
+		return nil, errors.New("could not read validate data: " + validationError.Error())
 	}
+	//eventValidation := validateEvent(&event)
+	//if eventValidation != nil {
+	//	return nil, errors.New(`could not validate event: ` + eventValidation.Error())
+	//}
 	return &event, nil
 }
 
