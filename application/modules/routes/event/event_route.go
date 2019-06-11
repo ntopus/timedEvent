@@ -69,7 +69,7 @@ func jsonHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 	event.Data = data
 	headers := context.Request.Header
 
-	if value, ok := headers["specversion"]; ok {
+	if value, ok := headers["Specversion"]; ok {
 		err := event.SetSpecVersion(value[0])
 		if err != nil {
 			return nil, errors.New("could not get spec version: " + err.Error())
@@ -80,13 +80,13 @@ func jsonHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 			return nil, errors.New("could not get spec version: " + err.Error())
 		}
 	}
-	if value, ok := headers["type"]; ok {
+	if value, ok := headers["Type"]; ok {
 		err = event.SetType(value[0])
 		if err != nil {
 			return nil, errors.New("could not get type: " + err.Error())
 		}
 	}
-	if value, ok := headers["source"]; ok {
+	if value, ok := headers["Source"]; ok {
 		err = event.SetSource(value[0])
 		if err != nil {
 			return nil, errors.New("could not get source: " + err.Error())
@@ -97,7 +97,7 @@ func jsonHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 			return nil, errors.New("could not generate source: " + err.Error())
 		}
 	}
-	if value, ok := headers["id"]; ok {
+	if value, ok := headers["Id"]; ok {
 		err = event.SetID(value[0])
 		if err != nil {
 			return nil, errors.New("could not get id: " + err.Error())
@@ -114,7 +114,7 @@ func jsonHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 			return nil, errors.New("could not get content type: " + err.Error())
 		}
 	}
-	if value, ok := headers["publishDate"]; ok {
+	if value, ok := headers["PublishDate"]; ok {
 		time, err := data_types.GetTime(value[0])
 		if err != nil {
 			return nil, errors.New("could not get time: " + err.Error())
@@ -123,7 +123,7 @@ func jsonHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 	} else {
 		return nil, errors.New("could not get publishDate")
 	}
-	if value, ok := headers["publishQueue"]; ok {
+	if value, ok := headers["PublishQueue"]; ok {
 		event.PublishQueue = value[0]
 	} else {
 		return nil, errors.New("could not get publishQueue")
