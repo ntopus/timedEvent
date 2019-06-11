@@ -9,6 +9,7 @@ import (
 	"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
 	"github.com/ivanmeca/timedEvent/application/modules/routes"
+	"github.com/pborman/uuid"
 	"io/ioutil"
 	"net/http"
 )
@@ -74,7 +75,10 @@ func jsonHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 			return nil, errors.New("could not get spec version: " + err.Error())
 		}
 	} else {
-		event.SetSpecVersion(cloudevents.CloudEventsVersionV02)
+		err := event.SetSpecVersion(cloudevents.CloudEventsVersionV02)
+		if err != nil {
+			return nil, errors.New("could not get spec version: " + err.Error())
+		}
 	}
 	if value, ok := headers["type"]; ok {
 		err = event.SetType(value[0])
@@ -88,12 +92,20 @@ func jsonHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 			return nil, errors.New("could not get source: " + err.Error())
 		}
 	} else {
-		event.SetSource(context.ClientIP())
+		err = event.SetSource(context.ClientIP())
+		if err != nil {
+			return nil, errors.New("could not generate source: " + err.Error())
+		}
 	}
 	if value, ok := headers["id"]; ok {
 		err = event.SetID(value[0])
 		if err != nil {
 			return nil, errors.New("could not get id: " + err.Error())
+		}
+	} else {
+		err = event.SetID(uuid.NewUUID().String())
+		if err != nil {
+			return nil, errors.New("could not generate id: " + err.Error())
 		}
 	}
 	if value, ok := headers["Content-Type"]; ok {
@@ -108,9 +120,13 @@ func jsonHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 			return nil, errors.New("could not get time: " + err.Error())
 		}
 		event.PublishDate = time.String()
+	} else {
+		return nil, errors.New("could not get publishDate")
 	}
 	if value, ok := headers["publishQueue"]; ok {
 		event.PublishQueue = value[0]
+	} else {
+		return nil, errors.New("could not get publishQueue")
 	}
 
 	for name, value := range headers {
