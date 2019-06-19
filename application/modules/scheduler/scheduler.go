@@ -3,6 +3,8 @@ package scheduler
 import (
 	"context"
 	"fmt"
+	"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
+	"sync"
 	//"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
 	"time"
@@ -24,7 +26,7 @@ func NewScheduler(pollTime int) Scheduler {
 
 type EventScheduler struct {
 	poolTime  time.Duration
-	eventList map[string]EventMapper
+	eventList sync.Map
 }
 
 func (es *EventScheduler) Run(ctx context.Context) {
@@ -43,7 +45,7 @@ func (es *EventScheduler) Run(ctx context.Context) {
 
 func (es *EventScheduler) DBPoll() {
 	fmt.Println("pool")
-	//data, err := collection_managment.NewEventCollection().Read(nil)
+	data, err := collection_managment.NewEventCollection().Read(nil)
 	//if err != nil {
 	//}
 	//fmt.Println(data)
