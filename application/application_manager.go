@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/ivanmeca/timedEvent/application/modules/config/file_config"
+	"github.com/ivanmeca/timedEvent/application/modules/scheduler"
 	"github.com/ivanmeca/timedEvent/application/modules/server"
 	"strconv"
 )
@@ -22,9 +23,11 @@ func (app *ApplicationManager) RunApplication(ctx context.Context) error {
 	app.initializeConfig()
 	initializeDB()
 	cancelServer := app.initializeServer()
+	cancelScheduler := app.initializeScheduler()
 	go func() {
 		<-ctx.Done()
 		cancelServer()
+		cancelScheduler()
 	}()
 	return nil
 }
@@ -52,5 +55,13 @@ func (app *ApplicationManager) initializeServer() context.CancelFunc {
 	ctxServer := context.Background()
 	ctxServer, cancelServer := context.WithCancel(ctxServer)
 	s.RunServer(ctxServer)
+	return cancelServer
+}
+
+func (app *ApplicationManager) initializeScheduler() context.CancelFunc {
+	s := scheduler.NewScheduler(2000)
+	ctxServer := context.Background()
+	ctxServer, cancelServer := context.WithCancel(ctxServer)
+	s.Run(ctxServer)
 	return cancelServer
 }
