@@ -3,7 +3,6 @@ package scheduler
 import (
 	"context"
 	"fmt"
-	"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
 	"sync"
 	//"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
@@ -45,7 +44,7 @@ func (es *EventScheduler) Run(ctx context.Context) {
 
 func (es *EventScheduler) DBPoll() {
 	fmt.Println("pool")
-	data, err := collection_managment.NewEventCollection().Read(nil)
+	//data, err := collection_managment.NewEventCollection().Read(nil)
 	//if err != nil {
 	//}
 	//fmt.Println(data)
