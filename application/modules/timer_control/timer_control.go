@@ -9,12 +9,13 @@ import (
 )
 
 type TimerControl struct {
-	controlTime time.Duration
-	list        *sync.Map
+	exclusionTime time.Duration
+	controlTime   time.Duration
+	list          *sync.Map
 }
 
-func NewTimerControl(controlTime int, list *sync.Map) *TimerControl {
-	return &TimerControl{list: list, controlTime: time.Duration(controlTime)}
+func NewTimerControl(controlTime int, exclusionTime int, list *sync.Map) *TimerControl {
+	return &TimerControl{list: list, controlTime: time.Duration(controlTime), exclusionTime: time.Duration(exclusionTime)}
 }
 
 func (tc *TimerControl) Run(ctx context.Context) {
@@ -35,11 +36,18 @@ func (tc *TimerControl) processList() {
 	horaAtual := time.Now()
 	tc.list.Range(func(key interface{}, value interface{}) bool {
 		if event, ok := value.(data_types.EventMapper); ok {
-			if horaAtual.Sub(event.PublishDate) > 0 {
-				return true
+			timeDiffInSecond := horaAtual.Sub(event.PublishDate) / time.Second
+			if timeDiffInSecond > tc.exclusionTime {
+				fmt.Println("Excluir ID" + event.EventID)
+				//todo: excluir entrada
+			} else {
+				if timeDiffInSecond > 0 {
+					fmt.Println("Publicar ID" + event.EventID)
+					//todo: publicar evento
+				}
 			}
 		}
-		return false
+		return true
 	})
 	fmt.Println("TC")
 }
