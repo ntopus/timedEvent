@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"github.com/ivanmeca/timedEvent/application/modules/database"
 	"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
-	"sync"
-	//"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
+	"sync"
 	"time"
 )
 
