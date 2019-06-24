@@ -36,7 +36,9 @@ func (tc *TimerControl) processList() {
 	horaAtual := time.Now()
 	tc.list.Range(func(key interface{}, value interface{}) bool {
 		if event, ok := value.(data_types.EventMapper); ok {
-			timeDiffInSecond := horaAtual.Sub(event.PublishDate) / time.Second
+			timeDiffInSecond := horaAtual.Sub(event.PublishDate)
+			timeDiffInSecond /= time.Second
+			fmt.Printf("Hora atual: %s, hora do evento: %s\n", horaAtual.Format("2006-01-02 15:04:05"), event.PublishDate.Format("2006-01-02 15:04:05"))
 			if timeDiffInSecond > tc.exclusionTime {
 				fmt.Println("Excluir ID" + event.EventID)
 				//todo: excluir entrada
