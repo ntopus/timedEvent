@@ -6,15 +6,16 @@ import (
 	"github.com/ivanmeca/timedEvent/application/modules/database"
 	"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
+	"github.com/ivanmeca/timedEvent/application/modules/timer_control"
 	"sync"
 	"time"
 )
 
 type EventMapper struct {
-	publishDate   time.Time
-	eventRevision string
-	eventID       string
-	event         data_types.ArangoCloudEvent
+	PublishDate   time.Time
+	EventRevision string
+	EventID       string
+	Event         data_types.ArangoCloudEvent
 }
 
 type Scheduler interface {
@@ -22,12 +23,15 @@ type Scheduler interface {
 }
 
 func NewScheduler(pollTime int) Scheduler {
-	return &EventScheduler{poolTime: time.Duration(pollTime)}
+	sc := &EventScheduler{poolTime: time.Duration(pollTime)}
+	sc.tc = timer_control.NewTimerControl(&sc.eventList)
+	return sc
 }
 
 type EventScheduler struct {
 	poolTime  time.Duration
 	eventList sync.Map
+	tc        *timer_control.TimerControl
 }
 
 func (es *EventScheduler) Run(ctx context.Context) {
@@ -42,21 +46,10 @@ func (es *EventScheduler) Run(ctx context.Context) {
 			}
 		}
 	}()
-	go func() {
-		for {
-			time.Sleep(time.Second)
-			es.timerControl()
-		}
-	}()
 }
 
 func (es *EventScheduler) pooler() {
-	fmt.Println("Pooler" + time.Now().Format("2006-01-02 15:04:05Z"))
 	es.DBPoll()
-}
-
-func (es *EventScheduler) timerControl() {
-	fmt.Println("Control" + time.Now().Format("2006-01-02 15:04:05Z"))
 }
 
 func (es *EventScheduler) DBPoll() {
@@ -71,11 +64,12 @@ func (es *EventScheduler) DBPoll() {
 		publishDate, err := time.Parse("2006-01-02 15:04:05Z", value.PublishDate)
 		if err != nil {
 			fmt.Println("Erro no parse da data")
+			continue
 		}
-		ev.publishDate = publishDate
-		ev.event = value
-		ev.eventRevision = value.ArangoRev
-		ev.eventID = value.ArangoId
+		ev.PublishDate = publishDate
+		ev.Event = value
+		ev.EventRevision = value.ArangoRev
+		ev.EventID = value.ArangoId
 		es.eventList.Store(value.ID, value)
 	}
 	fmt.Println("Pool ok")
