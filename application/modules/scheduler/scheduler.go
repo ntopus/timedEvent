@@ -3,6 +3,8 @@ package scheduler
 import (
 	"context"
 	"fmt"
+	"github.com/ivanmeca/timedEvent/application/modules/database"
+	"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
 	"sync"
 	//"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
@@ -10,6 +12,8 @@ import (
 )
 
 type EventMapper struct {
+	elapsedTime   int64
+	totalTime     int64
 	eventRevision string
 	eventID       string
 	event         data_types.ArangoCloudEvent
@@ -36,16 +40,21 @@ func (es *EventScheduler) Run(ctx context.Context) {
 				return
 			default:
 				time.Sleep(es.poolTime * time.Second)
-				es.DBPoll()
+				es.pooler()
 			}
 		}
 	}()
 }
 
+func (es *EventScheduler) pooler() {
+	es.DBPoll()
+}
+
 func (es *EventScheduler) DBPoll() {
-	fmt.Println("pool")
-	//data, err := collection_managment.NewEventCollection().Read(nil)
-	//if err != nil {
-	//}
-	//fmt.Println(data)
+
+	horaAtual := time.Now().Format("2006-01-02 15:04:05Z")
+	data, err := collection_managment.NewEventCollection().Read([]database.AQLComparator{{Field: "publishdate", Comparator: ">=", Value: horaAtual}})
+	if err != nil {
+	}
+	fmt.Println(data)
 }

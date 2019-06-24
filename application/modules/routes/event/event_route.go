@@ -14,14 +14,6 @@ import (
 	"net/http"
 )
 
-const (
-	F_ID            = 1
-	F_SPEC_VERSION  = 2
-	F_SOURCE        = 4
-	F_PUBLISH_DATE  = 8
-	F_PUBLISH_QUEUE = 16
-)
-
 func bindQueryFilterParams(context *gin.Context) []database.AQLComparator {
 	var filter []database.AQLComparator
 	for i, value := range context.Request.URL.Query() {
