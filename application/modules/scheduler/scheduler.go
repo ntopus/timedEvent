@@ -11,20 +11,13 @@ import (
 	"time"
 )
 
-type EventMapper struct {
-	PublishDate   time.Time
-	EventRevision string
-	EventID       string
-	Event         data_types.ArangoCloudEvent
-}
-
 type Scheduler interface {
 	Run(ctx context.Context)
 }
 
-func NewScheduler(pollTime int) Scheduler {
+func NewScheduler(pollTime int, controlTime int) Scheduler {
 	sc := &EventScheduler{poolTime: time.Duration(pollTime)}
-	sc.tc = timer_control.NewTimerControl(&sc.eventList)
+	sc.tc = timer_control.NewTimerControl(controlTime, &sc.eventList)
 	return sc
 }
 
@@ -46,20 +39,17 @@ func (es *EventScheduler) Run(ctx context.Context) {
 			}
 		}
 	}()
+	es.tc.Run(ctx)
 }
 
 func (es *EventScheduler) pooler() {
-	es.DBPoll()
-}
-
-func (es *EventScheduler) DBPoll() {
 	horaAtual := time.Now()
 	data, err := collection_managment.NewEventCollection().Read([]database.AQLComparator{{Field: "publishdate", Comparator: "<=", Value: horaAtual.Add(es.poolTime).Format("2006-01-02 15:04:05Z")}})
 	if err != nil {
 		return
 	}
 	for _, value := range data {
-		ev := EventMapper{}
+		ev := data_types.EventMapper{}
 
 		publishDate, err := time.Parse("2006-01-02 15:04:05Z", value.PublishDate)
 		if err != nil {
