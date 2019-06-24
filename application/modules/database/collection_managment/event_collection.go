@@ -39,7 +39,7 @@ func (e *EventCollection) Update(patch map[string]interface{}, key string) (bool
 
 	return true, nil
 }
-func (e *EventCollection) Read(filters []database.AQLComparator) ([]data_types.CloudEvent, error) {
+func (e *EventCollection) Read(filters []database.AQLComparator) ([]data_types.ArangoCloudEvent, error) {
 	coll, err := GetDBSession().GetCollection(EventCollectionName)
 	if err != nil {
 		return nil, err
@@ -48,13 +48,9 @@ func (e *EventCollection) Read(filters []database.AQLComparator) ([]data_types.C
 	if err != nil {
 		return nil, err
 	}
-	var returnData []data_types.CloudEvent
-	for _, value := range collectionData {
-		returnData = append(returnData, value.CloudEvent)
-	}
-	return returnData, nil
+	return collectionData, nil
 }
-func (e *EventCollection) ReadItem(key string) (*data_types.CloudEvent, error) {
+func (e *EventCollection) ReadItem(key string) (*data_types.ArangoCloudEvent, error) {
 	coll, err := GetDBSession().GetCollection(EventCollectionName)
 	if err != nil {
 		return nil, err
@@ -63,5 +59,5 @@ func (e *EventCollection) ReadItem(key string) (*data_types.CloudEvent, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &item.CloudEvent, nil
+	return item, nil
 }

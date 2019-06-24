@@ -11,8 +11,7 @@ import (
 )
 
 type EventMapper struct {
-	elapsedTime   int64
-	totalTime     int64
+	publishDate   time.Time
 	eventRevision string
 	eventID       string
 	event         data_types.ArangoCloudEvent
@@ -43,17 +42,42 @@ func (es *EventScheduler) Run(ctx context.Context) {
 			}
 		}
 	}()
+	go func() {
+		for {
+			time.Sleep(time.Second)
+			es.timerControl()
+		}
+	}()
 }
 
 func (es *EventScheduler) pooler() {
+	fmt.Println("Pooler" + time.Now().Format("2006-01-02 15:04:05Z"))
 	es.DBPoll()
 }
 
-func (es *EventScheduler) DBPoll() {
+func (es *EventScheduler) timerControl() {
+	fmt.Println("Control" + time.Now().Format("2006-01-02 15:04:05Z"))
+}
 
-	horaAtual := time.Now().Format("2006-01-02 15:04:05Z")
-	data, err := collection_managment.NewEventCollection().Read([]database.AQLComparator{{Field: "publishdate", Comparator: ">=", Value: horaAtual}})
+func (es *EventScheduler) DBPoll() {
+	horaAtual := time.Now()
+	data, err := collection_managment.NewEventCollection().Read([]database.AQLComparator{{Field: "publishdate", Comparator: "<=", Value: horaAtual.Add(es.poolTime).Format("2006-01-02 15:04:05Z")}})
 	if err != nil {
+		return
 	}
-	fmt.Println(data)
+	for _, value := range data {
+		ev := EventMapper{}
+
+		publishDate, err := time.Parse("2006-01-02 15:04:05Z", value.PublishDate)
+		if err != nil {
+			fmt.Println("Erro no parse da data")
+		}
+		ev.publishDate = publishDate
+		ev.event = value
+		ev.eventRevision = value.ArangoRev
+		ev.eventID = value.ArangoId
+		es.eventList.Store(value.ID, value)
+	}
+	fmt.Println("Pool ok")
+	return
 }
