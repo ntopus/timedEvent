@@ -14,5 +14,4 @@ func TestSchedulerPoll(test *testing.T) {
 	scheduler := NewScheduler(2)
 	scheduler.Run(context.Background())
 	time.Sleep(20000 * time.Second)
-	//Expect(err).ShouldNot(HaveOccurred())
 }
