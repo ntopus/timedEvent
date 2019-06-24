@@ -60,7 +60,7 @@ func (es *EventScheduler) pooler() {
 		ev.PublishDate = publishDate
 		ev.Event = value
 		ev.EventRevision = value.ArangoRev
-		ev.EventID = value.ArangoId
+		ev.EventID = value.ArangoKey
 		es.eventList.Store(value.ID, ev)
 	}
 	return

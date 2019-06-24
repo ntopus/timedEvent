@@ -17,9 +17,9 @@ type Collection struct {
 
 func (coll *Collection) DeleteItem(keyList []string) ([]data_types.ArangoCloudEvent, error) {
 	var oldDocs []data_types.ArangoCloudEvent
-	ctx := driver.WithReturnOld(context.Background(), oldDocs)
+	//ctx := driver.WithReturnOld(context.Background(), oldDocs)
 	for _, key := range keyList {
-		_, err := coll.collectionDriver.RemoveDocument(ctx, key)
+		_, err := coll.collectionDriver.RemoveDocument(nil, key)
 		if err != nil {
 			return nil, err
 		}

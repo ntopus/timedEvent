@@ -3,6 +3,7 @@ package timer_control
 import (
 	"context"
 	"fmt"
+	"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
 	"sync"
 	"time"
@@ -40,8 +41,13 @@ func (tc *TimerControl) processList() {
 			timeDiffInSecond /= time.Second
 			fmt.Printf("Hora atual: %s, hora do evento: %s\n", horaAtual.Format("2006-01-02 15:04:05"), event.PublishDate.Format("2006-01-02 15:04:05"))
 			if timeDiffInSecond > tc.exclusionTime {
-				fmt.Println("Excluir ID" + event.EventID)
-				//todo: excluir entrada
+				_, err := collection_managment.NewEventCollection().DeleteItem([]string{event.EventID})
+				if err != nil {
+					fmt.Printf("falha ao excluir ID: " + event.EventID)
+				}
+				tc.list.Delete(key)
+				fmt.Println("ID excluido: " + event.EventID)
+
 			} else {
 				if timeDiffInSecond > 0 {
 					fmt.Println("Publicar ID" + event.EventID)
