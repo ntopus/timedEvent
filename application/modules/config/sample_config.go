@@ -20,14 +20,15 @@ func configSample() *ConfigData {
 	config.DataBase.ServerUser = ""
 	config.DataBase.ServerPassword = ""
 
-	var cqueueconf ConfigQueue
-	cqueueconf.ServerHost = "127.0.0.1"
-	cqueueconf.ServerPort = "5672"
-	cqueueconf.ServerUser = "dummy_user"
-	cqueueconf.ServerPassword = "dummy_pass"
-	cqueueconf.QueueName = "throwAt"
+	var pqueueconf ConfigQueue
+	pqueueconf.ServerHost = "127.0.0.1"
+	pqueueconf.ServerVHost = "/"
+	pqueueconf.ServerPort = "5672"
+	pqueueconf.ServerUser = "dummy_user"
+	pqueueconf.ServerPassword = "dummy_pass"
+	pqueueconf.QueueName = "throwAt"
 
-	config.PublishQueue = append(config.PublishQueue, cqueueconf)
+	config.PublishQueue = append(config.PublishQueue, pqueueconf)
 	return &config
 }
 
