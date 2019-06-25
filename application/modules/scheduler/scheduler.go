@@ -15,9 +15,9 @@ type Scheduler interface {
 	Run(ctx context.Context)
 }
 
-func NewScheduler(pollTime int, controlTime int, exclusionTime int) Scheduler {
+func NewScheduler(pollTime int, controlTime int, expirationTime int) Scheduler {
 	sc := &EventScheduler{poolTime: time.Duration(pollTime)}
-	sc.tc = timer_control.NewTimerControl(controlTime, exclusionTime, &sc.eventList)
+	sc.tc = timer_control.NewTimerControl(controlTime, expirationTime, &sc.eventList)
 	return sc
 }
 

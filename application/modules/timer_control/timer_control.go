@@ -10,13 +10,13 @@ import (
 )
 
 type TimerControl struct {
-	exclusionTime time.Duration
-	controlTime   time.Duration
-	list          *sync.Map
+	expirationTime time.Duration
+	controlTime    time.Duration
+	list           *sync.Map
 }
 
-func NewTimerControl(controlTime int, exclusionTime int, list *sync.Map) *TimerControl {
-	return &TimerControl{list: list, controlTime: time.Duration(controlTime), exclusionTime: time.Duration(exclusionTime)}
+func NewTimerControl(controlTime int, expirationTime int, list *sync.Map) *TimerControl {
+	return &TimerControl{list: list, controlTime: time.Duration(controlTime), expirationTime: time.Duration(expirationTime)}
 }
 
 func (tc *TimerControl) Run(ctx context.Context) {
@@ -40,7 +40,7 @@ func (tc *TimerControl) processList() {
 			timeDiffInSecond := horaAtual.Sub(event.PublishDate)
 			timeDiffInSecond /= time.Second
 			fmt.Printf("Hora atual: %s, hora do evento: %s\n", horaAtual.Format("2006-01-02 15:04:05Z"), event.PublishDate.Format("2006-01-02 15:04:05Z"))
-			if timeDiffInSecond > tc.exclusionTime {
+			if timeDiffInSecond > tc.expirationTime {
 				_, err := collection_managment.NewEventCollection().DeleteItem([]string{event.EventID})
 				if err != nil {
 					fmt.Printf("falha ao excluir ID: " + event.EventID)

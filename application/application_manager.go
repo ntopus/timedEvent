@@ -3,7 +3,7 @@ package application
 import (
 	"context"
 	"fmt"
-	"github.com/ivanmeca/timedEvent/application/modules/config/file_config"
+	"github.com/ivanmeca/timedEvent/application/modules/config"
 	"github.com/ivanmeca/timedEvent/application/modules/scheduler"
 	"github.com/ivanmeca/timedEvent/application/modules/server"
 	"strconv"
@@ -20,7 +20,6 @@ func NewApplicationManager(configPath string) *ApplicationManager {
 }
 func (app *ApplicationManager) RunApplication(ctx context.Context) error {
 	fmt.Println("Initialize API")
-	app.initializeConfig()
 	initializeDB()
 	cancelServer := app.initializeServer()
 	cancelScheduler := app.initializeScheduler()
@@ -29,16 +28,6 @@ func (app *ApplicationManager) RunApplication(ctx context.Context) error {
 		cancelServer()
 		cancelScheduler()
 	}()
-	return nil
-}
-
-func (app *ApplicationManager) initializeConfig() error {
-	appConfig, err := file_config.LoadConfig(app.configPath)
-	if err != nil {
-		return err
-	}
-	file_config.SetConfig(appConfig)
-	//return config.InitConfig()
 	return nil
 }
 
@@ -59,7 +48,7 @@ func (app *ApplicationManager) initializeServer() context.CancelFunc {
 }
 
 func (app *ApplicationManager) initializeScheduler() context.CancelFunc {
-	s := scheduler.NewScheduler(2000)
+	s := scheduler.NewScheduler(config.GetConfig().PoolTime, config.GetConfig().PoolTime)
 	ctxServer := context.Background()
 	ctxServer, cancelServer := context.WithCancel(ctxServer)
 	s.Run(ctxServer)
