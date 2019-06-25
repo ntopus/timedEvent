@@ -54,9 +54,21 @@ func (qp *queue_publisher) init() {
 }
 
 func (qp *queue_publisher) ValidateQueue(queueName string) bool {
+	if _, ok := qp.queueMap[queueName]; ok {
+		return true
+	}
 	return false
 }
 
 func (qp *queue_publisher) PublishInQueue(queueName string, data interface{}) bool {
+	AppLogger := logger.GetLogger()
+	if val, ok := qp.queueMap[queueName]; ok {
+		err := val.Publish(data)
+		if err != nil {
+			AppLogger.ErrorPrintln("could not publish on queue: " + err.Error())
+			return false
+		}
+		return true
+	}
 	return false
 }
