@@ -6,5 +6,5 @@ RUN apt-get install tzdata
 ENV TZ=America/Bahia
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 WORKDIR /app
-COPY ./bin/timed-queue-service /app/
-ENTRYPOINT ["/app/timed-queue-service"]
+COPY ./bin/timed-event /app/
+ENTRYPOINT ["/app/timed-event"]
