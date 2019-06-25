@@ -5,6 +5,7 @@ import (
 	"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
 	"github.com/ivanmeca/timedEvent/application/modules/logger"
+	"github.com/ivanmeca/timedEvent/application/modules/queue_publisher"
 	"sync"
 	"time"
 )
@@ -58,7 +59,14 @@ func (tc *TimerControl) processList() {
 						return true
 					}
 					if data.ArangoRev == event.EventRevision {
-						//todo: publicar evento
+						if queue_publisher.QueuePublisher().PublishInQueue(data.PublishQueue, event.Event) {
+							_, err := collection_managment.NewEventCollection().DeleteItem([]string{event.EventID})
+							if err != nil {
+								tc.logger.NoticePrintln("falha ao excluir ID: " + event.EventID)
+							}
+							tc.list.Delete(key)
+							tc.logger.DebugPrintln("ID excluido: " + event.EventID)
+						}
 					} else {
 						tc.list.Delete(key)
 					}
