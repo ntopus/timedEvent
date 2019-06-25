@@ -6,6 +6,7 @@ import (
 	"github.com/ivanmeca/timedEvent/application/modules/database"
 	"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
+	"github.com/ivanmeca/timedEvent/application/modules/logger"
 	"github.com/ivanmeca/timedEvent/application/modules/timer_control"
 	"sync"
 	"time"
@@ -26,6 +27,7 @@ type EventScheduler struct {
 	poolTime    time.Duration
 	eventList   sync.Map
 	tc          *timer_control.TimerControl
+	logger      *logger.StdLogger
 }
 
 func (es *EventScheduler) Run(ctx context.Context) {
@@ -40,6 +42,7 @@ func (es *EventScheduler) Run(ctx context.Context) {
 			}
 		}
 	}()
+	es.logger = logger.GetLogger()
 	es.tc.Run(ctx)
 }
 
@@ -53,7 +56,7 @@ func (es *EventScheduler) pooler() {
 		ev := data_types.EventMapper{}
 		publishDate, err := time.Parse("2006-01-02 15:04:05Z", value.PublishDate)
 		if err != nil {
-			fmt.Println("Erro no parse da data")
+			es.logger.ErrorPrintln("error on date parsing (value.PublishDate,event id: " + value.ArangoKey + ") : " + err.Error())
 			continue
 		}
 		ev.PublishDate = publishDate

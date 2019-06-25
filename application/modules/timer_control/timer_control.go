@@ -2,10 +2,9 @@ package timer_control
 
 import (
 	"context"
-	"devgit.kf.com.br/comercial/gateway-maxtrack/module_maxtrack/logger"
-	"fmt"
 	"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
+	"github.com/ivanmeca/timedEvent/application/modules/logger"
 	"sync"
 	"time"
 )
