@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/ivanmeca/timedEvent/application/modules/config"
+	"github.com/ivanmeca/timedEvent/application/modules/queue_publisher"
 	"github.com/ivanmeca/timedEvent/application/modules/scheduler"
 	"github.com/ivanmeca/timedEvent/application/modules/server"
 	"strconv"
@@ -22,6 +23,7 @@ func (app *ApplicationManager) RunApplication(ctx context.Context) error {
 	fmt.Println("Initialize API")
 	cancelServer := app.initializeServer()
 	cancelScheduler := app.initializeScheduler()
+	queue_publisher.QueuePublisher()
 	go func() {
 		<-ctx.Done()
 		cancelServer()

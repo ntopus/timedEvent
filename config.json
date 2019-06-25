@@ -1,1 +1,24 @@
-{"LogLevel":250,"ServerPort":9010,"PoolTime":5,"ControlTime":1,"ExpirationTime":1800,"DataBase":{"ServerHost":"http://localhost","ServerPort":"8529","ServerUser":"testUser","ServerPassword":"123456","DbName":"testDb"},"PublishQueue":[{"ServerHost":"127.0.0.1","ServerVHost":"/","ServerPort":"5672","ServerUser":"dummy_user","ServerPassword":"dummy_pass","QueueName":"throwAt"}]}
+{
+  "LogLevel": 250,
+  "ServerPort": 9010,
+  "PoolTime": 5,
+  "ControlTime": 1,
+  "ExpirationTime": 1800,
+  "DataBase": {
+    "ServerHost": "http://localhost",
+    "ServerPort": "8529",
+    "ServerUser": "testUser",
+    "ServerPassword": "123456",
+    "DbName": "testDb"
+  },
+  "PublishQueue": [
+    {
+      "ServerHost": "127.0.0.1",
+      "ServerVHost": "/",
+      "ServerPort": "5672",
+      "ServerUser": "randomUser",
+      "ServerPassword": "randomPass",
+      "QueueName": "throwAt"
+    }
+  ]
+}
