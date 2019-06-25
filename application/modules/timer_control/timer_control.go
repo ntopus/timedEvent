@@ -39,7 +39,7 @@ func (tc *TimerControl) processList() {
 		if event, ok := value.(data_types.EventMapper); ok {
 			timeDiffInSecond := horaAtual.Sub(event.PublishDate)
 			timeDiffInSecond /= time.Second
-			fmt.Printf("Hora atual: %s, hora do evento: %s\n", horaAtual.Format("2006-01-02 15:04:05"), event.PublishDate.Format("2006-01-02 15:04:05"))
+			fmt.Printf("Hora atual: %s, hora do evento: %s\n", horaAtual.Format("2006-01-02 15:04:05Z"), event.PublishDate.Format("2006-01-02 15:04:05Z"))
 			if timeDiffInSecond > tc.exclusionTime {
 				_, err := collection_managment.NewEventCollection().DeleteItem([]string{event.EventID})
 				if err != nil {
@@ -56,5 +56,5 @@ func (tc *TimerControl) processList() {
 		}
 		return true
 	})
-	fmt.Println("TC")
+	//fmt.Println("TC")
 }

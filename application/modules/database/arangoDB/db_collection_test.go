@@ -47,7 +47,7 @@ func TestInsertDocument(test *testing.T) {
 		data := fmt.Sprintf(`"Teste data %d"`, i)
 		event, err := data_types.NewArangoCloudEventV02("TestEvent", data, nil)
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-		publishdate := time.Now().Add(time.Duration(i*60) * time.Second).Format("2006-01-02 15:04:05Z")
+		publishdate := horaAtual.Add(time.Duration(i*60) * time.Second).Format("2006-01-02 15:04:05Z")
 		event.PublishDate = publishdate
 		eventTime := horaAtual.AddDate(0, 0, i)
 		event.SetTime(eventTime)

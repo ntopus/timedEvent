@@ -49,7 +49,7 @@ func (es *EventScheduler) pooler() {
 	if err != nil {
 		return
 	}
-	fmt.Println(len(data))
+	//fmt.Println(len(data))
 	for _, value := range data {
 		ev := data_types.EventMapper{}
 		publishDate, err := time.Parse("2006-01-02 15:04:05Z", value.PublishDate)
@@ -57,7 +57,7 @@ func (es *EventScheduler) pooler() {
 			fmt.Println("Erro no parse da data")
 			continue
 		}
-		fmt.Println("Data salva: " + publishDate.Format("2006-01-02 15:04:05Z"))
+		//fmt.Println("Data salva: " + publishDate.Format("2006-01-02 15:04:05Z"))
 		ev.PublishDate = publishDate
 		ev.Event = value
 		ev.EventRevision = value.ArangoRev
