@@ -19,7 +19,7 @@ type queue_publisher struct {
 
 func QueuePublisher() *queue_publisher {
 	once.Do(func() {
-		instance = &queue_publisher{}
+		instance = &queue_publisher{queueMap: map[string]*queue.Queue{}}
 		instance.init()
 	})
 	return instance
