@@ -37,23 +37,24 @@ func (coll *Collection) Insert(item *data_types.ArangoCloudEvent) (*data_types.A
 	return &newDoc, nil
 }
 
-//func (coll *Collection) Upsert(key string, item *data_types.ArangoCloudEvent) (*data_types.ArangoCloudEvent, error) {
-//	var newDoc data_types.ArangoCloudEvent
-//	ctx := driver.WithReturnNew(context.Background(), &newDoc)
-//
-//	//UPSERT searchExpression INSERT insertExpression REPLACE updateExpression IN collection options
-//	query := fmt.Sprintf("UPSERT {_key:%s} ", coll.collection)
-//	query += fmt.Sprintf(" SORT item.context.time DESC RETURN item")
-//	cursor, err := coll.db.Query(nil, query, nil)
-//	defer cursor.Close()
-//
-//
-//	_, err := coll.collectionDriver.CreateDocument(ctx, item)
-//	if err != nil {
-//		return nil, err
-//	}
-//	return &newDoc, nil
-//}
+func (coll *Collection) Upsert(key string, item *data_types.ArangoCloudEvent) (*data_types.ArangoCloudEvent, error) {
+	var newDoc data_types.ArangoCloudEvent
+	ctx := driver.WithReturnNew(context.Background(), &newDoc)
+	//UPSERT searchExpression INSERT insertExpression REPLACE updateExpression IN collection options
+	query := fmt.Sprintf("UPSERT {_key:%s} INSERT %s UPDATE %s in %s", key, item, item, coll.collection)
+	cursor, err := coll.db.Query(ctx, query, nil)
+	defer cursor.Close()
+	if err != nil {
+		return nil, errors.New("internal error: " + err.Error())
+	}
+	for cursor.HasMore() == true {
+		_, err = cursor.ReadDocument(nil, &newDoc)
+		if err != nil {
+			return nil, errors.New("internal error: " + err.Error())
+		}
+	}
+	return &newDoc, nil
+}
 
 func (coll *Collection) Update(patch map[string]interface{}, key string) (*data_types.ArangoCloudEvent, error) {
 	var newDoc data_types.ArangoCloudEvent

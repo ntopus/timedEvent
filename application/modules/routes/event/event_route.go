@@ -173,6 +173,7 @@ func HTTPCreateEvent(context *gin.Context) {
 			context.JSON(int(response.Status()), &response)
 			return
 		}
+		_, _ = collection_managment.NewEventCollection().DeleteItem([]string{event.ID})
 		insertedItem, err := collection_managment.NewEventCollection().Insert(event)
 		if err != nil {
 			response = collection_managment.DefaultErrorHandler(err)
