@@ -14,7 +14,7 @@ import (
 )
 
 const flagConfig = "config"
-const configFilePathDefault = "./config/config.json"
+const configFilePathDefault = "./config.json"
 
 func runApplication(cli *cli.Context) error {
 	err := verifyConfig(cli)

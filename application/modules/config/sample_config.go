@@ -50,5 +50,5 @@ func generateConfigFile(filename string, data *ConfigData) error {
 }
 
 func ConfigSample() error {
-	return generateConfigFile("./config-sample.json", configSample())
+	return generateConfigFile("./config.json", configSample())
 }

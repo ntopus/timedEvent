@@ -20,7 +20,6 @@ func NewApplicationManager(configPath string) *ApplicationManager {
 }
 func (app *ApplicationManager) RunApplication(ctx context.Context) error {
 	fmt.Println("Initialize API")
-	initializeDB()
 	cancelServer := app.initializeServer()
 	cancelScheduler := app.initializeScheduler()
 	go func() {
@@ -29,13 +28,6 @@ func (app *ApplicationManager) RunApplication(ctx context.Context) error {
 		cancelScheduler()
 	}()
 	return nil
-}
-
-func initializeDB() {
-	//err := fleetDB.EnsureIndex()
-	//if err != nil {
-	//	panic(err.Error())
-	//}
 }
 
 func (app *ApplicationManager) initializeServer() context.CancelFunc {
