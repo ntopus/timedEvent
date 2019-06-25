@@ -56,5 +56,4 @@ func (tc *TimerControl) processList() {
 		}
 		return true
 	})
-	//fmt.Println("TC")
 }
