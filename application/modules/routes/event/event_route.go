@@ -13,6 +13,7 @@ import (
 	"github.com/pborman/uuid"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 func bindQueryFilterParams(context *gin.Context) []database.AQLComparator {
@@ -153,6 +154,10 @@ func jsonHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 func validateEvent(event *data_types.CloudEvent) error {
 	if queue_publisher.QueuePublisher().ValidateQueue(event.PublishQueue) != true {
 		return errors.New(`could not validate publish queue`)
+	}
+	_, err := time.Parse("2006-01-02 15:04:05Z", event.PublishDate)
+	if err != nil {
+		return errors.New(`could not validate publish date`)
 	}
 	return nil
 }
