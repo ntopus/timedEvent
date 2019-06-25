@@ -1,8 +1,6 @@
 package queue_publisher
 
 import (
-	"devgit.kf.com.br/core/lib-queue/queue"
-	"devgit.kf.com.br/core/lib-queue/queue-repository"
 	"github.com/ivanmeca/timedEvent/application/modules/config"
 	"github.com/ivanmeca/timedEvent/application/modules/logger"
 	"os"
