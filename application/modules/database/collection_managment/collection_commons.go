@@ -18,7 +18,8 @@ func GetDBSession() database.DataBaseManagment {
 	once.Do(func() {
 		var err error
 
-		dbConn, err := arangoDB.NewDBClient(GetTestDatabase())
+		appConfig := config.GetConfig()
+		dbConn, err := arangoDB.NewDBClient(&appConfig.DataBase)
 		if err != nil {
 			panic(err)
 		}
@@ -46,14 +47,4 @@ func DefaultErrorHandler(err error) routes.JsendMessage {
 	errMsg.SetStatus(http.StatusInternalServerError)
 	errMsg.SetMessage(err.Error())
 	return errMsg
-}
-
-func GetTestDatabase() *config.ConfigDB {
-	return &config.ConfigDB{
-		ServerHost:     "http://localhost",
-		ServerPort:     "8529",
-		ServerUser:     "testUser",
-		ServerPassword: "123456",
-		DbName:         "testDb",
-	}
 }
