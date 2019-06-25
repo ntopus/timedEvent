@@ -1,6 +1,8 @@
 package queue_publisher
 
 import (
+	"devgit.kf.com.br/core/lib-queue/queue"
+	"devgit.kf.com.br/core/lib-queue/queue_repository"
 	"github.com/ivanmeca/timedEvent/application/modules/config"
 	"github.com/ivanmeca/timedEvent/application/modules/logger"
 	"os"
@@ -45,9 +47,7 @@ func (qp *queue_publisher) init() {
 			AppLogger.ErrorPrintln("could not declare queue " + queueName)
 			os.Exit(1)
 		}
-		if queue, ok := q.(*queue.Queue); ok {
-			qp.queueMap[queueName] = queue
-		}
+		qp.queueMap[queueName] = q
 	}
 }
 
