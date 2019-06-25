@@ -41,7 +41,7 @@ func TestInsertDocument(test *testing.T) {
 	gomega.RegisterTestingT(test)
 	fmt.Println("Trying insert into read collection")
 	coll := getTestCollectionInstance("testeCollection")
-	horaAtual := time.Now()
+	horaAtual := time.Now().UTC()
 
 	for i := 0; i < 10; i++ {
 		data := fmt.Sprintf(`"Teste data %d"`, i)

@@ -66,27 +66,3 @@ func (es *EventScheduler) pooler() {
 	}
 	return
 }
-
-func (es *EventScheduler) processList() {
-	horaAtual := time.Now()
-	es.eventList.Range(func(key interface{}, value interface{}) bool {
-		if event, ok := value.(data_types.EventMapper); ok {
-			timeDiffInSecond := horaAtual.Sub(event.PublishDate) / time.Second
-			if timeDiffInSecond > 600 {
-				fmt.Println("Excluir ID" + event.EventID)
-				//todo: excluir entrada
-				return false
-			} else {
-				if timeDiffInSecond > 0 {
-					fmt.Println("Publicar ID" + event.EventID)
-					//todo: publicar evento
-					return true
-				}
-			}
-		} else {
-			es.eventList.Delete(key)
-		}
-		return false
-	})
-	fmt.Println("TC")
-}
