@@ -169,7 +169,8 @@ func HTTPCreateEvent(context *gin.Context) {
 		event, err := ceHttpCreate(context)
 		if err != nil {
 			response = collection_managment.DefaultErrorHandler(err)
-
+			context.JSON(int(response.Status()), &response)
+			return
 		}
 		insertedItem, err := collection_managment.NewEventCollection().Insert(event)
 		if err != nil {
