@@ -2,37 +2,57 @@ package config
 
 import (
 	"encoding/json"
-	"github.com/micro/go-config"
-	"github.com/micro/go-config/source/env"
+	"io/ioutil"
 )
 
-var actual map[string]interface{}
+type AppConfig struct {
+	configFile string
+	configData map[string]interface{}
+}
 
-func InitConfig() error {
-	conf := config.NewConfig()
-	src := env.NewSource()
-	conf.Load(src)
+func NewServerConfigByFile(filename string) (*AppConfig, error) {
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		appConfig := configSample(filename)
+		err := generateConfigFile(appConfig)
+		if err != nil {
+			return nil, err
+		}
+		return appConfig, nil
+	}
 
-	source := env.NewSource()
-	c, err := source.Read()
+	appConfig := AppConfig{configFile: filename, configData: make(map[string]interface{})}
+
+	err = json.Unmarshal([]byte(data), &appConfig.configData)
+	if err != nil {
+		return nil, err
+	}
+
+	return &appConfig, nil
+}
+
+func (sc *AppConfig) GetConfigParam(attr string, defaultValue interface{}) interface{} {
+	if v, i := sc.configData[attr]; i {
+		return v
+	}
+	return defaultValue
+}
+
+func (sc *AppConfig) SetConfigParam(attr string, Value interface{}) {
+	sc.configData[attr] = Value
+}
+
+func (sc *AppConfig) SaveConfig() error {
+
+	data, err := json.Marshal(sc.configData)
 	if err != nil {
 		return err
 	}
 
-	if err := json.Unmarshal(c.Data, &actual); err != nil {
+	err = ioutil.WriteFile(sc.configFile, data, 0644)
+	if err != nil {
 		return err
 	}
-	return nil
-}
 
-func GetDatabaseHost() string {
-	actualDB, ok := actual["mongodb"].(map[string]interface{})
-	if !ok {
-		return ""
-	}
-	server, ok := actualDB["server"].(string)
-	if !ok {
-		return ""
-	}
-	return server
+	return nil
 }

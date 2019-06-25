@@ -2,36 +2,56 @@ package config
 
 import (
 	"encoding/json"
+	"github.com/ivanmeca/timedEvent/application/modules/logger"
 	"os"
+	"strconv"
 )
 
-func configSample() *ConfigData {
-	var config ConfigData
+func generateConfigFile(appConfig *AppConfig) error {
 
-	config.DataBase.DbName = "time-queue"
-	config.DataBase.ServerHost = "timedEvent.db.ivanmeca.com.br"
-	config.DataBase.ServerPort = "8529"
-	config.DataBase.ServerUser = "root"
-	config.DataBase.ServerPassword = "rootpass"
-	return &config
-}
-
-func generateConfigFile(filename string, data *ConfigData) error {
-	file, err := os.Create(filename)
+	file, err := os.Create(appConfig.configFile)
 	if err != nil {
 		return err
 	}
-	jsondata, err := json.Marshal(data)
+
+	data, err := json.Marshal(appConfig.configData)
 	if err != nil {
 		return err
 	}
-	_, err = file.Write(jsondata)
+
+	_, err = file.Write(data)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func ConfigSample(sampleFile string) error {
-	return generateConfigFile(sampleFile, configSample())
+const (
+	DatabaseServerHost     = "databaseServerHost"
+	DatabaseServerPort     = "databaseServerPort"
+	DatabaseServerUser     = "databaseServerUser"
+	DatabaseServerPassword = "databaseServerPassword"
+	QueueServerHost        = "queueServerHost"
+	QueueServerPort        = "queueServerPort"
+	QueueServerUser        = "queueServerUser"
+	QueueServerPassword    = "queueServerPassword"
+	QueueName              = "queueName"
+	AppToken               = "AppToken"
+	LogLevel               = "LogLevel"
+	LogFile                = "LogFile"
+)
+
+func configSample(filename string) *AppConfig {
+
+	appConfig := AppConfig{configFile: filename, configData: make(map[string]interface{})}
+
+	appConfig.configData[QueueServerHost] = "srvqueue.vehicular.module.ntopus.com.br"
+	appConfig.configData[AppToken] = "123456"
+	appConfig.configData[QueueServerPort] = "5672"
+	appConfig.configData[QueueServerUser] = "miseravi"
+	appConfig.configData[QueueServerPassword] = "trAfr@guR36a"
+	appConfig.configData[QueueName] = "gsmSyncQueue"
+	appConfig.configData[LogLevel] = strconv.Itoa(logger.LogNotice)
+	appConfig.configData[LogFile] = ""
+	return &appConfig
 }
