@@ -108,7 +108,7 @@ func jsonHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 			return nil, errors.New("could not get content type: " + err.Error())
 		}
 	}
-	if value, ok := headers["PublishDate"]; ok {
+	if value, ok := headers["Publishdate"]; ok {
 		time, err := data_types.GetTime(value[0])
 		if err != nil {
 			return nil, errors.New("could not get time: " + err.Error())
@@ -117,7 +117,7 @@ func jsonHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 	} else {
 		return nil, errors.New("could not get publishDate")
 	}
-	if value, ok := headers["PublishQueue"]; ok {
+	if value, ok := headers["Publishqueue"]; ok {
 		event.PublishQueue = value[0]
 	} else {
 		return nil, errors.New("could not get publishQueue")
