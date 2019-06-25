@@ -4,54 +4,49 @@ import (
 	"encoding/json"
 	"github.com/ivanmeca/timedEvent/application/modules/logger"
 	"os"
-	"strconv"
 )
 
-func generateConfigFile(appConfig *AppConfig) error {
+func configSample() *ConfigData {
+	var config ConfigData
 
-	file, err := os.Create(appConfig.configFile)
+	config.LogLevel = logger.LogNotice
+	config.ControlTime = 1
+	config.PoolTime = 5
+	config.ExpirationTime = 1800
+
+	config.DataBase.DbName = "timed-event"
+	config.DataBase.ServerHost = "127.0.0.1"
+	config.DataBase.ServerPort = "9003"
+	config.DataBase.ServerUser = ""
+	config.DataBase.ServerPassword = ""
+
+	var cqueueconf ConfigQueue
+	cqueueconf.ServerHost = "127.0.0.1"
+	cqueueconf.ServerPort = "5672"
+	cqueueconf.ServerUser = "dummy_user"
+	cqueueconf.ServerPassword = "dummy_pass"
+	cqueueconf.QueueName = "throwAt"
+
+	config.PublishQueue = append(config.PublishQueue, cqueueconf)
+	return &config
+}
+
+func generateConfigFile(filename string, data *ConfigData) error {
+	file, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
-
-	data, err := json.Marshal(appConfig.configData)
+	jsondata, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
-
-	_, err = file.Write(data)
+	_, err = file.Write(jsondata)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-const (
-	DatabaseServerHost     = "databaseServerHost"
-	DatabaseServerPort     = "databaseServerPort"
-	DatabaseServerUser     = "databaseServerUser"
-	DatabaseServerPassword = "databaseServerPassword"
-	QueueServerHost        = "queueServerHost"
-	QueueServerPort        = "queueServerPort"
-	QueueServerUser        = "queueServerUser"
-	QueueServerPassword    = "queueServerPassword"
-	QueueName              = "queueName"
-	AppToken               = "AppToken"
-	LogLevel               = "LogLevel"
-	LogFile                = "LogFile"
-)
-
-func configSample(filename string) *AppConfig {
-
-	appConfig := AppConfig{configFile: filename, configData: make(map[string]interface{})}
-
-	appConfig.configData[QueueServerHost] = "srvqueue.vehicular.module.ntopus.com.br"
-	appConfig.configData[AppToken] = "123456"
-	appConfig.configData[QueueServerPort] = "5672"
-	appConfig.configData[QueueServerUser] = "miseravi"
-	appConfig.configData[QueueServerPassword] = "trAfr@guR36a"
-	appConfig.configData[QueueName] = "gsmSyncQueue"
-	appConfig.configData[LogLevel] = strconv.Itoa(logger.LogNotice)
-	appConfig.configData[LogFile] = ""
-	return &appConfig
+func ConfigSample() error {
+	return generateConfigFile("./config-sample.json", configSample())
 }
