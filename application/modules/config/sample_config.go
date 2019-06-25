@@ -13,12 +13,13 @@ func configSample() *ConfigData {
 	config.ControlTime = 1
 	config.PoolTime = 5
 	config.ExpirationTime = 1800
+	config.ServerPort = 9010
 
-	config.DataBase.DbName = "timed-event"
-	config.DataBase.ServerHost = "127.0.0.1"
-	config.DataBase.ServerPort = "9003"
-	config.DataBase.ServerUser = ""
-	config.DataBase.ServerPassword = ""
+	config.DataBase.DbName = "testDb"
+	config.DataBase.ServerHost = "http://localhost"
+	config.DataBase.ServerPort = "8529"
+	config.DataBase.ServerUser = "testUser"
+	config.DataBase.ServerPassword = "123456"
 
 	var pqueueconf ConfigQueue
 	pqueueconf.ServerHost = "127.0.0.1"

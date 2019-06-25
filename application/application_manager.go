@@ -39,8 +39,7 @@ func initializeDB() {
 }
 
 func (app *ApplicationManager) initializeServer() context.CancelFunc {
-	//s := server.NewHttpServer(strconv.Itoa(file_config.GetConfig().Port))
-	s := server.NewHttpServer(strconv.Itoa(9010))
+	s := server.NewHttpServer(strconv.Itoa(config.GetConfig().ServerPort))
 	ctxServer := context.Background()
 	ctxServer, cancelServer := context.WithCancel(ctxServer)
 	s.RunServer(ctxServer)
@@ -48,7 +47,7 @@ func (app *ApplicationManager) initializeServer() context.CancelFunc {
 }
 
 func (app *ApplicationManager) initializeScheduler() context.CancelFunc {
-	s := scheduler.NewScheduler(config.GetConfig().PoolTime, config.GetConfig().PoolTime)
+	s := scheduler.NewScheduler(config.GetConfig().PoolTime, config.GetConfig().ControlTime, config.GetConfig().ExpirationTime)
 	ctxServer := context.Background()
 	ctxServer, cancelServer := context.WithCancel(ctxServer)
 	s.Run(ctxServer)

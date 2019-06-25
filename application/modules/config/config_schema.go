@@ -2,6 +2,7 @@ package config
 
 type ConfigData struct {
 	LogLevel       int
+	ServerPort     int
 	PoolTime       int
 	ControlTime    int
 	ExpirationTime int
