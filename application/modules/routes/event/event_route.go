@@ -8,6 +8,7 @@ import (
 	"github.com/ivanmeca/timedEvent/application/modules/database"
 	"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
+	"github.com/ivanmeca/timedEvent/application/modules/queue_publisher"
 	"github.com/ivanmeca/timedEvent/application/modules/routes"
 	"github.com/pborman/uuid"
 	"io/ioutil"
@@ -142,15 +143,15 @@ func jsonHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 	if validationError != nil {
 		return nil, errors.New("could not read validate data: " + validationError.Error())
 	}
-	//eventValidation := validateEvent(&event)
-	//if eventValidation != nil {
-	//	return nil, errors.New(`could not validate event: ` + eventValidation.Error())
-	//}
+	eventValidation := validateEvent(&event)
+	if eventValidation != nil {
+		return nil, errors.New(`could not validate event: ` + eventValidation.Error())
+	}
 	return &event, nil
 }
 
 func validateEvent(event *data_types.CloudEvent) error {
-	if event.PublishQueue == "" {
+	if queue_publisher.QueuePublisher().ValidateQueue(event.PublishQueue) != true {
 		return errors.New(`could not validate publish queue`)
 	}
 	return nil
