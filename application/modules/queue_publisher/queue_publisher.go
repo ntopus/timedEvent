@@ -1,9 +1,10 @@
 package queue_publisher
 
 import (
+	"devgit.kf.com.br/core/lib-queue/queue"
+	"devgit.kf.com.br/core/lib-queue/queue-repository"
 	"github.com/ivanmeca/timedEvent/application/modules/config"
 	"github.com/ivanmeca/timedEvent/application/modules/logger"
-	"github.com/kofre/lib-queue/rabbitmq_repository"
 	"os"
 	"strconv"
 	"sync"
@@ -13,8 +14,7 @@ var once sync.Once
 var instance *queue_publisher
 
 type queue_publisher struct {
-	queueRepo *rabbitmq_repository.QueueRepository
-	queueMap  map[string]*rabbitmq_repository.Queue
+	queueMap map[string]*queue.Queue
 }
 
 func QueuePublisher() *queue_publisher {
@@ -34,20 +34,20 @@ func (qp *queue_publisher) init() {
 			AppLogger.ErrorPrintln("could not get queue port on queue " + qConf.QueueName)
 			os.Exit(1)
 		}
-		qr, err := rabbitmq_repository.NewQueueRepository(rabbitmq_repository.NewQueueRepositoryParams(qConf.ServerUser, qConf.ServerPassword, qConf.ServerHost, port))
+		qr, err := queue_repository.NewQueueRepository(queue_repository.NewQueueRepositoryParams(qConf.ServerUser, qConf.ServerPassword, qConf.ServerHost, port))
 		if err != nil {
 			AppLogger.ErrorPrintln("could not init queue repository on queue " + qConf.QueueName)
 			os.Exit(1)
 		}
 		queueName := qConf.QueueName
-		qParam := rabbitmq_repository.NewQueueParams(queueName)
+		qParam := queue.NewQueueParams(queueName)
 		qParam.SetThreadLimit(200)
 		q, err := qr.QueueDeclare(qParam, false)
 		if err != nil {
 			AppLogger.ErrorPrintln("could not declare queue " + queueName)
 			os.Exit(1)
 		}
-		if queue, ok := q.(*rabbitmq_repository.Queue); ok {
+		if queue, ok := q.(*queue.Queue); ok {
 			qp.queueMap[queueName] = queue
 		}
 	}

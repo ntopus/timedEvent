@@ -17,8 +17,10 @@ import:
   version: v1.2
 - package: github.com/urfave/cli
   version: v1.20.0
-- package: github.com/kofre/lib-queue
-  version: 1.0.0
+- package: devgit.kf.com.br/core/lib-queue
+  repo: git@devgit.kf.com.br:core/lib-queue.git
+  vcs: git
+  version: 2.0.1
 testImport:
 - package: github.com/onsi/gomega
   version: v1.5.0
