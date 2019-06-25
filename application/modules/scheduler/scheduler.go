@@ -44,7 +44,7 @@ func (es *EventScheduler) Run(ctx context.Context) {
 }
 
 func (es *EventScheduler) pooler() {
-	horaAtual := time.Now()
+	horaAtual := time.Now().UTC()
 	data, err := collection_managment.NewEventCollection().Read([]database.AQLComparator{{Field: "publishdate", Comparator: "<=", Value: horaAtual.Add(es.poolTime).Format("2006-01-02 15:04:05Z")}})
 	if err != nil {
 		return
@@ -57,6 +57,7 @@ func (es *EventScheduler) pooler() {
 			fmt.Println("Erro no parse da data")
 			continue
 		}
+		fmt.Println("Data salva: " + publishDate.Format("2006-01-02 15:04:05Z"))
 		ev.PublishDate = publishDate
 		ev.Event = value
 		ev.EventRevision = value.ArangoRev
