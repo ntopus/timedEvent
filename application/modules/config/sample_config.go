@@ -25,8 +25,8 @@ func configSample() *ConfigData {
 	pqueueconf.ServerHost = "127.0.0.1"
 	pqueueconf.ServerVHost = "/"
 	pqueueconf.ServerPort = "5672"
-	pqueueconf.ServerUser = "dummy_user"
-	pqueueconf.ServerPassword = "dummy_pass"
+	pqueueconf.ServerUser = "randomUser"
+	pqueueconf.ServerPassword = "randomPass"
 	pqueueconf.QueueName = "throwAt"
 
 	config.PublishQueue = append(config.PublishQueue, pqueueconf)
