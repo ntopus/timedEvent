@@ -79,6 +79,11 @@ func jsonHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 		if err != nil {
 			return nil, errors.New("could not get type: " + err.Error())
 		}
+	} else {
+		err = event.SetType("Received.Schedule.Request")
+		if err != nil {
+			return nil, errors.New("could not get type: " + err.Error())
+		}
 	}
 	if value, ok := headers["Source"]; ok {
 		err = event.SetSource(value[0])
@@ -109,11 +114,7 @@ func jsonHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 		}
 	}
 	if value, ok := headers["Publishdate"]; ok {
-		time, err := data_types.GetTime(value[0])
-		if err != nil {
-			return nil, errors.New("could not get time: " + err.Error())
-		}
-		event.PublishDate = time.String()
+		event.PublishDate = value[0]
 	} else {
 		return nil, errors.New("could not get publishDate")
 	}
@@ -142,7 +143,7 @@ func jsonHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 	}
 	validationError := event.Validate()
 	if validationError != nil {
-		return nil, errors.New("could not read validate data: " + validationError.Error())
+		return nil, errors.New("could not validate data: " + validationError.Error())
 	}
 	eventValidation := validateEvent(&event)
 	if eventValidation != nil {

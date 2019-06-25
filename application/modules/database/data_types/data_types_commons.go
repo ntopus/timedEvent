@@ -14,7 +14,7 @@ func ParseData(data time.Time) string {
 
 func GetTime(data string) (*time.Time, error) {
 	const shortForm = "2006-01-02 15:04:05Z"
-	t, err := time.Parse(shortForm, "1983-10-19")
+	t, err := time.Parse(shortForm, data)
 	if err != nil {
 		return nil, err
 	}
