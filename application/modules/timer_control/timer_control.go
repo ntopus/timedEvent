@@ -59,7 +59,13 @@ func (tc *TimerControl) processList() {
 						return true
 					}
 					if data.ArangoRev == event.EventRevision {
-						if queue_publisher.QueuePublisher().PublishInQueue(data.PublishQueue, event.Event.CloudEvent) {
+						var dataToPublish interface{}
+						if event.Event.PublishType == "data_only" {
+							dataToPublish = event.Event.CloudEvent.Data
+						} else {
+							dataToPublish = event.Event.CloudEvent
+						}
+						if queue_publisher.QueuePublisher().PublishInQueue(data.PublishQueue, dataToPublish) {
 							_, err := collection_managment.NewEventCollection().DeleteItem([]string{event.EventID})
 							if err != nil {
 								tc.logger.NoticePrintln("falha ao excluir ID: " + event.EventID)
