@@ -123,6 +123,9 @@ func jsonHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 	} else {
 		return nil, errors.New("could not get publishQueue")
 	}
+	if value, ok := headers["Publishtype"]; ok {
+		event.PublishType = value[0]
+	}
 
 	for name, value := range headers {
 		switch name {
@@ -132,8 +135,9 @@ func jsonHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 		case "id":
 		case "Expires":
 		case "Content-Type":
-		case "publishDate":
-		case "publishQueue":
+		case "publishdate":
+		case "publishqueue":
+		case "Publishtype":
 		default:
 			err := event.SetExtension(name, value)
 			if err != nil {
@@ -159,6 +163,9 @@ func validateEvent(event *data_types.CloudEvent) error {
 	_, err := time.Parse("2006-01-02 15:04:05Z", event.PublishDate)
 	if err != nil {
 		return errors.New(`could not validate publish date`)
+	}
+	if event.PublishType != "data_only" {
+		event.PublishType = "cloud_event"
 	}
 	return nil
 }

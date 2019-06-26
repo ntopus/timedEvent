@@ -1,6 +1,8 @@
 package main
 
 import (
+	"devgit.kf.com.br/core/lib-queue/queue"
+	"devgit.kf.com.br/core/lib-queue/queue_repository"
 	"encoding/json"
 	"fmt"
 	"github.com/onsi/gomega"

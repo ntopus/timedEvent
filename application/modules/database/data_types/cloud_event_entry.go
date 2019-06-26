@@ -15,6 +15,7 @@ type CloudEvent struct {
 	cloudevents.EventContextV02
 	PublishDate  string      `json:"publishdate"`
 	PublishQueue string      `json:"publishqueue"`
+	PublishType  string      `json:"publishtype"`
 	Data         interface{} `json:"data"`
 	DataEncoded  bool        `json:"dataencoded"`
 }
