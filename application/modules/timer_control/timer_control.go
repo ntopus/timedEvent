@@ -53,7 +53,7 @@ func (tc *TimerControl) processList() {
 				tc.list.Delete(key)
 				tc.logger.DebugPrintln("ID excluido: " + event.EventID)
 			} else {
-				if timeDiffInSecond > 0 {
+				if timeDiffInSecond >= 0 {
 					tc.logger.DebugPrintln("Publicar ID" + event.EventID)
 					data, err := collection_managment.NewEventCollection().ReadItem(event.EventID)
 					if err != nil {
