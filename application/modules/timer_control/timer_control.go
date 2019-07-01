@@ -2,6 +2,7 @@ package timer_control
 
 import (
 	"context"
+	"fmt"
 	"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
 	"github.com/ivanmeca/timedEvent/application/modules/logger"
@@ -43,7 +44,7 @@ func (tc *TimerControl) processList() {
 		if event, ok := value.(data_types.EventMapper); ok {
 			timeDiffInSecond := horaAtual.Sub(event.PublishDate)
 			timeDiffInSecond /= time.Second
-			tc.logger.DebugPrintln("Hora atual: %s, hora do evento: %s\n", horaAtual.Format("2006-01-02 15:04:05Z"), event.PublishDate.Format("2006-01-02 15:04:05Z"))
+			tc.logger.DebugPrintln(fmt.Sprintf("Actual time: %s, event time: %s, timeDiff: %v", horaAtual.Format("2006-01-02 15:04:05Z"), event.PublishDate.Format("2006-01-02 15:04:05Z"), timeDiffInSecond))
 			if timeDiffInSecond > tc.expirationTime {
 				_, err := collection_managment.NewEventCollection().DeleteItem([]string{event.EventID})
 				if err != nil {

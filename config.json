@@ -1,5 +1,5 @@
 {
-  "LogLevel": 250,
+  "LogLevel": 100,
   "ServerPort": 9010,
   "PoolTime": 5,
   "ControlTime": 1,
