@@ -80,7 +80,7 @@ func (coll *Collection) Read(filters []database.AQLComparator) ([]data_types.Ara
 		glueStr = "AND"
 		bindVarsNames++
 	}
-	query += fmt.Sprintf(" SORT item.context.time DESC RETURN item")
+	query += fmt.Sprintf(" SORT item.time DESC RETURN item")
 	cursor, err := coll.db.Query(nil, query, bindVars)
 	defer cursor.Close()
 	if err != nil {

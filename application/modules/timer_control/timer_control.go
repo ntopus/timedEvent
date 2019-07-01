@@ -57,6 +57,7 @@ func (tc *TimerControl) processList() {
 					data, err := collection_managment.NewEventCollection().ReadItem(event.EventID)
 					if err != nil {
 						tc.logger.ErrorPrintln("event check fail: " + err.Error())
+						tc.list.Delete(key)
 						return true
 					}
 					if data.ArangoRev == event.EventRevision {

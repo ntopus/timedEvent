@@ -13,12 +13,19 @@ import (
 
 type Scheduler interface {
 	Run(ctx context.Context)
+	CheckEvent(event *data_types.ArangoCloudEvent)
+}
+
+var instance *EventScheduler
+
+func GetScheduler() Scheduler {
+	return instance
 }
 
 func NewScheduler(pollTime int, controlTime int, expirationTime int) Scheduler {
-	sc := &EventScheduler{poolTime: time.Duration(pollTime)}
-	sc.tc = timer_control.NewTimerControl(controlTime, expirationTime, &sc.eventList)
-	return sc
+	instance = &EventScheduler{poolTime: time.Duration(pollTime)}
+	instance.tc = timer_control.NewTimerControl(controlTime, expirationTime, &instance.eventList)
+	return instance
 }
 
 type EventScheduler struct {
@@ -43,6 +50,26 @@ func (es *EventScheduler) Run(ctx context.Context) {
 	}()
 	es.logger = logger.GetLogger()
 	es.tc.Run(ctx)
+}
+
+func (es *EventScheduler) CheckEvent(event *data_types.ArangoCloudEvent) {
+	horaAtual := time.Now().UTC()
+	publishDate, err := time.Parse("2006-01-02 15:04:05Z", event.PublishDate)
+	if err != nil {
+		es.logger.ErrorPrintln("error on date parsing (value.PublishDate,event id: " + event.ArangoKey + ") : " + err.Error())
+		return
+	}
+	timeDiffInSecond := horaAtual.Sub(publishDate)
+	timeDiffInSecond /= time.Second
+
+	if timeDiffInSecond >= (es.poolTime * -1) {
+		ev := data_types.EventMapper{}
+		ev.PublishDate = publishDate
+		ev.Event = *event
+		ev.EventRevision = event.ArangoRev
+		ev.EventID = event.ArangoKey
+		es.eventList.Store(event.ID, ev)
+	}
 }
 
 func (es *EventScheduler) pooler() {

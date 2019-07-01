@@ -10,6 +10,7 @@ import (
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
 	"github.com/ivanmeca/timedEvent/application/modules/queue_publisher"
 	"github.com/ivanmeca/timedEvent/application/modules/routes"
+	"github.com/ivanmeca/timedEvent/application/modules/scheduler"
 	"github.com/pborman/uuid"
 	"io/ioutil"
 	"net/http"
@@ -173,6 +174,11 @@ func validateEvent(event *data_types.CloudEvent) error {
 	return nil
 }
 
+func checkScheduler(event *data_types.ArangoCloudEvent) {
+	s := scheduler.GetScheduler()
+	s.CheckEvent(event)
+}
+
 func HTTPCreateEvent(context *gin.Context) {
 	response := routes.JsendMessage{}
 	switch context.Request.Header.Get("Content-Type") {
@@ -190,6 +196,7 @@ func HTTPCreateEvent(context *gin.Context) {
 			context.JSON(int(response.Status()), &response)
 			return
 		}
+		checkScheduler(insertedItem)
 		response.SetStatus(http.StatusCreated)
 		response.SetData(insertedItem.CloudEvent)
 		context.JSON(int(response.Status()), &response)
@@ -207,6 +214,7 @@ func HTTPCreateEvent(context *gin.Context) {
 			context.JSON(int(response.Status()), &response)
 			return
 		}
+		checkScheduler(insertedItem)
 		response.SetStatus(http.StatusCreated)
 		response.SetData(insertedItem.CloudEvent)
 		context.JSON(int(response.Status()), &response)
