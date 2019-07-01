@@ -44,7 +44,7 @@ func (tc *TimerControl) processList() {
 		if event, ok := value.(data_types.EventMapper); ok {
 			timeDiffInSecond := horaAtual.Sub(event.PublishDate)
 			timeDiffInSecond /= time.Second
-			tc.logger.DebugPrintln(fmt.Sprintf("Actual time: %s, event time: %s, timeDiff: %v", horaAtual.Format("2006-01-02 15:04:05Z"), event.PublishDate.Format("2006-01-02 15:04:05Z"), timeDiffInSecond))
+			tc.logger.DebugPrintln(fmt.Sprintf("Actual time: %s, event time: %s, timeDiff: %d", horaAtual.Format("2006-01-02 15:04:05Z"), event.PublishDate.Format("2006-01-02 15:04:05Z"), timeDiffInSecond))
 			if timeDiffInSecond > tc.expirationTime {
 				_, err := collection_managment.NewEventCollection().DeleteItem([]string{event.EventID})
 				if err != nil {

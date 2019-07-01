@@ -1,7 +1,7 @@
 {
   "LogLevel": 100,
   "ServerPort": 9010,
-  "PoolTime": 5,
+  "PoolTime": 10,
   "ControlTime": 1,
   "ExpirationTime": 1800,
   "DataBase": {
