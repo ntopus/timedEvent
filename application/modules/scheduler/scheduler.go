@@ -47,6 +47,7 @@ func (es *EventScheduler) Run(ctx context.Context) {
 
 func (es *EventScheduler) pooler() {
 	horaAtual := time.Now().UTC()
+	es.logger.DebugPrintln("Scheduler:" + horaAtual.Format("2006-01-02 15:04:05Z"))
 	data, err := collection_managment.NewEventCollection().Read([]database.AQLComparator{{Field: "publishdate", Comparator: "<=", Value: horaAtual.Add(es.poolTime).Format("2006-01-02 15:04:05Z")}})
 	if err != nil {
 		return

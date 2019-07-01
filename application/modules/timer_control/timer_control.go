@@ -38,6 +38,7 @@ func (tc *TimerControl) Run(ctx context.Context) {
 func (tc *TimerControl) processList() {
 	time.Sleep(tc.controlTime * time.Second)
 	horaAtual := time.Now().UTC()
+	tc.logger.DebugPrintln("Timer control:" + horaAtual.Format("2006-01-02 15:04:05Z"))
 	tc.list.Range(func(key interface{}, value interface{}) bool {
 		if event, ok := value.(data_types.EventMapper); ok {
 			timeDiffInSecond := horaAtual.Sub(event.PublishDate)
