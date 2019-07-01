@@ -60,7 +60,10 @@ func jsonHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 		return nil, errors.New("could not read request data: " + err.Error())
 	}
 	event := data_types.CloudEvent{}
-	event.Data = data
+	err = json.Unmarshal(data, &event.Data)
+	if err != nil {
+		return nil, errors.New("could not parse request data: " + err.Error())
+	}
 	headers := context.Request.Header
 
 	if value, ok := headers["Specversion"]; ok {
