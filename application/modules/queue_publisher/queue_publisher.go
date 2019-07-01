@@ -15,6 +15,7 @@ var instance *queue_publisher
 
 type queue_publisher struct {
 	queueMap map[string]*queue.Queue
+	mutex    sync.Mutex
 }
 
 func QueuePublisher() *queue_publisher {
@@ -60,6 +61,8 @@ func (qp *queue_publisher) ValidateQueue(queueName string) bool {
 
 func (qp *queue_publisher) PublishInQueue(queueName string, data interface{}) bool {
 	AppLogger := logger.GetLogger()
+	qp.mutex.Lock()
+	defer qp.mutex.Unlock()
 	if val, ok := qp.queueMap[queueName]; ok {
 		err := val.Publish(data)
 		if err != nil {

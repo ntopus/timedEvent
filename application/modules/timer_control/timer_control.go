@@ -54,27 +54,29 @@ func (tc *TimerControl) processList() {
 				tc.logger.DebugPrintln("ID excluido: " + event.EventID)
 			} else {
 				if timeDiffInSecond >= 0 {
-					tc.logger.DebugPrintln("Publicar ID " + event.EventID)
 					data, err := collection_managment.NewEventCollection().ReadItem(event.EventID)
 					if err != nil {
 						tc.logger.ErrorPrintln("event check fail: " + err.Error())
 						return true
 					}
 					if data.ArangoRev == event.EventRevision {
+						tc.logger.DebugPrintln("Publicar ID " + event.EventID)
 						var dataToPublish interface{}
 						if event.Event.PublishType == "data_only" {
 							dataToPublish = event.Event.CloudEvent.Data
 						} else {
 							dataToPublish = event.Event.CloudEvent
 						}
-						if queue_publisher.QueuePublisher().PublishInQueue(data.PublishQueue, dataToPublish) {
-							_, err := collection_managment.NewEventCollection().DeleteItem([]string{event.EventID})
-							if err != nil {
-								tc.logger.NoticePrintln("falha ao excluir ID: " + event.EventID)
+						go func() {
+							if queue_publisher.QueuePublisher().PublishInQueue(data.PublishQueue, dataToPublish) {
+								_, err := collection_managment.NewEventCollection().DeleteItem([]string{event.EventID})
+								if err != nil {
+									tc.logger.NoticePrintln("falha ao excluir ID: " + event.EventID)
+								}
+								tc.list.Delete(key)
+								tc.logger.DebugPrintln("ID excluido: " + event.EventID)
 							}
-							tc.list.Delete(key)
-							tc.logger.DebugPrintln("ID excluido: " + event.EventID)
-						}
+						}()
 					} else {
 						tc.list.Delete(key)
 					}
