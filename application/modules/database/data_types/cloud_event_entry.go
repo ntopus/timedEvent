@@ -10,6 +10,11 @@ import (
 	"time"
 )
 
+const (
+	DataOnly         = "dataOnly"
+	EntireCloudEvent = "cloudEvent"
+)
+
 // Event represents the canonical representation of a CloudEvent.
 type CloudEvent struct {
 	cloudevents.EventContextV02

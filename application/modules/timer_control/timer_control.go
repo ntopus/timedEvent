@@ -37,7 +37,7 @@ func (tc *TimerControl) Run(ctx context.Context) {
 }
 
 func (tc *TimerControl) processList() {
-	time.Sleep(tc.controlTime * time.Second)
+	time.Sleep(tc.controlTime * time.Millisecond)
 	horaAtual := time.Now().UTC()
 	tc.logger.DebugPrintln("Timer control:" + horaAtual.Format("2006-01-02 15:04:05Z"))
 	tc.list.Range(func(key interface{}, value interface{}) bool {
@@ -63,7 +63,7 @@ func (tc *TimerControl) processList() {
 					if data.ArangoRev == event.EventRevision {
 						tc.logger.DebugPrintln("Publicar ID " + event.EventID)
 						var dataToPublish interface{}
-						if event.Event.PublishType == "data_only" {
+						if event.Event.PublishType == data_types.DataOnly {
 							dataToPublish = event.Event.CloudEvent.Data
 						} else {
 							dataToPublish = event.Event.CloudEvent

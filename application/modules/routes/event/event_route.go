@@ -168,8 +168,8 @@ func validateEvent(event *data_types.CloudEvent) error {
 	if err != nil {
 		return errors.New(`could not validate publish date`)
 	}
-	if event.PublishType != "data_only" {
-		event.PublishType = "cloud_event"
+	if event.PublishType != data_types.DataOnly {
+		event.PublishType = data_types.EntireCloudEvent
 	}
 	return nil
 }
