@@ -1,8 +1,8 @@
 {
   "LogLevel": 100,
   "ServerPort": 9010,
-  "PoolTime": 10,
-  "ControlTime": 1,
+  "PoolTime": 10000,
+  "ControlTime": 100,
   "ExpirationTime": 1800,
   "DataBase": {
     "ServerHost": "http://localhost",

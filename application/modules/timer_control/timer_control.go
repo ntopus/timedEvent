@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-const TimerControlUnit = time.Second
+const TimerControlUnit = time.Millisecond
 
 type TimerControl struct {
 	expirationTime time.Duration
