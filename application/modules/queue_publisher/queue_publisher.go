@@ -67,6 +67,7 @@ func (qp *queue_publisher) PublishInQueue(queueName string, data interface{}) bo
 		err := val.Publish(data)
 		if err != nil {
 			AppLogger.ErrorPrintln("could not publish on queue: " + err.Error())
+			os.Exit(1)
 			return false
 		}
 		return true

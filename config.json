@@ -3,7 +3,7 @@
   "ServerPort": 9010,
   "PoolTime": 10000,
   "ControlTime": 100,
-  "ExpirationTime": 1800,
+  "ExpirationTime": 180000,
   "DataBase": {
     "ServerHost": "http://localhost",
     "ServerPort": "8529",
