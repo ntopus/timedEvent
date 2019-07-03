@@ -17,7 +17,7 @@ services:
         aliases:
           - "timedEvent.db.ivanmeca.com.br"
     volumes:
-      - ./docker-data/arangodb:/var/lib/arangodb3
+      - ./test-data/arangodb:/var/lib/arangodb3
     environment:
       ARANGO_ROOT_PASSWORD: "rootpass"
       ARANGO_STORAGE_ENGINE: rocksdb
@@ -37,7 +37,7 @@ services:
       RABBITMQ_DEFAULT_PASS: randomPass
       RABBITMQ_DEFAULT_VHOST: /
     volumes:
-      - ./docker-data/rabbitmq/data:/var/lib/rabbitmq
+      - ./test-data/rabbitmq/data:/var/lib/rabbitmq
 
 networks:
   back:
