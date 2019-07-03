@@ -43,7 +43,7 @@ func (es *EventScheduler) Run(ctx context.Context) {
 			case <-ctx.Done():
 				return
 			default:
-				time.Sleep(es.poolTime * time.Second)
+				time.Sleep(es.poolTime * timer_control.TimerControlUnit)
 				es.pooler()
 			}
 		}
@@ -60,7 +60,7 @@ func (es *EventScheduler) CheckEvent(event *data_types.ArangoCloudEvent) {
 		return
 	}
 	timeDiffInSecond := horaAtual.Sub(publishDate)
-	timeDiffInSecond /= time.Second
+	timeDiffInSecond /= timer_control.TimerControlUnit
 
 	if timeDiffInSecond >= (es.poolTime * -1) {
 		ev := data_types.EventMapper{}
@@ -74,7 +74,7 @@ func (es *EventScheduler) CheckEvent(event *data_types.ArangoCloudEvent) {
 
 func (es *EventScheduler) pooler() {
 	horaAtual := time.Now().UTC()
-	horaLimite := horaAtual.Add(es.poolTime * time.Second).Format("2006-01-02 15:04:05Z")
+	horaLimite := horaAtual.Add(es.poolTime * timer_control.TimerControlUnit).Format("2006-01-02 15:04:05Z")
 	es.logger.DebugPrintln("Scheduler:" + horaAtual.Format("2006-01-02 15:04:05Z") + " timeLimit:" + horaLimite)
 	data, err := collection_managment.NewEventCollection().Read([]database.AQLComparator{{Field: "publishdate", Comparator: "<=", Value: horaLimite}})
 	if err != nil {

@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+const TimerControlUnit = time.Second
+
 type TimerControl struct {
 	expirationTime time.Duration
 	controlTime    time.Duration
@@ -37,13 +39,13 @@ func (tc *TimerControl) Run(ctx context.Context) {
 }
 
 func (tc *TimerControl) processList() {
-	time.Sleep(tc.controlTime * time.Millisecond)
+	time.Sleep(tc.controlTime * TimerControlUnit)
 	horaAtual := time.Now().UTC()
 	tc.logger.DebugPrintln("Timer control:" + horaAtual.Format("2006-01-02 15:04:05Z"))
 	tc.list.Range(func(key interface{}, value interface{}) bool {
 		if event, ok := value.(data_types.EventMapper); ok {
 			timeDiffInSecond := horaAtual.Sub(event.PublishDate)
-			timeDiffInSecond /= time.Second
+			timeDiffInSecond /= TimerControlUnit
 			tc.logger.DebugPrintln(fmt.Sprintf("Actual time: %s, event time: %s, timeDiff: %d", horaAtual.Format("2006-01-02 15:04:05Z"), event.PublishDate.Format("2006-01-02 15:04:05Z"), timeDiffInSecond))
 			if timeDiffInSecond > tc.expirationTime {
 				_, err := collection_managment.NewEventCollection().DeleteItem([]string{event.EventID})
