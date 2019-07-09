@@ -9,6 +9,11 @@ import (
 	"time"
 )
 
+const (
+	TestDBName         = "testDb"
+	TestCollectionName = "TesteColl"
+)
+
 func TestReadDocumentsWithFilter(test *testing.T) {
 	gomega.RegisterTestingT(test)
 	fmt.Println("Trying to a read collection")
@@ -57,32 +62,6 @@ func TestInsertDocument(test *testing.T) {
 	}
 }
 
-func TestUpsertDocument(test *testing.T) {
-	gomega.RegisterTestingT(test)
-	fmt.Println("Trying insert into read collection")
-	coll := getTestCollectionInstance("testeCollection")
-	horaAtual := time.Now().UTC()
-
-	data := fmt.Sprintf(`"Teste data 1"`)
-	event, err := data_types.NewArangoCloudEventV02("TestEvent", data, nil)
-	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-	publishdate := horaAtual.Add(time.Duration(60) * time.Second).Format("2006-01-02 15:04:05Z")
-	event.PublishDate = publishdate
-	eventTime := horaAtual.AddDate(0, 0, 1)
-	event.SetTime(eventTime)
-	newDoc, err := coll.Insert(event)
-	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-	readDocument(newDoc.GetID())
-	if upcoll, upOk := coll.(*Collection); upOk {
-		newDoc.Type = "Upsert.test"
-		newDoc, err := upcoll.Upsert(newDoc.ArangoKey, newDoc)
-		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-		gomega.Expect(newDoc.Type).Should(gomega.Equal("Upsert.test"))
-	}
-	readDocument(newDoc.GetID())
-
-}
-
 func TestInsertDocumentComplete(test *testing.T) {
 	gomega.RegisterTestingT(test)
 	fmt.Println("Trying insert into read collection")
@@ -126,13 +105,13 @@ func getTestCollectionInstance(collName string) database.CollectionManagment {
 	DBClient, err := NewDBClient(GetTestDatabase())
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 
-	db, err := DBClient.GetDatabase("TestDB", true)
+	db, err := DBClient.GetDatabase(TestDBName, true)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 
-	coll, err := db.GetCollection("TesteColl")
+	coll, err := db.GetCollection(TestCollectionName)
 
 	if err != nil {
-		ok, err := db.CreateCollection("TesteColl")
+		ok, err := db.CreateCollection(TestCollectionName)
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		gomega.Expect(ok).Should(gomega.BeTrue())
 	}

@@ -34,20 +34,20 @@ func TestLibConnection(test *testing.T) {
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	ctx := context.Background()
 
-	exist, err := c.DatabaseExists(ctx, "dbTeste")
+	exist, err := c.DatabaseExists(ctx, TestDBName+"_1")
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	gomega.Expect(exist).Should(gomega.BeFalse())
 
-	_, err = c.CreateDatabase(nil, "dbTeste", nil)
+	_, err = c.CreateDatabase(nil, TestDBName+"_1", nil)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 
-	db, err := c.Database(ctx, "dbTeste")
+	db, err := c.Database(ctx, TestDBName+"_1")
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 
 	err = db.Remove(ctx)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 
-	exist, err = c.DatabaseExists(ctx, "dbTeste")
+	exist, err = c.DatabaseExists(ctx, TestDBName+"_1")
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	gomega.Expect(exist).Should(gomega.BeFalse())
 

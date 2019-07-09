@@ -14,11 +14,11 @@
   "PublishQueue": [
     {
       "ServerHost": "127.0.0.1",
-      "ServerVHost": "/",
+      "ServerVHost": "/test",
       "ServerPort": "5672",
       "ServerUser": "randomUser",
       "ServerPassword": "randomPass",
-      "QueueName": "throwAt"
+      "QueueName": "timer.Resource.throwAt"
     }
   ]
 }
