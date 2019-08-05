@@ -1,34 +1,39 @@
 APPLICATION_NAME := $(shell grep "const ApplicationName " version.go | sed -E 's/.*"(.+)"$$/\1/')
 BIN_NAME=${APPLICATION_NAME}
-PORT=:5000
 
-VERSION := $(shell grep "const Version " version.go | sed -E 's/.*"(.+)"$$/\1/')
+BASE_VERSION := $(shell grep "const Version " version.go | sed -E 's/.*"(.+)"$$/\1/')
+VERSION="${BASE_VERSION}.$(shell date +%s | head -c 9)"
 GIT_COMMIT=$(shell git rev-parse HEAD)
 GIT_DIRTY=$(shell test -n "`git status --porcelain`" && echo "+CHANGES" || true)
+default: run-test
 
-# HELP
-# This will output the help for each task
-# thanks to https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
-.PHONY: help
+help:
+	@echo 'Management commands for ${APPLICATION_NAME}:'
+	@echo ''
+	@echo 'Usage:'
+	@echo '    make build                       Compile the project.'
+	@echo '    make build-native-production     Compile the project for production to current OS type.'
+	@echo '    make build-production            Compile the project for production to linux and windows (386 and arm64).'
+	@echo '    make dist                        Pack the project for production to linux and windows (386 and arm64).'
+	@echo '    make get-deps                    Runs glide install'
+	@echo '    make up-deps                     Runs glide update'
+	@echo '    make docker-build                Build a docker image of the project.'
+	@echo '    make docker-push                 Push project docker image on our docker image repository'
+	@echo '    make run-test                    Run tests on a compiled project.'
+	@echo '    make clean                       Clean t he directory tree.'
+	@echo ''
 
-help: ## This help.
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
-
-.DEFAULT_GOAL := help
-
-default: help
-
-build: ## Build project for development
+build:
 	@echo "building ${BIN_NAME} ${VERSION}"
 	@echo "GOPATH=${GOPATH}"
 	go build -ldflags "-X main.GitCommit=${GIT_COMMIT}${GIT_DIRTY} -X main.VersionPrerelease=DEV" -o bin/${BIN_NAME} ./
 
-build-native-production: ## Build project for native production
+build-native-production:
 	@echo "building ${BIN_NAME} ${VERSION}"
 	@echo "GOPATH=${GOPATH}"
 	go build -ldflags "-X main.GitCommit=${GIT_COMMIT}${GIT_DIRTY}" -o bin/${BIN_NAME} ./
 
-build-production: ## Build project for all plataforms production
+build-production:
 	@echo "building ${BIN_NAME} ${VERSION}"
 	@echo "GOPATH=${GOPATH}"
 	GOOS=linux GOARCH=386 go build -ldflags "-X main.GitCommit=${GIT_COMMIT}${GIT_DIRTY}" -o bin/${BIN_NAME}32 ./
@@ -38,13 +43,13 @@ build-production: ## Build project for all plataforms production
 	GOOS=windows GOARCH=386 go build -ldflags "-X main.GitCommit=${GIT_COMMIT}${GIT_DIRTY}" -o bin/${BIN_NAME}32.exe ./
 	GOOS=windows GOARCH=amd64 go build -ldflags "-X main.GitCommit=${GIT_COMMIT}${GIT_DIRTY}" -o bin/${BIN_NAME}64.exe ./
 
-build-art: ## Build artefacts
+build-art:
 	@echo "building Artefacts ${BIN_NAME} ${VERSION}"
 	@echo "GOPATH=${GOPATH}"
 	GOOS=linux GOARCH=amd64 go build -ldflags "-X main.GitCommit=${GIT_COMMIT}${GIT_DIRTY}" -o artefacts/${BIN_NAME} ./
 
 
-dist: build-production ## Pack project for all plataforms production
+dist: build-production
 	@echo "building dist files for Windows"
 	cd bin && mv ${BIN_NAME}32.exe ${BIN_NAME}.exe
 	cd bin && zip ${BIN_NAME}_win32.zip ${BIN_NAME}.exe
@@ -67,29 +72,33 @@ dist: build-production ## Pack project for all plataforms production
 	cd bin && tar -zcvf ${BIN_NAME}_linux_arm64.tar.gz ${BIN_NAME}
 	cd bin && mv ${BIN_NAME} ${BIN_NAME}-arm64
 
-get-deps: ## Install projects dependecies with Glide
-	glide install
+get-deps:
+    curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
-up-deps: ## Update projects dependecies with Glide
+up-deps:
 	glide up
 
-docker-build: build-native-production ## Build docker image
-	docker build -t ${APPLICATION_NAME}:${VERSION} ./
+docker-build: build-native-production
+	sudo docker build -t ${APPLICATION_NAME}:${BASE_VERSION} ./
 
-docker-tag: ## Tag docker image
-	docker tag ${APPLICATION_NAME}:${VERSION} registry.interno.ntopus.kf.com.br${PORT}/internal/${APPLICATION_NAME}:${VERSION}
-	docker tag ${APPLICATION_NAME}:${VERSION} registry.interno.ntopus.kf.com.br${PORT}/internal/${APPLICATION_NAME}:latest
+docker-push:
+	sudo docker tag ${APPLICATION_NAME}:${BASE_VERSION} internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:${BASE_VERSION}
+	sudo docker tag ${APPLICATION_NAME}:${BASE_VERSION} internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:${VERSION}
+	sudo docker tag ${APPLICATION_NAME}:${BASE_VERSION} internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:latest
+	sudo docker tag ${APPLICATION_NAME}:${BASE_VERSION} gcr.io/ntopus-1379/${APPLICATION_NAME}:${BASE_VERSION}
+	sudo docker tag ${APPLICATION_NAME}:${BASE_VERSION} gcr.io/ntopus-1379/${APPLICATION_NAME}:${VERSION}
+	sudo docker tag ${APPLICATION_NAME}:${BASE_VERSION} gcr.io/ntopus-1379/${APPLICATION_NAME}:latest
+	sudo docker push internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:${BASE_VERSION}
+	sudo docker push internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:${VERSION}
+	sudo docker push internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:latest
+	sudo docker push gcr.io/ntopus-1379/${APPLICATION_NAME}:${BASE_VERSION}
+	sudo docker push gcr.io/ntopus-1379/${APPLICATION_NAME}:${VERSION}
+	sudo docker push gcr.io/ntopus-1379/${APPLICATION_NAME}:latest
 
-docker-push: ## Push docker image
-	docker push registry.interno.ntopus.kf.com.br${PORT}/internal/${APPLICATION_NAME}:${VERSION}
-	docker push registry.interno.ntopus.kf.com.br${PORT}/internal/${APPLICATION_NAME}:latest
-
-release: docker-build docker-tag docker-push ## Build, tag and push docker image
-
-clean: ## Clean build project
+clean:
 	@test ! -e bin/${BIN_NAME} || rm bin/${BIN_NAME}
 
-run-test:  ## Run project tests
+run-test:
 	mkdir -p ./test/cover
 	go test -race -coverpkg= ./... -coverprofile=./test/cover/cover.out
 	go tool cover -html=./test/cover/cover.out -o ./test/cover/cover.html
