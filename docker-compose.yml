@@ -17,7 +17,7 @@ services:
         aliases:
           - "timedEvent.db.ivanmeca.com.br"
     volumes:
-      - ./docker-data/arangodb:/var/lib/arangodb3
+      - ./docker-data/arangodb:/var/lib/arangodb
     environment:
       ARANGO_ROOT_PASSWORD: "rootpass"
       ARANGO_STORAGE_ENGINE: rocksdb
