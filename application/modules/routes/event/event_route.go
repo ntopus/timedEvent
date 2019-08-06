@@ -186,10 +186,13 @@ func HTTPCreateEvent(context *gin.Context) {
 		event, err := ceHttpCreate(context)
 		if err != nil {
 			response = collection_managment.DefaultErrorHandler(err)
-			context.JSON(int(response.Status()), &response)
-			return
+			if response.Status() == http.StatusForbidden {
+				_, _ = collection_managment.NewEventCollection().DeleteItem([]string{event.ID})
+			} else {
+				context.JSON(int(response.Status()), &response)
+				return
+			}
 		}
-		_, _ = collection_managment.NewEventCollection().DeleteItem([]string{event.ID})
 		insertedItem, err := collection_managment.NewEventCollection().Insert(event)
 		if err != nil {
 			response = collection_managment.DefaultErrorHandler(err)

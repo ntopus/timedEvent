@@ -38,8 +38,8 @@ func (j *JsendMessage) MarshalJSON() ([]byte, error) {
 	if j.status >= 200 && j.status <= 299 {
 		statusMsg := "success"
 		return json.Marshal(struct {
-			Status string      `json:"Status"`
-			Data   interface{} `json:"Data"`
+			Status string      `json:"status"`
+			Data   interface{} `json:"data"`
 		}{
 			Status: statusMsg,
 			Data:   j.data,
@@ -47,8 +47,8 @@ func (j *JsendMessage) MarshalJSON() ([]byte, error) {
 	} else {
 		statusMsg := "fail"
 		return json.Marshal(struct {
-			Status  string `json:"Status"`
-			Message string `json:"Message"`
+			Status  string `json:"status"`
+			Message string `json:"message"`
 		}{
 			Status:  statusMsg,
 			Message: j.message,
@@ -58,9 +58,9 @@ func (j *JsendMessage) MarshalJSON() ([]byte, error) {
 
 func (j *JsendMessage) UnmarshalJSON(data []byte) error {
 	aux := struct {
-		Status  *int16      `json:"Status"`
-		Message *string     `json:"Message"`
-		Data    interface{} `json:"Data"`
+		Status  *int16      `json:"status"`
+		Message *string     `json:"message"`
+		Data    interface{} `json:"data"`
 	}{
 		Status:  &j.status,
 		Message: &j.message,
