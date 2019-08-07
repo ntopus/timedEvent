@@ -23,4 +23,4 @@ import:
   version: 2.0.1
 testImport:
 - package: github.com/onsi/gomega
-  version: v1.5.0
+- package: github.com/onsi/ginkgo

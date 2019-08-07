@@ -52,7 +52,7 @@ func verifyConfig(cli *cli.Context) error {
 }
 
 func generateConfig(cli *cli.Context) error {
-	err := config.ConfigSample()
+	err := config.ConfigSample("./config.json")
 	if err != nil {
 		log.Fatal("Could not get config sample")
 		return err

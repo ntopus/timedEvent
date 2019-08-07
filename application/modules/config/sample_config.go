@@ -10,9 +10,9 @@ func configSample() *ConfigData {
 	var config ConfigData
 
 	config.LogLevel = logger.LogNotice
-	config.ControlTime = 1
-	config.PoolTime = 5
-	config.ExpirationTime = 1800
+	config.ControlTime = 100
+	config.PoolTime = 10000
+	config.ExpirationTime = 2592000000
 	config.ServerPort = 9010
 
 	config.DataBase.DbName = "testDb"
@@ -22,8 +22,8 @@ func configSample() *ConfigData {
 	config.DataBase.ServerPassword = "123456"
 
 	var pqueueconf ConfigQueue
-	pqueueconf.ServerHost = "127.0.0.1"
-	pqueueconf.ServerVHost = "/"
+	pqueueconf.ServerHost = "http://localhost"
+	pqueueconf.ServerVHost = "/timed"
 	pqueueconf.ServerPort = "5672"
 	pqueueconf.ServerUser = "randomUser"
 	pqueueconf.ServerPassword = "randomPass"
@@ -49,6 +49,6 @@ func generateConfigFile(filename string, data *ConfigData) error {
 	return nil
 }
 
-func ConfigSample() error {
-	return generateConfigFile("./config.json", configSample())
+func ConfigSample(fileName string) error {
+	return generateConfigFile(fileName, configSample())
 }
