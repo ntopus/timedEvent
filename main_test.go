@@ -22,9 +22,10 @@ var _ = ginkgo.Describe("main_test_suite", func() {
 	ginkgo.BeforeSuite(func() {
 		tests.BuildApplication()
 		tests.SaveConfigFile()
+		App = tests.RunApp()
 		ginkgo.AfterSuite(func() {
 			fmt.Println("Killing application")
-			//App.Kill()
+			App.Kill()
 		})
 		//ginkgo.Context("Get empty driver list", test_files.GetDriverListRequest)
 	})
