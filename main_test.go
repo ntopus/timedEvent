@@ -7,6 +7,7 @@ import (
 	"github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
 	"testing"
+	"time"
 )
 
 func TestApplication(t *testing.T) {
@@ -23,12 +24,13 @@ var _ = ginkgo.Describe("main_test_suite", func() {
 		tests.BuildApplication()
 		tests.SaveConfigFile()
 		App = tests.RunApp()
-		ginkgo.AfterSuite(func() {
-			fmt.Println("Killing application")
-			App.Kill()
-		})
-		//ginkgo.Context("Get empty driver list", test_files.GetDriverListRequest)
+		time.Sleep(5 * time.Second)
 	})
+	ginkgo.AfterSuite(func() {
+		fmt.Println("Killing application")
+		App.Kill()
+	})
+	ginkgo.Context("Test DB generator", tests.CreateEventRequest)
 })
 
 //
