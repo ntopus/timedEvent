@@ -22,7 +22,7 @@ func configSample() *ConfigData {
 	config.DataBase.ServerPassword = "123456"
 
 	var pqueueconf ConfigQueue
-	pqueueconf.ServerHost = "http://localhost"
+	pqueueconf.ServerHost = "localhost"
 	pqueueconf.ServerVHost = "/timed"
 	pqueueconf.ServerPort = "5672"
 	pqueueconf.ServerUser = "randomUser"
