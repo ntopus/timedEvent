@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
@@ -25,7 +24,7 @@ func CreateEventRequest() {
 	ginkgo.It("Valid msg", func() {
 		for i := 1; i < 300; i++ {
 			strIvalue := strconv.Itoa(i)
-			fmt.Print("Trying to create an event " + strIvalue)
+			fmt.Println("Trying to create an event " + strIvalue)
 			mockReader, err := GetMockReader(getMockEvent(time.Now(), strIvalue))
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 			h := make(map[string]string)
@@ -41,7 +40,7 @@ func CreateEventRequest() {
 }
 
 func getMockEvent(publihsDate time.Time, ref string) interface{} {
-	date, err := json.Marshal(struct {
+	return struct {
 		SpecVersion  string `json:"specversion"`
 		Type         string `json:"type"`
 		Source       string `json:"source"`
@@ -59,7 +58,5 @@ func getMockEvent(publihsDate time.Time, ref string) interface{} {
 		PublishQueue: TEST_PUBLISH_QUEUE,
 		PublishType:  TEST_PUBLISH_TYPE,
 		Data:         fmt.Sprintf("Mock event ref: %s, generated at %s", ref, publihsDate.Format(DATE_FORMAT)),
-	})
-	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-	return date
+	}
 }
