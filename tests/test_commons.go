@@ -2,11 +2,11 @@ package tests
 
 import (
 	"bytes"
+	"devgit.kf.com.br/core/lib-queue/queue"
+	"devgit.kf.com.br/core/lib-queue/queue_repository"
 	"encoding/json"
 	"fmt"
 	"github.com/ivanmeca/timedEvent/application/modules/config"
-	"github.com/ivanmeca/timedQueue/queue"
-	queue_repository "github.com/ivanmeca/timedQueue/queue-repository"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
@@ -41,11 +41,14 @@ func GetConfigPath() string {
 }
 
 func GetQueue(queueName string, threadLimit int) *queue.Queue {
-	qr, err := queue_repository.NewQueueRepository(queue_repository.NewQueueRepositoryParams("randomUser", "randomPass", "srvqueue.module.ntopus.com.br", 5672))
-	params := queue.NewQueueParams(queueName)
-	params.SetThreadLimit(threadLimit)
-	q, err := qr.QueueDeclare(params, true)
-	gomega.Expect(err).To(gomega.BeNil())
+	params := queue_repository.NewQueueRepositoryParams("randomUser", "randomPass", "srvqueue.module.ntopus.com.br", 5672)
+	params.SetVHost("/timed")
+	qr, err := queue_repository.NewQueueRepository(params)
+	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+	qParam := queue.NewQueueParams(queueName)
+	qParam.SetThreadLimit(threadLimit)
+	q, err := qr.QueueDeclare(qParam, false)
+	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	return q
 }
 
