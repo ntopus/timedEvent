@@ -69,12 +69,11 @@ func CreateEventRequest() {
 		err := q.StartConsume(func(queueName string, msg []byte) bool {
 			mu.Lock()
 			defer mu.Unlock()
-			fmt.Println(fmt.Sprintf("%s", msg))
 			count++
+			fmt.Println(fmt.Sprintf("cnt=%d, %s", count, msg))
 			return true
 		})
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-		time.Sleep(2 * time.Second)
 		gomega.Eventually(func() int {
 			mu.Lock()
 			defer mu.Unlock()
@@ -113,12 +112,11 @@ func CreateEventRequest() {
 		err := q.StartConsume(func(queueName string, msg []byte) bool {
 			mu.Lock()
 			defer mu.Unlock()
-			fmt.Println(fmt.Sprintf("%s", msg))
 			countDO++
+			fmt.Println(fmt.Sprintf("cnt=%d, %s", countDO, msg))
 			return true
 		})
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-		time.Sleep(2 * time.Second)
 		gomega.Eventually(func() int {
 			mu.Lock()
 			defer mu.Unlock()
