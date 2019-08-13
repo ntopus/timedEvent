@@ -30,5 +30,8 @@ var _ = ginkgo.Describe("main_test_suite", func() {
 		fmt.Println("Killing application")
 		App.Kill()
 	})
+	ginkgo.BeforeEach(func() {
+		tests.PurgeQueue(tests.TEST_PUBLISH_QUEUE)
+	})
 	ginkgo.Context("Test DB generator", tests.CreateEventRequest)
 })

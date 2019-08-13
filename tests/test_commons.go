@@ -10,6 +10,7 @@ import (
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
+	"github.com/streadway/amqp"
 	"io"
 	"net/http"
 	"os"
@@ -50,6 +51,17 @@ func GetQueue(queueName string, threadLimit int) *queue.Queue {
 	q, err := qr.QueueDeclare(qParam, false)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	return q
+}
+
+func PurgeQueue(queue string) {
+	conn, err := amqp.Dial("amqp://randomUser:randomPass@srvqueue.module.ntopus.com.br:5672/timed")
+	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+	ch, err := conn.Channel()
+	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+	_, err = ch.QueueInspect(queue)
+	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+	_, err = ch.QueuePurge(queue, false)
+	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 }
 
 func GetMockReader(mockData interface{}) (io.Reader, error) {

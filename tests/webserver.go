@@ -24,23 +24,27 @@ const (
 func CreateEventRequest() {
 	ginkgo.It("Valid msg", func() {
 
-		const TESTE_QTD = 1500
+		const TESTE_QTD = 150
+		wg := sync.WaitGroup{}
 
 		for i := 1; i < TESTE_QTD; i++ {
 			strIvalue := strconv.Itoa(i)
 			//fmt.Println("Trying to create an event " + strIvalue)
-			mockReader, err := GetMockReader(getMockEvent(time.Now(), strIvalue))
+			mockReader, err := GetMockReader(getMockEvent(time.Now().UTC(), strIvalue))
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 			h := make(map[string]string)
 			h[CONTENT_TYPE] = CONTENT_TYPE_CE
 			h[PUBLISH_DATE] = time.Now().Add(time.Duration(i) * time.Millisecond).UTC().Format(DATE_FORMAT)
 			h[PUBLISH_QUEUE] = TEST_PUBLISH_QUEUE
 			h[PUBLISH_TYPE] = TEST_PUBLISH_TYPE
+			wg.Add(1)
 			go func() {
+				defer wg.Done()
 				resp, err := SendPostRequestWithHeaders(TEST_ENDPOINT, mockReader, h)
 				gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 				gomega.Expect(resp.StatusCode).To(gomega.Equal(201))
 			}()
+			wg.Wait()
 		}
 		mu := sync.Mutex{}
 		q := GetQueue(TEST_PUBLISH_QUEUE, 200)

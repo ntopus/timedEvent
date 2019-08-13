@@ -33,7 +33,7 @@ func (app *ApplicationManager) RunApplication(ctx context.Context) error {
 }
 
 func (app *ApplicationManager) initializeServer() context.CancelFunc {
-	s := server.NewHttpServer(strconv.Itoa(config.GetConfig().ServerPort))
+	s := server.NewHttpServer(strconv.Itoa(config.GetConfig().ServerPort), false)
 	ctxServer := context.Background()
 	ctxServer, cancelServer := context.WithCancel(ctxServer)
 	s.RunServer(ctxServer)
