@@ -18,13 +18,18 @@ const (
 	PUBLISH_QUEUE      = "publishQueue"
 	PUBLISH_TYPE       = "publishtype"
 	TEST_PUBLISH_QUEUE = "throwAt"
-	TEST_PUBLISH_TYPE  = "data_only"
+	TEST_PUBLISH_TYPE  = "dataOnly"
 )
+
+type MockData struct {
+	Ref         string
+	PublishDate string
+}
 
 func CreateEventRequest() {
 	ginkgo.It("Valid msg", func() {
 
-		const TESTE_QTD = 150
+		const TESTE_QTD = 15
 		wg := sync.WaitGroup{}
 
 		for i := 0; i < TESTE_QTD; i++ {
@@ -38,6 +43,7 @@ func CreateEventRequest() {
 			h[PUBLISH_TYPE] = TEST_PUBLISH_TYPE
 			wg.Add(1)
 			go func() {
+				defer ginkgo.GinkgoRecover()
 				defer wg.Done()
 				resp, err := SendPostRequestWithHeaders(TEST_ENDPOINT, mockReader, h)
 				gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
@@ -50,24 +56,10 @@ func CreateEventRequest() {
 		mu.Lock()
 		count := 0
 		mu.Unlock()
-		q.OnPublishedEvent = func(message interface{}) {
-			mu.Lock()
-			defer mu.Unlock()
-			count++
-			fmt.Println("Publish OK")
-		}
-		mu.Lock()
-		countErr := 0
-		mu.Unlock()
-		q.OnNotPublishedEvent = func(message interface{}) {
-			mu.Lock()
-			defer mu.Unlock()
-			countErr++
-			fmt.Println("Publish Err")
-		}
 		err := q.StartConsume(func(queueName string, msg []byte) bool {
 			mu.Lock()
 			defer mu.Unlock()
+			fmt.Println(fmt.Sprintf("%s", msg))
 			count++
 			return true
 		})
@@ -83,14 +75,14 @@ func CreateEventRequest() {
 
 func getMockEvent(publihsDate time.Time, ref string) interface{} {
 	return struct {
-		SpecVersion  string `json:"specversion"`
-		Type         string `json:"type"`
-		Source       string `json:"source"`
-		ID           string `json:"id"`
-		PublishDate  string `json:"publishdate"`
-		PublishQueue string `json:"publishqueue"`
-		PublishType  string `json:"publishtype"`
-		Data         string `json:"data"`
+		SpecVersion  string      `json:"specversion"`
+		Type         string      `json:"type"`
+		Source       string      `json:"source"`
+		ID           string      `json:"id"`
+		PublishDate  string      `json:"publishdate"`
+		PublishQueue string      `json:"publishqueue"`
+		PublishType  string      `json:"publishtype"`
+		Data         interface{} `json:"data"`
 	}{
 		SpecVersion:  "0.2",
 		Type:         "TestEvent",
@@ -99,6 +91,6 @@ func getMockEvent(publihsDate time.Time, ref string) interface{} {
 		PublishDate:  publihsDate.Format(DATE_FORMAT),
 		PublishQueue: TEST_PUBLISH_QUEUE,
 		PublishType:  TEST_PUBLISH_TYPE,
-		Data:         fmt.Sprintf("Mock event ref: %s, generated at %s", ref, publihsDate.Format(DATE_FORMAT)),
+		Data:         MockData{Ref: ref, PublishDate: publihsDate.Format(DATE_FORMAT)},
 	}
 }
