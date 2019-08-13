@@ -27,7 +27,7 @@ func CreateEventRequest() {
 		const TESTE_QTD = 150
 		wg := sync.WaitGroup{}
 
-		for i := 1; i < TESTE_QTD; i++ {
+		for i := 0; i < TESTE_QTD; i++ {
 			strIvalue := strconv.Itoa(i)
 			//fmt.Println("Trying to create an event " + strIvalue)
 			mockReader, err := GetMockReader(getMockEvent(time.Now().UTC(), strIvalue))
