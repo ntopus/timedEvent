@@ -29,7 +29,6 @@ func CreateEventRequest() {
 
 		for i := 0; i < TESTE_QTD; i++ {
 			strIvalue := strconv.Itoa(i)
-			//fmt.Println("Trying to create an event " + strIvalue)
 			mockReader, err := GetMockReader(getMockEvent(time.Now().UTC(), strIvalue))
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 			h := make(map[string]string)
@@ -70,7 +69,6 @@ func CreateEventRequest() {
 			mu.Lock()
 			defer mu.Unlock()
 			count++
-			fmt.Println("New message")
 			return true
 		})
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
