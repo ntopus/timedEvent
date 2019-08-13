@@ -37,9 +37,22 @@ type MockData struct {
 	PublishDate string
 }
 
+type fnConsume func(queueName string, msg []byte) bool
+
+var Consumer fnConsume
+
+func SetQueue() {
+	q := GetQueue(TEST_PUBLISH_QUEUE, 200)
+	err := q.StartConsume(func(queueName string, msg []byte) bool {
+		return Consumer(queueName, msg)
+	})
+	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+}
+
 func CreateEventRequest() {
 	ginkgo.It("Valid CloudEvent msg", func() {
 		fmt.Println("Sending a valid CloudEvent data")
+		SetQueue()
 		const TESTE_QTD = 10
 		wg := sync.WaitGroup{}
 
@@ -62,18 +75,16 @@ func CreateEventRequest() {
 			wg.Wait()
 		}
 		mu := sync.Mutex{}
-		q := GetQueue(TEST_PUBLISH_QUEUE, 200)
 		mu.Lock()
 		count := 0
 		mu.Unlock()
-		err := q.StartConsume(func(queueName string, msg []byte) bool {
+		Consumer = func(queueName string, msg []byte) bool {
 			mu.Lock()
 			defer mu.Unlock()
 			count++
 			fmt.Println(fmt.Sprintf("cnt=%d, %s", count, msg))
 			return true
-		})
-		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+		}
 		gomega.Eventually(func() int {
 			mu.Lock()
 			defer mu.Unlock()
@@ -105,18 +116,16 @@ func CreateEventRequest() {
 			wg.Wait()
 		}
 		mu := sync.Mutex{}
-		q := GetQueue(TEST_PUBLISH_QUEUE, 200)
 		mu.Lock()
 		countDO := 0
 		mu.Unlock()
-		err := q.StartConsume(func(queueName string, msg []byte) bool {
+		Consumer = func(queueName string, msg []byte) bool {
 			mu.Lock()
 			defer mu.Unlock()
 			countDO++
-			fmt.Println(fmt.Sprintf("cnt=%d, %s", countDO, msg))
+			fmt.Println(fmt.Sprintf("cntD=%d, %s", countDO, msg))
 			return true
-		})
-		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+		}
 		gomega.Eventually(func() int {
 			mu.Lock()
 			defer mu.Unlock()
