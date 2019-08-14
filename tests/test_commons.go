@@ -19,7 +19,34 @@ import (
 	"time"
 )
 
-const APP_NAME = "timed-event"
+const (
+	APP_NAME           = "timed-event"
+	DATE_FORMAT        = "2006-01-02 15:04:05Z"
+	TEST_ENDPOINT      = "http://localhost:9010/v1/event"
+	CONTENT_TYPE       = "Content-Type"
+	CONTENT_TYPE_CE    = "application/cloudevents"
+	PUBLISH_DATE       = "publishDate"
+	PUBLISH_QUEUE      = "publishQueue"
+	PUBLISH_TYPE       = "publishtype"
+	TEST_PUBLISH_QUEUE = "throwAt"
+	TEST_PUBLISH_TYPE  = "dataOnly"
+)
+
+type MockEvent struct {
+	SpecVersion  string      `json:"specversion"`
+	Type         string      `json:"type"`
+	Source       string      `json:"source"`
+	ID           string      `json:"id"`
+	PublishDate  string      `json:"publishdate"`
+	PublishQueue string      `json:"publishqueue"`
+	PublishType  string      `json:"publishtype"`
+	Data         interface{} `json:"data"`
+}
+
+type MockData struct {
+	Ref         string
+	PublishDate string
+}
 
 func BuildApplication() {
 	cwd, err := os.Getwd()
@@ -117,4 +144,17 @@ func SendPostRequestWithHeaders(url string, body io.Reader, headers map[string]s
 		req.Header.Set(key, value)
 	}
 	return client.Do(req)
+}
+
+func getMockEvent(publihsDate time.Time, publishType string, ref string) interface{} {
+	return MockEvent{
+		SpecVersion:  "0.2",
+		Type:         "TestEvent",
+		Source:       "sourceEvent",
+		ID:           fmt.Sprintf("mockEvent%s", ref),
+		PublishDate:  publihsDate.Format(DATE_FORMAT),
+		PublishQueue: TEST_PUBLISH_QUEUE,
+		PublishType:  publishType,
+		Data:         MockData{Ref: ref, PublishDate: publihsDate.Format(DATE_FORMAT)},
+	}
 }

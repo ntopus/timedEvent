@@ -9,19 +9,7 @@ import (
 	"time"
 )
 
-type fnConsume func(queueName string, msg []byte) bool
-
-var Consumer fnConsume
-
-func SetQueue() {
-	q := GetQueue(TEST_PUBLISH_QUEUE, 200)
-	err := q.StartConsume(func(queueName string, msg []byte) bool {
-		return Consumer(queueName, msg)
-	})
-	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-}
-
-func CreateEventTester() {
+func SchedulerTester() {
 	ginkgo.It("Valid CloudEvent msg", func() {
 		fmt.Println("Sending a valid CloudEvent data")
 		SetQueue()
