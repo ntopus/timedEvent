@@ -16,6 +16,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sync"
 	"time"
 )
 
@@ -48,9 +49,7 @@ type MockData struct {
 	PublishDate string
 }
 
-type fnConsume func(queueName string, msg []byte) bool
-
-var Consumer fnConsume
+type fnConsume func(queueName string, msg []byte, counter int) bool
 
 func BuildApplication() {
 	cwd, err := os.Getwd()
@@ -80,6 +79,22 @@ func GetQueue(queueName string, threadLimit int) *queue.Queue {
 	qParam := queue.NewQueueParams(queueName)
 	qParam.SetThreadLimit(threadLimit)
 	q, err := qr.QueueDeclare(qParam, false)
+	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+	return q
+}
+
+func InitQueue(queueName string, counter *int, consume fnConsume) *queue.Queue {
+	mu := sync.Mutex{}
+	mu.Lock()
+	*counter = 0
+	mu.Unlock()
+	q := GetQueue(queueName, 200)
+	err := q.StartConsume(func(queueName string, msg []byte) bool {
+		mu.Lock()
+		defer mu.Unlock()
+		*counter++
+		return consume(queueName, msg, *counter)
+	})
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	return q
 }
@@ -148,14 +163,6 @@ func SendPostRequestWithHeaders(url string, body io.Reader, headers map[string]s
 		req.Header.Set(key, value)
 	}
 	return client.Do(req)
-}
-
-func SetQueue() {
-	q := GetQueue(TEST_PUBLISH_QUEUE, 200)
-	err := q.StartConsume(func(queueName string, msg []byte) bool {
-		return Consumer(queueName, msg)
-	})
-	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 }
 
 func getMockEvent(publihsDate time.Time, publishType string, ref string) MockEvent {

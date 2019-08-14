@@ -24,7 +24,6 @@ var _ = ginkgo.Describe("main_test_suite", func() {
 		tests.BuildApplication()
 		tests.SaveConfigFile()
 		App = tests.RunApp()
-		tests.SetQueue()
 		time.Sleep(time.Second)
 	})
 	ginkgo.AfterSuite(func() {
@@ -35,5 +34,5 @@ var _ = ginkgo.Describe("main_test_suite", func() {
 		tests.PurgeQueue(tests.TEST_PUBLISH_QUEUE)
 	})
 	ginkgo.FContext("Test webserver", tests.CreateEventTester)
-	ginkgo.Context("Test scheduler", tests.SchedulerTester)
+	//ginkgo.Context("Test scheduler", tests.SchedulerTester)
 })

@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
@@ -16,6 +17,19 @@ func CreateEventTester() {
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		h := make(map[string]string)
 		h[CONTENT_TYPE] = CONTENT_TYPE_CE
+		mu := sync.Mutex{}
+		mu.Lock()
+		count := 0
+		mu.Unlock()
+		q := InitQueue(TEST_PUBLISH_QUEUE, &count, func(queueName string, msg []byte, counter int) bool {
+			var mock MockEvent
+			err := json.Unmarshal(msg, &mock)
+			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+			fmt.Println(fmt.Sprintf("cnt=%d, %s", counter, msg))
+			fmt.Println(mock)
+			return true
+		})
+		defer q.Close()
 		wg.Add(1)
 		go func() {
 			defer ginkgo.GinkgoRecover()
@@ -25,17 +39,6 @@ func CreateEventTester() {
 			gomega.Expect(resp.StatusCode).To(gomega.Equal(201))
 		}()
 		wg.Wait()
-		mu := sync.Mutex{}
-		mu.Lock()
-		count := 0
-		mu.Unlock()
-		Consumer = func(queueName string, msg []byte) bool {
-			mu.Lock()
-			defer mu.Unlock()
-			count++
-			fmt.Println(fmt.Sprintf("cnt=%d, %s", count, msg))
-			return true
-		}
 		gomega.Eventually(func() int {
 			mu.Lock()
 			defer mu.Unlock()
@@ -51,6 +54,15 @@ func CreateEventTester() {
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		h := make(map[string]string)
 		h[CONTENT_TYPE] = CONTENT_TYPE_CE
+		mu := sync.Mutex{}
+		mu.Lock()
+		count := 0
+		mu.Unlock()
+		q := InitQueue(TEST_PUBLISH_QUEUE, &count, func(queueName string, msg []byte, counter int) bool {
+			fmt.Println(fmt.Sprintf("cnt=%d, %s", counter, msg))
+			return true
+		})
+		defer q.Close()
 		wg.Add(1)
 		go func() {
 			defer ginkgo.GinkgoRecover()
@@ -60,17 +72,6 @@ func CreateEventTester() {
 			gomega.Expect(resp.StatusCode).To(gomega.Equal(500))
 		}()
 		wg.Wait()
-		mu := sync.Mutex{}
-		mu.Lock()
-		count := 0
-		mu.Unlock()
-		Consumer = func(queueName string, msg []byte) bool {
-			mu.Lock()
-			defer mu.Unlock()
-			count++
-			fmt.Println(fmt.Sprintf("cnt=%d, %s", count, msg))
-			return true
-		}
 		gomega.Consistently(func() int {
 			mu.Lock()
 			defer mu.Unlock()
@@ -85,6 +86,15 @@ func CreateEventTester() {
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		h := make(map[string]string)
 		h[CONTENT_TYPE] = CONTENT_TYPE_CE
+		mu := sync.Mutex{}
+		mu.Lock()
+		count := 0
+		mu.Unlock()
+		q := InitQueue(TEST_PUBLISH_QUEUE, &count, func(queueName string, msg []byte, counter int) bool {
+			fmt.Println(fmt.Sprintf("cnt=%d, %s", counter, msg))
+			return true
+		})
+		defer q.Close()
 		wg.Add(1)
 		go func() {
 			defer ginkgo.GinkgoRecover()
@@ -94,21 +104,10 @@ func CreateEventTester() {
 			gomega.Expect(resp.StatusCode).To(gomega.Equal(201))
 		}()
 		wg.Wait()
-		mu := sync.Mutex{}
-		mu.Lock()
-		countDO := 0
-		mu.Unlock()
-		Consumer = func(queueName string, msg []byte) bool {
-			mu.Lock()
-			defer mu.Unlock()
-			countDO++
-			fmt.Println(fmt.Sprintf("cntD=%d, %s", countDO, msg))
-			return true
-		}
 		gomega.Eventually(func() int {
 			mu.Lock()
 			defer mu.Unlock()
-			return countDO
+			return count
 		}).Should(gomega.BeEquivalentTo(1))
 	})
 	ginkgo.It("Invalid CloudEvent (dataOnly) msg", func() {
@@ -120,6 +119,15 @@ func CreateEventTester() {
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		h := make(map[string]string)
 		h[CONTENT_TYPE] = CONTENT_TYPE_CE
+		mu := sync.Mutex{}
+		mu.Lock()
+		count := 0
+		mu.Unlock()
+		q := InitQueue(TEST_PUBLISH_QUEUE, &count, func(queueName string, msg []byte, counter int) bool {
+			fmt.Println(fmt.Sprintf("cnt=%d, %s", counter, msg))
+			return true
+		})
+		defer q.Close()
 		wg.Add(1)
 		go func() {
 			defer ginkgo.GinkgoRecover()
@@ -129,21 +137,10 @@ func CreateEventTester() {
 			gomega.Expect(resp.StatusCode).To(gomega.Equal(500))
 		}()
 		wg.Wait()
-		mu := sync.Mutex{}
-		mu.Lock()
-		countDO := 0
-		mu.Unlock()
-		Consumer = func(queueName string, msg []byte) bool {
-			mu.Lock()
-			defer mu.Unlock()
-			countDO++
-			fmt.Println(fmt.Sprintf("cntD=%d, %s", countDO, msg))
-			return true
-		}
 		gomega.Consistently(func() int {
 			mu.Lock()
 			defer mu.Unlock()
-			return countDO
+			return count
 		}).Should(gomega.BeEquivalentTo(0))
 	})
 }
