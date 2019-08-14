@@ -24,7 +24,7 @@ var _ = ginkgo.Describe("main_test_suite", func() {
 		tests.BuildApplication()
 		tests.SaveConfigFile()
 		App = tests.RunApp()
-		SetQueue()
+		tests.SetQueue()
 		time.Sleep(time.Second)
 	})
 	ginkgo.AfterSuite(func() {

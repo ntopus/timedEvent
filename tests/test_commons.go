@@ -48,6 +48,10 @@ type MockData struct {
 	PublishDate string
 }
 
+type fnConsume func(queueName string, msg []byte) bool
+
+var Consumer fnConsume
+
 func BuildApplication() {
 	cwd, err := os.Getwd()
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
