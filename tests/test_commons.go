@@ -158,7 +158,7 @@ func SetQueue() {
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 }
 
-func getMockEvent(publihsDate time.Time, publishType string, ref string) interface{} {
+func getMockEvent(publihsDate time.Time, publishType string, ref string) MockEvent {
 	return MockEvent{
 		SpecVersion:  "0.2",
 		Type:         "TestEvent",
