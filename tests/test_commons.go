@@ -146,6 +146,14 @@ func SendPostRequestWithHeaders(url string, body io.Reader, headers map[string]s
 	return client.Do(req)
 }
 
+func SetQueue() {
+	q := GetQueue(TEST_PUBLISH_QUEUE, 200)
+	err := q.StartConsume(func(queueName string, msg []byte) bool {
+		return Consumer(queueName, msg)
+	})
+	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+}
+
 func getMockEvent(publihsDate time.Time, publishType string, ref string) interface{} {
 	return MockEvent{
 		SpecVersion:  "0.2",
