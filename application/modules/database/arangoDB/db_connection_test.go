@@ -55,7 +55,7 @@ func TestLibConnection(test *testing.T) {
 
 func GetTestDatabase() *config.ConfigDB {
 	return &config.ConfigDB{
-		ServerHost:     "http://localhost",
+		ServerHost:     "tcp://localhost",
 		ServerPort:     "8529",
 		ServerUser:     "testUser",
 		ServerPassword: "123456",

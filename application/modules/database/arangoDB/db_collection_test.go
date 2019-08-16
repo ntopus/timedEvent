@@ -5,6 +5,7 @@ import (
 	"github.com/ivanmeca/timedEvent/application/modules/database"
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
 	"github.com/onsi/gomega"
+	"sync"
 	"testing"
 	"time"
 )
@@ -62,12 +63,11 @@ func TestInsertDocument(test *testing.T) {
 	}
 }
 
-func TestInsertMultipleDocuments(test *testing.T) {
+func TestSyncInsertMultipleDocuments(test *testing.T) {
 	gomega.RegisterTestingT(test)
 	fmt.Println("Trying insert into read collection")
 	coll := getTestCollectionInstance("testeCollection")
 	horaAtual := time.Now().UTC()
-
 	for i := 0; i < 10000; i++ {
 		data := fmt.Sprintf(`"Teste data %d"`, i)
 		event, err := data_types.NewArangoCloudEventV02("TestEvent", data, nil)
@@ -80,10 +80,39 @@ func TestInsertMultipleDocuments(test *testing.T) {
 		timeInitRequest := time.Now()
 		newDoc, err := coll.Insert(event)
 		timeDiff := time.Now().Sub(timeInitRequest)
-		gomega.Expect(timeDiff).To(gomega.BeNumerically("<", 15*time.Millisecond))
+		gomega.Expect(timeDiff).To(gomega.BeNumerically("<", 25*time.Millisecond))
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		readDocument(newDoc.GetID())
 	}
+}
+
+func TestAsyncInsertMultipleDocuments(test *testing.T) {
+	gomega.RegisterTestingT(test)
+	fmt.Println("Trying insert into read collection")
+	coll := getTestCollectionInstance("testeCollection")
+	horaAtual := time.Now().UTC()
+	wg := sync.WaitGroup{}
+	for i := 0; i < 10000; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			data := fmt.Sprintf(`"Teste data %d"`, i)
+			event, err := data_types.NewArangoCloudEventV02("TestEvent", data, nil)
+			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+			publishdate := horaAtual.Add(time.Duration(i*60) * time.Second).Format("2006-01-02 15:04:05Z")
+			event.PublishDate = publishdate
+			eventTime := horaAtual.AddDate(0, 0, i)
+			err = event.SetTime(eventTime)
+			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+			timeInitRequest := time.Now()
+			newDoc, err := coll.Insert(event)
+			timeDiff := time.Now().Sub(timeInitRequest)
+			gomega.Expect(timeDiff).To(gomega.BeNumerically("<", 9500*time.Millisecond))
+			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+			readDocument(newDoc.GetID())
+		}()
+	}
+	wg.Wait()
 }
 
 func TestInsertDocumentComplete(test *testing.T) {
