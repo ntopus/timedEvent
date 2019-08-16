@@ -16,6 +16,9 @@ func CreateEventTester() {
 	ginkgo.It("InValid CloudEvent msg", func() {
 		testSendInvalidCloudEventRequest()
 	})
+	ginkgo.It("Valid CloudEvent multiple msg", func() {
+		testSendMultiplesValidCloudEventRequest()
+	})
 	ginkgo.It("Valid CloudEvent (dataOnly) msg", func() {
 		testSendValidCloudEventDataOnlyRequest()
 	})
@@ -25,6 +28,50 @@ func CreateEventTester() {
 	ginkgo.It("Valid json msg", func() {
 		testSendValidJsonRequest()
 	})
+}
+
+func testSendMultiplesValidCloudEventRequest() {
+	fmt.Println("Sending a valid CloudEvent data")
+	wg := sync.WaitGroup{}
+	mu := sync.Mutex{}
+	mu.Lock()
+	count := 0
+	mu.Unlock()
+	q := InitQueue(TEST_PUBLISH_QUEUE, &count, func(queueName string, msg []byte, counter int) bool {
+		var mock MockEvent
+		err := json.Unmarshal(msg, &mock)
+		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+		fmt.Println(fmt.Sprintf("cnt=%d, %s", counter, msg))
+		//fmt.Println(mock)
+		return true
+	})
+	defer q.Close()
+
+	for i := 0; i < 3000; i++ {
+		mockReader, err := GetMockReader(getMockEvent(time.Now().UTC(), "CE", "1"))
+		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+		h := make(map[string]string)
+		h[CONTENT_TYPE] = CONTENT_TYPE_CE
+		wg.Add(1)
+		go func() {
+			defer ginkgo.GinkgoRecover()
+			defer wg.Done()
+			timeInitRequest := time.Now()
+			resp, err := SendPostRequestWithHeaders(TEST_ENDPOINT, mockReader, h)
+			timeDiff := time.Now().Sub(timeInitRequest)
+			//gomega.Expect(timeDiff).To(gomega.BeNumerically("<",50*time.Millisecond))
+			fmt.Println(timeDiff)
+			fmt.Println(resp.Body)
+			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+			gomega.Expect(resp.StatusCode).To(gomega.Equal(201))
+		}()
+	}
+	wg.Wait()
+	gomega.Eventually(func() int {
+		mu.Lock()
+		defer mu.Unlock()
+		return count
+	}).Should(gomega.BeEquivalentTo(1))
 }
 
 func testSendValidCloudEventRequest() {

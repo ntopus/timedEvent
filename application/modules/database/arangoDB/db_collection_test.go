@@ -35,11 +35,11 @@ func TestReadDocuments(test *testing.T) {
 }
 
 func readDocument(id string) {
-	fmt.Println("Trying to a read collection by id")
+	//fmt.Println("Trying to a read collection by id")
 	coll := getTestCollectionInstance("testeCollection")
-	item, err := coll.ReadItem(id)
+	_, err := coll.ReadItem(id)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-	fmt.Println(item)
+	//fmt.Println(item)
 }
 
 func TestInsertDocument(test *testing.T) {
@@ -57,6 +57,30 @@ func TestInsertDocument(test *testing.T) {
 		eventTime := horaAtual.AddDate(0, 0, i)
 		event.SetTime(eventTime)
 		newDoc, err := coll.Insert(event)
+		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+		readDocument(newDoc.GetID())
+	}
+}
+
+func TestInsertMultipleDocuments(test *testing.T) {
+	gomega.RegisterTestingT(test)
+	fmt.Println("Trying insert into read collection")
+	coll := getTestCollectionInstance("testeCollection")
+	horaAtual := time.Now().UTC()
+
+	for i := 0; i < 10000; i++ {
+		data := fmt.Sprintf(`"Teste data %d"`, i)
+		event, err := data_types.NewArangoCloudEventV02("TestEvent", data, nil)
+		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+		publishdate := horaAtual.Add(time.Duration(i*60) * time.Second).Format("2006-01-02 15:04:05Z")
+		event.PublishDate = publishdate
+		eventTime := horaAtual.AddDate(0, 0, i)
+		err = event.SetTime(eventTime)
+		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+		timeInitRequest := time.Now()
+		newDoc, err := coll.Insert(event)
+		timeDiff := time.Now().Sub(timeInitRequest)
+		gomega.Expect(timeDiff).To(gomega.BeNumerically("<", 15*time.Millisecond))
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		readDocument(newDoc.GetID())
 	}

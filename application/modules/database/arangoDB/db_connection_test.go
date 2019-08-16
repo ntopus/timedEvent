@@ -29,7 +29,7 @@ func TestLibConnection(test *testing.T) {
 
 	c, err := driver.NewClient(driver.ClientConfig{
 		Connection:     conn,
-		Authentication: driver.BasicAuthentication("testUser", "123456"),
+		Authentication: driver.BasicAuthentication("root", "rootpass"),
 	})
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	ctx := context.Background()
