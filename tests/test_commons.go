@@ -26,6 +26,7 @@ const (
 	TEST_ENDPOINT      = "http://localhost:9010/v1/event"
 	CONTENT_TYPE       = "Content-Type"
 	CONTENT_TYPE_CE    = "application/cloudevents"
+	CONTENT_TYPE_JSON  = "application/json"
 	PUBLISH_DATE       = "publishDate"
 	PUBLISH_QUEUE      = "publishQueue"
 	PUBLISH_TYPE       = "publishtype"
