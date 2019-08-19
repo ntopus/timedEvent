@@ -23,7 +23,7 @@ func TestLibConnection(test *testing.T) {
 	gomega.RegisterTestingT(test)
 
 	conn, err := http.NewConnection(http.ConnectionConfig{
-		Endpoints: []string{"http://localhost:8529"},
+		Endpoints: []string{"tcp://localhost:8529"},
 	})
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 

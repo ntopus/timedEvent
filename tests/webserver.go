@@ -41,37 +41,32 @@ func testSendMultiplesValidCloudEventRequest() {
 		var mock MockEvent
 		err := json.Unmarshal(msg, &mock)
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-		fmt.Println(fmt.Sprintf("cnt=%d, %s", counter, msg))
+		fmt.Println(fmt.Sprintf("cnt=%d", counter))
 		//fmt.Println(mock)
 		return true
 	})
 	defer q.Close()
-
-	for i := 0; i < 3000; i++ {
-		mockReader, err := GetMockReader(getMockEvent(time.Now().UTC(), "CE", "1"))
-		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+	const TEST_QTDE = 10000
+	for i := 0; i < TEST_QTDE; i++ {
 		h := make(map[string]string)
 		h[CONTENT_TYPE] = CONTENT_TYPE_CE
 		wg.Add(1)
-		go func() {
+		go func(ref string) {
 			defer ginkgo.GinkgoRecover()
 			defer wg.Done()
-			timeInitRequest := time.Now()
+			mockReader, err := GetMockReader(getMockEvent(time.Now().UTC(), "CE", ref))
+			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 			resp, err := SendPostRequestWithHeaders(TEST_ENDPOINT, mockReader, h)
-			timeDiff := time.Now().Sub(timeInitRequest)
-			//gomega.Expect(timeDiff).To(gomega.BeNumerically("<",50*time.Millisecond))
-			fmt.Println(timeDiff)
-			fmt.Println(resp.Body)
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 			gomega.Expect(resp.StatusCode).To(gomega.Equal(201))
-		}()
+		}(fmt.Sprintf("%d", i))
 	}
 	wg.Wait()
 	gomega.Eventually(func() int {
 		mu.Lock()
 		defer mu.Unlock()
 		return count
-	}).Should(gomega.BeEquivalentTo(1))
+	}, 10).Should(gomega.BeEquivalentTo(TEST_QTDE))
 }
 
 func testSendValidCloudEventRequest() {

@@ -17,7 +17,7 @@ const (
 
 func TestReadDocumentsWithFilter(test *testing.T) {
 	gomega.RegisterTestingT(test)
-	fmt.Println("Trying to a read collection")
+	fmt.Println("Trying to a read collection with filters")
 	coll := getTestCollectionInstance("testeCollection")
 	horaAtual := time.Now().AddDate(0, 0, 3)
 	list, err := coll.Read([]database.AQLComparator{{Field: "Context.time", Comparator: ">=", Value: horaAtual}})
@@ -29,23 +29,22 @@ func TestReadDocuments(test *testing.T) {
 	gomega.RegisterTestingT(test)
 	fmt.Println("Trying to a read collection")
 	coll := getTestCollectionInstance("testeCollection")
-
 	list, err := coll.Read(nil)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-	fmt.Println(list)
+	gomega.Expect(len(list)).Should(gomega.BeNumerically(">", 0))
+	fmt.Println(fmt.Sprintf("Got %d documents on collection", len(list)))
 }
 
 func readDocument(id string) {
-	//fmt.Println("Trying to a read collection by id")
+	fmt.Println("Trying to a read collection by id")
 	coll := getTestCollectionInstance("testeCollection")
 	_, err := coll.ReadItem(id)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-	//fmt.Println(item)
 }
 
 func TestInsertDocument(test *testing.T) {
 	gomega.RegisterTestingT(test)
-	fmt.Println("Trying insert into read collection")
+	fmt.Println("Trying insert into collection")
 	coll := getTestCollectionInstance("testeCollection")
 	horaAtual := time.Now().UTC()
 
@@ -65,7 +64,8 @@ func TestInsertDocument(test *testing.T) {
 
 func TestSyncInsertMultipleDocuments(test *testing.T) {
 	gomega.RegisterTestingT(test)
-	fmt.Println("Trying insert into read collection")
+	fmt.Println("Trying multiple sync inserts into collection")
+	maxDuration := time.Duration(0)
 	coll := getTestCollectionInstance("testeCollection")
 	horaAtual := time.Now().UTC()
 	for i := 0; i < 10000; i++ {
@@ -78,19 +78,24 @@ func TestSyncInsertMultipleDocuments(test *testing.T) {
 		err = event.SetTime(eventTime)
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		timeInitRequest := time.Now()
-		newDoc, err := coll.Insert(event)
+		_, err = coll.Insert(event)
 		timeDiff := time.Now().Sub(timeInitRequest)
-		gomega.Expect(timeDiff).To(gomega.BeNumerically("<", 25*time.Millisecond))
+		gomega.Expect(timeDiff).To(gomega.BeNumerically("<", 35*time.Millisecond))
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-		readDocument(newDoc.GetID())
+		if timeDiff >= maxDuration {
+			maxDuration = timeDiff
+		}
 	}
+	fmt.Println(fmt.Sprintf("Max query duration: %v", maxDuration))
 }
 
 func TestAsyncInsertMultipleDocuments(test *testing.T) {
 	gomega.RegisterTestingT(test)
-	fmt.Println("Trying insert into read collection")
+	fmt.Println("Trying multiple async inserts into collection")
 	coll := getTestCollectionInstance("testeCollection")
 	horaAtual := time.Now().UTC()
+	duration := make(chan time.Duration, 100)
+	maxDuration := time.Duration(0)
 	wg := sync.WaitGroup{}
 	for i := 0; i < 10000; i++ {
 		wg.Add(1)
@@ -105,14 +110,23 @@ func TestAsyncInsertMultipleDocuments(test *testing.T) {
 			err = event.SetTime(eventTime)
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 			timeInitRequest := time.Now()
-			newDoc, err := coll.Insert(event)
+			_, err = coll.Insert(event)
 			timeDiff := time.Now().Sub(timeInitRequest)
-			gomega.Expect(timeDiff).To(gomega.BeNumerically("<", 9500*time.Millisecond))
+			duration <- timeDiff
+			gomega.Expect(timeDiff).To(gomega.BeNumerically("<", 600*time.Millisecond))
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-			readDocument(newDoc.GetID())
 		}()
 	}
+	go func() {
+		for d := range duration {
+			if d >= maxDuration {
+				maxDuration = d
+			}
+		}
+	}()
 	wg.Wait()
+	close(duration)
+	fmt.Println(fmt.Sprintf("Max query duration: %v", maxDuration))
 }
 
 func TestInsertDocumentComplete(test *testing.T) {
@@ -147,10 +161,9 @@ func TestReadCollection(test *testing.T) {
 	gomega.RegisterTestingT(test)
 	fmt.Println("Trying to a read collection")
 	coll := getTestCollectionInstance("testeCollection")
-
 	list, err := coll.Read(nil)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-	fmt.Println(list)
+	fmt.Println(list[0])
 }
 
 func getTestCollectionInstance(collName string) database.CollectionManagment {

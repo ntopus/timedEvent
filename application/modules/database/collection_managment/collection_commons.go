@@ -41,7 +41,7 @@ func DefaultErrorHandler(err error) routes.JsendMessage {
 		} else {
 			errMsg.SetMessage(err.Error())
 		}
-		errMsg.SetStatus(http.StatusForbidden)
+		errMsg.SetStatus(http.StatusConflict)
 		return errMsg
 	}
 	errMsg.SetStatus(http.StatusInternalServerError)
