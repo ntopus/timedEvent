@@ -17,9 +17,9 @@ type Collection struct {
 
 func (coll *Collection) DeleteItem(keyList []string) ([]data_types.ArangoCloudEvent, error) {
 	var oldDocs []data_types.ArangoCloudEvent
-	//ctx := driver.WithReturnOld(context.Background(), oldDocs)
+	ctx := driver.WithReturnOld(context.Background(), oldDocs)
 	for _, key := range keyList {
-		_, err := coll.collectionDriver.RemoveDocument(nil, key)
+		_, err := coll.collectionDriver.RemoveDocument(ctx, key)
 		if err != nil {
 			return nil, err
 		}
@@ -37,12 +37,13 @@ func (coll *Collection) Insert(item *data_types.ArangoCloudEvent) (*data_types.A
 	return &newDoc, nil
 }
 
-func (coll *Collection) Upsert(key string, item *data_types.ArangoCloudEvent) (*data_types.ArangoCloudEvent, error) {
+func (coll *Collection) Upsert(item *data_types.ArangoCloudEvent) (*data_types.ArangoCloudEvent, error) {
 	var newDoc data_types.ArangoCloudEvent
 	ctx := driver.WithReturnNew(context.Background(), &newDoc)
-	//UPSERT searchExpression INSERT insertExpression REPLACE updateExpression IN collection options
-	query := fmt.Sprintf("UPSERT {_key:%s} INSERT %s UPDATE %s in %s", key, item, item, coll.collection)
-	cursor, err := coll.db.Query(ctx, query, nil)
+	bindVars := map[string]interface{}{}
+	bindVars["item"] = item
+	query := fmt.Sprintf(`UPSERT {_key:"%s"} INSERT @item REPLACE @item in %s RETURN NEW`, item.ArangoKey, coll.collection)
+	cursor, err := coll.db.Query(ctx, query, bindVars)
 	defer cursor.Close()
 	if err != nil {
 		return nil, errors.New("internal error: " + err.Error())
@@ -53,6 +54,7 @@ func (coll *Collection) Upsert(key string, item *data_types.ArangoCloudEvent) (*
 			return nil, errors.New("internal error: " + err.Error())
 		}
 	}
+	fmt.Println("Success on upsert")
 	return &newDoc, nil
 }
 

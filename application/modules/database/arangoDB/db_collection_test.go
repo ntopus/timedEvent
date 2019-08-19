@@ -62,6 +62,73 @@ func TestInsertDocument(test *testing.T) {
 	}
 }
 
+func TestUpsertDocument(test *testing.T) {
+	gomega.RegisterTestingT(test)
+	fmt.Println("Trying insert into collection")
+	coll := getTestCollectionInstance("testeCollection")
+	horaAtual := time.Now().UTC()
+
+	for i := 0; i < 1; i++ {
+		data := fmt.Sprintf(`"Teste data %d"`, i)
+		event, err := data_types.NewArangoCloudEventV02("TestEvent", data, nil)
+		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+		publishdate := horaAtual.Add(time.Duration(i*60) * time.Second).Format("2006-01-02 15:04:05Z")
+		event.PublishDate = publishdate
+		eventTime := horaAtual.AddDate(0, 0, i)
+		event.SetTime(eventTime)
+		event.ArangoKey = "teste_10"
+		newDoc, err := coll.Upsert(event)
+		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+		gomega.Expect(newDoc.ArangoKey).To(gomega.BeEquivalentTo(event.ArangoKey))
+	}
+}
+
+func TestAsyncUpsertDocument(test *testing.T) {
+	gomega.RegisterTestingT(test)
+	fmt.Println("Trying multiple async upserts into collection")
+	coll := getTestCollectionInstance("testeCollection")
+	horaAtual := time.Now().UTC()
+	duration := make(chan time.Duration, 100)
+	maxDuration := time.Duration(0)
+	wg := sync.WaitGroup{}
+	for i := 0; i < 1; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			data := fmt.Sprintf(`"Teste data %d"`, i)
+			event, err := data_types.NewArangoCloudEventV02("TestEvent", data, nil)
+			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+			publishdate := horaAtual.Add(time.Duration(i*60) * time.Second).Format("2006-01-02 15:04:05Z")
+			event.PublishDate = publishdate
+			if i%2 == 0 {
+				event.ArangoKey = "asyncEvenRef"
+			} else {
+				event.ArangoKey = "asyncOddRef"
+			}
+			eventTime := horaAtual.AddDate(0, 0, i)
+			err = event.SetTime(eventTime)
+			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+			timeInitRequest := time.Now()
+			newDoc, err := coll.Upsert(event)
+			timeDiff := time.Now().Sub(timeInitRequest)
+			duration <- timeDiff
+			gomega.Expect(timeDiff).To(gomega.BeNumerically("<", 600*time.Millisecond))
+			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+			gomega.Expect(newDoc.ArangoKey).To(gomega.BeEquivalentTo(event.ArangoKey))
+		}()
+	}
+	go func() {
+		for d := range duration {
+			if d >= maxDuration {
+				maxDuration = d
+			}
+		}
+	}()
+	wg.Wait()
+	close(duration)
+	fmt.Println(fmt.Sprintf("Max query duration: %v", maxDuration))
+}
+
 func TestSyncInsertMultipleDocuments(test *testing.T) {
 	gomega.RegisterTestingT(test)
 	fmt.Println("Trying multiple sync inserts into collection")

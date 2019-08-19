@@ -31,6 +31,7 @@ type DataBaseManagment interface {
 
 type CollectionManagment interface {
 	Insert(item *data_types.ArangoCloudEvent) (*data_types.ArangoCloudEvent, error)
+	Upsert(item *data_types.ArangoCloudEvent) (*data_types.ArangoCloudEvent, error)
 	DeleteItem(keyList []string) ([]data_types.ArangoCloudEvent, error)
 	Update(patch map[string]interface{}, key string) (*data_types.ArangoCloudEvent, error)
 	Read(filters []AQLComparator) ([]data_types.ArangoCloudEvent, error)
