@@ -47,9 +47,9 @@ func getDB(conn driver.Client, databaseName string) (driver.Database, error) {
 	return d, nil
 }
 
-func getCollection(Db driver.Database, collName string) error {
-
-}
+//func getCollection(Db driver.Database, collName string) error {
+//
+//}
 
 func TestDriverAsyncInsertMultipleDocuments(test *testing.T) {
 	gomega.RegisterTestingT(test)
