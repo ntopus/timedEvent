@@ -21,6 +21,8 @@ import:
   repo: git@devgit.kf.com.br:core/lib-queue.git
   vcs: git
   version: 2.0.1
+- package: github.com/pkg/errors
+  version: ~0.8.1
 testImport:
 - package: github.com/onsi/gomega
 - package: github.com/onsi/ginkgo

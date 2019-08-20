@@ -2,17 +2,21 @@ package arangoDB
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/arangodb/go-driver"
 	"github.com/ivanmeca/timedEvent/application/modules/database"
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
+	"github.com/pkg/errors"
 )
 
 type Collection struct {
 	db               driver.Database
 	collection       string
 	collectionDriver driver.Collection
+}
+
+func (coll *Collection) DefaultErrorHandler(err error) error {
+	return errors.Wrap(err, "internal db error")
 }
 
 func (coll *Collection) DeleteItem(keyList []string) ([]data_types.ArangoCloudEvent, error) {
@@ -32,7 +36,7 @@ func (coll *Collection) Insert(item *data_types.ArangoCloudEvent) (*data_types.A
 	ctx := driver.WithReturnNew(context.Background(), &newDoc)
 	_, err := coll.collectionDriver.CreateDocument(ctx, item)
 	if err != nil {
-		return nil, err
+		return nil, coll.DefaultErrorHandler(err)
 	}
 	return &newDoc, nil
 }
@@ -42,16 +46,17 @@ func (coll *Collection) Upsert(item *data_types.ArangoCloudEvent) (*data_types.A
 	ctx := driver.WithReturnNew(context.Background(), &newDoc)
 	bindVars := map[string]interface{}{}
 	bindVars["item"] = item
-	query := fmt.Sprintf(`UPSERT {_key:"%s"} INSERT @item REPLACE @item in %s RETURN NEW`, item.ArangoKey, coll.collection)
+	//query := fmt.Sprintf(`UPSERT {_key:'%s'} INSERT @item REPLACE @item in %s OPTIONS { exclusive: true } RETURN NEW `, item.ArangoKey, coll.collection)
+	query := fmt.Sprintf(`INSERT @item INTO %s OPTIONS { overwrite: true, exclusive: true } RETURN NEW `, coll.collection)
 	cursor, err := coll.db.Query(ctx, query, bindVars)
-	defer cursor.Close()
 	if err != nil {
-		return nil, errors.New("internal error: " + err.Error())
+		return nil, coll.DefaultErrorHandler(err)
 	}
+	defer cursor.Close()
 	for cursor.HasMore() == true {
 		_, err = cursor.ReadDocument(nil, &newDoc)
 		if err != nil {
-			return nil, errors.New("internal error: " + err.Error())
+			return nil, coll.DefaultErrorHandler(err)
 		}
 	}
 	return &newDoc, nil
@@ -62,7 +67,7 @@ func (coll *Collection) Update(patch map[string]interface{}, key string) (*data_
 	ctx := driver.WithReturnNew(context.Background(), &newDoc)
 	_, err := coll.collectionDriver.UpdateDocument(ctx, key, patch)
 	if err != nil {
-		return nil, err
+		return nil, coll.DefaultErrorHandler(err)
 	}
 	return &newDoc, nil
 }
@@ -85,12 +90,12 @@ func (coll *Collection) Read(filters []database.AQLComparator) ([]data_types.Ara
 	cursor, err := coll.db.Query(nil, query, bindVars)
 	defer cursor.Close()
 	if err != nil {
-		return nil, errors.New("internal error: " + err.Error())
+		return nil, coll.DefaultErrorHandler(err)
 	}
 	for cursor.HasMore() == true {
 		_, err = cursor.ReadDocument(nil, &item)
 		if err != nil {
-			return nil, errors.New("internal error: " + err.Error())
+			return nil, coll.DefaultErrorHandler(err)
 		}
 		list = append(list, item)
 	}
@@ -101,7 +106,7 @@ func (coll *Collection) ReadItem(key string) (*data_types.ArangoCloudEvent, erro
 	var item data_types.ArangoCloudEvent
 	_, err := coll.collectionDriver.ReadDocument(nil, key, &item)
 	if err != nil {
-		return nil, err
+		return nil, coll.DefaultErrorHandler(err)
 	}
 	return &item, nil
 }

@@ -68,7 +68,7 @@ func TestUpsertDocument(test *testing.T) {
 	coll := getTestCollectionInstance("testeCollection")
 	horaAtual := time.Now().UTC()
 
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 10000; i++ {
 		data := fmt.Sprintf(`"Teste data %d"`, i)
 		event, err := data_types.NewArangoCloudEventV02("TestEvent", data, nil)
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
@@ -93,14 +93,19 @@ func TestAsyncUpsertDocument(test *testing.T) {
 	wg := sync.WaitGroup{}
 	for i := 0; i < 10000; i++ {
 		wg.Add(1)
-		go func() {
+		go func(ref int) {
 			defer wg.Done()
-			data := fmt.Sprintf(`"Teste data %d"`, i)
+			data := fmt.Sprintf(`"Teste data %d"`, ref)
 			event, err := data_types.NewArangoCloudEventV02("TestEvent", data, nil)
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+			if i%2 == 0 {
+				event.ArangoKey = "asyncEvenRef"
+			} else {
+				event.ArangoKey = "asyncOddRef"
+			}
 			publishdate := horaAtual.Add(time.Duration(i*60) * time.Second).Format("2006-01-02 15:04:05Z")
 			event.PublishDate = publishdate
-			eventTime := horaAtual.AddDate(0, 0, i)
+			eventTime := horaAtual.AddDate(0, 0, ref)
 			err = event.SetTime(eventTime)
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 			timeInitRequest := time.Now()
@@ -109,8 +114,8 @@ func TestAsyncUpsertDocument(test *testing.T) {
 			duration <- timeDiff
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 			gomega.Expect(newDoc.ArangoKey).To(gomega.BeEquivalentTo(event.ArangoKey))
-			gomega.Expect(timeDiff).To(gomega.BeNumerically("<", 900*time.Millisecond))
-		}()
+			gomega.Expect(timeDiff).To(gomega.BeNumerically("<", 1100*time.Millisecond))
+		}(i)
 	}
 	go func() {
 		for d := range duration {
