@@ -91,7 +91,7 @@ func TestAsyncUpsertDocument(test *testing.T) {
 	duration := make(chan time.Duration, 100)
 	maxDuration := time.Duration(0)
 	wg := sync.WaitGroup{}
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 10000; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -100,11 +100,6 @@ func TestAsyncUpsertDocument(test *testing.T) {
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 			publishdate := horaAtual.Add(time.Duration(i*60) * time.Second).Format("2006-01-02 15:04:05Z")
 			event.PublishDate = publishdate
-			if i%2 == 0 {
-				event.ArangoKey = "asyncEvenRef"
-			} else {
-				event.ArangoKey = "asyncOddRef"
-			}
 			eventTime := horaAtual.AddDate(0, 0, i)
 			err = event.SetTime(eventTime)
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
@@ -112,9 +107,9 @@ func TestAsyncUpsertDocument(test *testing.T) {
 			newDoc, err := coll.Upsert(event)
 			timeDiff := time.Now().Sub(timeInitRequest)
 			duration <- timeDiff
-			gomega.Expect(timeDiff).To(gomega.BeNumerically("<", 600*time.Millisecond))
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 			gomega.Expect(newDoc.ArangoKey).To(gomega.BeEquivalentTo(event.ArangoKey))
+			gomega.Expect(timeDiff).To(gomega.BeNumerically("<", 900*time.Millisecond))
 		}()
 	}
 	go func() {

@@ -54,7 +54,6 @@ func (coll *Collection) Upsert(item *data_types.ArangoCloudEvent) (*data_types.A
 			return nil, errors.New("internal error: " + err.Error())
 		}
 	}
-	fmt.Println("Success on upsert")
 	return &newDoc, nil
 }
 
