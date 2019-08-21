@@ -1,13 +1,29 @@
 package: github.com/ivanmeca/timedEvent
 import:
- - package: github.com/globalsign/mgo
- - package: github.com/globalsign/mgo/bson
- - package: github.com/gin-gonic/gin
- - package: github.com/micro/go-config
- - package: github.com/urfave/cli
- - package: golang.org/x/oauth2
- - package: github.com/onsi/gomega
- - package: github.com/arangodb/go-driver
- - package: github.com/cloudevents/sdk-go
- - package: github.com/pborman/uuid
-
+- package: github.com/gin-gonic/gin
+  version: v1.3.0
+- package: github.com/arangodb/go-driver
+  subpackages:
+  - http
+- package: github.com/cloudevents/sdk-go
+  version: v0.7.0
+  subpackages:
+  - v02
+- package: github.com/micro/go-config
+  version: v1.1.0
+  subpackages:
+  - source/file
+- package: github.com/pborman/uuid
+  version: v1.2
+- package: github.com/urfave/cli
+  version: v1.20.0
+- package: devgit.kf.com.br/core/lib-queue
+  repo: git@devgit.kf.com.br:core/lib-queue.git
+  vcs: git
+  version: 2.0.1
+- package: github.com/pkg/errors
+  version: ~0.8.1
+testImport:
+- package: github.com/onsi/gomega
+- package: github.com/onsi/ginkgo
+- package: github.com/onsi/gomega/gexec

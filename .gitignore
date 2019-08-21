@@ -14,5 +14,6 @@
 *.out
 
 .idea/
+/vendor/
 /docker-data/
-/glide.lock
+glide.lock
