@@ -35,7 +35,9 @@ func (qp *queue_publisher) init() {
 			AppLogger.ErrorPrintln("could not get queue port on queue " + qConf.QueueName)
 			os.Exit(1)
 		}
-		qr, err := queue_repository.NewQueueRepository(queue_repository.NewQueueRepositoryParams(qConf.ServerUser, qConf.ServerPassword, qConf.ServerHost, port))
+		params := queue_repository.NewQueueRepositoryParams(qConf.ServerUser, qConf.ServerPassword, qConf.ServerHost, port)
+		params.SetVHost(qConf.ServerVHost)
+		qr, err := queue_repository.NewQueueRepository(params)
 		if err != nil {
 			AppLogger.ErrorPrintln("could not init queue repository on queue " + qConf.QueueName)
 			os.Exit(1)
@@ -67,6 +69,7 @@ func (qp *queue_publisher) PublishInQueue(queueName string, data interface{}) bo
 		err := val.Publish(data)
 		if err != nil {
 			AppLogger.ErrorPrintln("could not publish on queue: " + err.Error())
+			os.Exit(1)
 			return false
 		}
 		return true

@@ -10,6 +10,7 @@ import (
 func NewDBClient(configuration database.DatabaseConfigurationReader) (database.DataBaseConnector, error) {
 	conn, err := http.NewConnection(http.ConnectionConfig{
 		Endpoints: []string{configuration.GetServerHost() + ":" + configuration.GetServerPort()},
+		ConnLimit: 100,
 	})
 	if err != nil {
 		return nil, err

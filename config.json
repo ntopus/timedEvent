@@ -1,11 +1,11 @@
 {
-  "LogLevel": 100,
+  "LogLevel": 250,
   "ServerPort": 9010,
-  "PoolTime": 10,
-  "ControlTime": 1,
-  "ExpirationTime": 1800,
+  "PoolTime": 10000,
+  "ControlTime": 100,
+  "ExpirationTime": 2592000000,
   "DataBase": {
-    "ServerHost": "http://localhost",
+    "ServerHost": "http://127.0.0.1",
     "ServerPort": "8529",
     "ServerUser": "testUser",
     "ServerPassword": "123456",
@@ -14,7 +14,7 @@
   "PublishQueue": [
     {
       "ServerHost": "127.0.0.1",
-      "ServerVHost": "/",
+      "ServerVHost": "/timed",
       "ServerPort": "5672",
       "ServerUser": "randomUser",
       "ServerPassword": "randomPass",

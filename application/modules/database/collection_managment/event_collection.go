@@ -24,6 +24,16 @@ func (e *EventCollection) Insert(item *data_types.CloudEvent) (*data_types.Arang
 	event.CloudEvent = *item
 	return coll.Insert(&event)
 }
+func (e *EventCollection) Upsert(item *data_types.CloudEvent) (*data_types.ArangoCloudEvent, error) {
+	coll, err := GetDBSession().GetCollection(EventCollectionName)
+	if err != nil {
+		return nil, err
+	}
+	event := data_types.ArangoCloudEvent{}
+	event.ArangoKey = item.GetID()
+	event.CloudEvent = *item
+	return coll.Upsert(&event)
+}
 func (e *EventCollection) DeleteItem(keyList []string) ([]data_types.ArangoCloudEvent, error) {
 	coll, err := GetDBSession().GetCollection(EventCollectionName)
 	if err != nil {

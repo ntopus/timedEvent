@@ -23,31 +23,31 @@ func TestLibConnection(test *testing.T) {
 	gomega.RegisterTestingT(test)
 
 	conn, err := http.NewConnection(http.ConnectionConfig{
-		Endpoints: []string{"http://localhost:8529"},
+		Endpoints: []string{"tcp://localhost:8529"},
 	})
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 
 	c, err := driver.NewClient(driver.ClientConfig{
 		Connection:     conn,
-		Authentication: driver.BasicAuthentication("testUser", "123456"),
+		Authentication: driver.BasicAuthentication("root", "rootpass"),
 	})
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	ctx := context.Background()
 
-	exist, err := c.DatabaseExists(ctx, "dbTeste")
+	exist, err := c.DatabaseExists(ctx, TestDBName+"_1")
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	gomega.Expect(exist).Should(gomega.BeFalse())
 
-	_, err = c.CreateDatabase(nil, "dbTeste", nil)
+	_, err = c.CreateDatabase(nil, TestDBName+"_1", nil)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 
-	db, err := c.Database(ctx, "dbTeste")
+	db, err := c.Database(ctx, TestDBName+"_1")
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 
 	err = db.Remove(ctx)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 
-	exist, err = c.DatabaseExists(ctx, "dbTeste")
+	exist, err = c.DatabaseExists(ctx, TestDBName+"_1")
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	gomega.Expect(exist).Should(gomega.BeFalse())
 
@@ -55,7 +55,7 @@ func TestLibConnection(test *testing.T) {
 
 func GetTestDatabase() *config.ConfigDB {
 	return &config.ConfigDB{
-		ServerHost:     "http://localhost",
+		ServerHost:     "tcp://localhost",
 		ServerPort:     "8529",
 		ServerUser:     "testUser",
 		ServerPassword: "123456",

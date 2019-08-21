@@ -5,13 +5,19 @@ import (
 	"github.com/ivanmeca/timedEvent/application/modules/database"
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
 	"github.com/onsi/gomega"
+	"sync"
 	"testing"
 	"time"
 )
 
+const (
+	TestDBName         = "testDb"
+	TestCollectionName = "TesteColl"
+)
+
 func TestReadDocumentsWithFilter(test *testing.T) {
 	gomega.RegisterTestingT(test)
-	fmt.Println("Trying to a read collection")
+	fmt.Println("Trying to a read collection with filters")
 	coll := getTestCollectionInstance("testeCollection")
 	horaAtual := time.Now().AddDate(0, 0, 3)
 	list, err := coll.Read([]database.AQLComparator{{Field: "Context.time", Comparator: ">=", Value: horaAtual}})
@@ -23,23 +29,22 @@ func TestReadDocuments(test *testing.T) {
 	gomega.RegisterTestingT(test)
 	fmt.Println("Trying to a read collection")
 	coll := getTestCollectionInstance("testeCollection")
-
 	list, err := coll.Read(nil)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-	fmt.Println(list)
+	gomega.Expect(len(list)).Should(gomega.BeNumerically(">", 0))
+	fmt.Println(fmt.Sprintf("Got %d documents on collection", len(list)))
 }
 
 func readDocument(id string) {
 	fmt.Println("Trying to a read collection by id")
 	coll := getTestCollectionInstance("testeCollection")
-	item, err := coll.ReadItem(id)
+	_, err := coll.ReadItem(id)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-	fmt.Println(item)
 }
 
 func TestInsertDocument(test *testing.T) {
 	gomega.RegisterTestingT(test)
-	fmt.Println("Trying insert into read collection")
+	fmt.Println("Trying insert into collection")
 	coll := getTestCollectionInstance("testeCollection")
 	horaAtual := time.Now().UTC()
 
@@ -59,28 +64,136 @@ func TestInsertDocument(test *testing.T) {
 
 func TestUpsertDocument(test *testing.T) {
 	gomega.RegisterTestingT(test)
-	fmt.Println("Trying insert into read collection")
+	fmt.Println("Trying insert into collection")
 	coll := getTestCollectionInstance("testeCollection")
 	horaAtual := time.Now().UTC()
 
-	data := fmt.Sprintf(`"Teste data 1"`)
-	event, err := data_types.NewArangoCloudEventV02("TestEvent", data, nil)
-	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-	publishdate := horaAtual.Add(time.Duration(60) * time.Second).Format("2006-01-02 15:04:05Z")
-	event.PublishDate = publishdate
-	eventTime := horaAtual.AddDate(0, 0, 1)
-	event.SetTime(eventTime)
-	newDoc, err := coll.Insert(event)
-	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-	readDocument(newDoc.GetID())
-	if upcoll, upOk := coll.(*Collection); upOk {
-		newDoc.Type = "Upsert.test"
-		newDoc, err := upcoll.Upsert(newDoc.ArangoKey, newDoc)
+	for i := 0; i < 10000; i++ {
+		data := fmt.Sprintf(`"Teste data %d"`, i)
+		event, err := data_types.NewArangoCloudEventV02("TestEvent", data, nil)
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-		gomega.Expect(newDoc.Type).Should(gomega.Equal("Upsert.test"))
+		publishdate := horaAtual.Add(time.Duration(i*60) * time.Second).Format("2006-01-02 15:04:05Z")
+		event.PublishDate = publishdate
+		eventTime := horaAtual.AddDate(0, 0, i)
+		event.SetTime(eventTime)
+		event.ArangoKey = "teste_10"
+		newDoc, err := coll.Upsert(event)
+		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+		gomega.Expect(newDoc.ArangoKey).To(gomega.BeEquivalentTo(event.ArangoKey))
 	}
-	readDocument(newDoc.GetID())
+}
 
+func TestAsyncUpsertDocument(test *testing.T) {
+	gomega.RegisterTestingT(test)
+	fmt.Println("Trying multiple async upserts into collection")
+	coll := getTestCollectionInstance("testeCollection")
+	horaAtual := time.Now().UTC()
+	duration := make(chan time.Duration, 100)
+	maxDuration := time.Duration(0)
+	wg := sync.WaitGroup{}
+	for i := 0; i < 10000; i++ {
+		wg.Add(1)
+		go func(ref int) {
+			defer wg.Done()
+			data := fmt.Sprintf(`"Teste data %d"`, ref)
+			event, err := data_types.NewArangoCloudEventV02("TestEvent", data, nil)
+			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+			if i%2 == 0 {
+				event.ArangoKey = "asyncEvenRef"
+			} else {
+				event.ArangoKey = "asyncOddRef"
+			}
+			publishdate := horaAtual.Add(time.Duration(i*60) * time.Second).Format("2006-01-02 15:04:05Z")
+			event.PublishDate = publishdate
+			eventTime := horaAtual.AddDate(0, 0, ref)
+			err = event.SetTime(eventTime)
+			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+			timeInitRequest := time.Now()
+			newDoc, err := coll.Upsert(event)
+			timeDiff := time.Now().Sub(timeInitRequest)
+			duration <- timeDiff
+			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+			gomega.Expect(newDoc.ArangoKey).To(gomega.BeEquivalentTo(event.ArangoKey))
+			gomega.Expect(timeDiff).To(gomega.BeNumerically("<", 1100*time.Millisecond))
+		}(i)
+	}
+	go func() {
+		for d := range duration {
+			if d >= maxDuration {
+				maxDuration = d
+			}
+		}
+	}()
+	wg.Wait()
+	close(duration)
+	fmt.Println(fmt.Sprintf("Max query duration: %v", maxDuration))
+}
+
+func TestSyncInsertMultipleDocuments(test *testing.T) {
+	gomega.RegisterTestingT(test)
+	fmt.Println("Trying multiple sync inserts into collection")
+	maxDuration := time.Duration(0)
+	coll := getTestCollectionInstance("testeCollection")
+	horaAtual := time.Now().UTC()
+	for i := 0; i < 10000; i++ {
+		data := fmt.Sprintf(`"Teste data %d"`, i)
+		event, err := data_types.NewArangoCloudEventV02("TestEvent", data, nil)
+		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+		publishdate := horaAtual.Add(time.Duration(i*60) * time.Second).Format("2006-01-02 15:04:05Z")
+		event.PublishDate = publishdate
+		eventTime := horaAtual.AddDate(0, 0, i)
+		err = event.SetTime(eventTime)
+		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+		timeInitRequest := time.Now()
+		_, err = coll.Insert(event)
+		timeDiff := time.Now().Sub(timeInitRequest)
+		gomega.Expect(timeDiff).To(gomega.BeNumerically("<", 35*time.Millisecond))
+		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+		if timeDiff >= maxDuration {
+			maxDuration = timeDiff
+		}
+	}
+	fmt.Println(fmt.Sprintf("Max query duration: %v", maxDuration))
+}
+
+func TestAsyncInsertMultipleDocuments(test *testing.T) {
+	gomega.RegisterTestingT(test)
+	fmt.Println("Trying multiple async inserts into collection")
+	coll := getTestCollectionInstance("testeCollection")
+	horaAtual := time.Now().UTC()
+	duration := make(chan time.Duration, 100)
+	maxDuration := time.Duration(0)
+	wg := sync.WaitGroup{}
+	for i := 0; i < 10000; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			data := fmt.Sprintf(`"Teste data %d"`, i)
+			event, err := data_types.NewArangoCloudEventV02("TestEvent", data, nil)
+			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+			publishdate := horaAtual.Add(time.Duration(i*60) * time.Second).Format("2006-01-02 15:04:05Z")
+			event.PublishDate = publishdate
+			eventTime := horaAtual.AddDate(0, 0, i)
+			err = event.SetTime(eventTime)
+			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+			timeInitRequest := time.Now()
+			_, err = coll.Insert(event)
+			timeDiff := time.Now().Sub(timeInitRequest)
+			duration <- timeDiff
+			gomega.Expect(timeDiff).To(gomega.BeNumerically("<", 600*time.Millisecond))
+			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+		}()
+	}
+	go func() {
+		for d := range duration {
+			if d >= maxDuration {
+				maxDuration = d
+			}
+		}
+	}()
+	wg.Wait()
+	close(duration)
+	fmt.Println(fmt.Sprintf("Max query duration: %v", maxDuration))
 }
 
 func TestInsertDocumentComplete(test *testing.T) {
@@ -115,10 +228,9 @@ func TestReadCollection(test *testing.T) {
 	gomega.RegisterTestingT(test)
 	fmt.Println("Trying to a read collection")
 	coll := getTestCollectionInstance("testeCollection")
-
 	list, err := coll.Read(nil)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-	fmt.Println(list)
+	fmt.Println(list[0])
 }
 
 func getTestCollectionInstance(collName string) database.CollectionManagment {
@@ -126,13 +238,13 @@ func getTestCollectionInstance(collName string) database.CollectionManagment {
 	DBClient, err := NewDBClient(GetTestDatabase())
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 
-	db, err := DBClient.GetDatabase("TestDB", true)
+	db, err := DBClient.GetDatabase(TestDBName, true)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 
-	coll, err := db.GetCollection("TesteColl")
+	coll, err := db.GetCollection(TestCollectionName)
 
 	if err != nil {
-		ok, err := db.CreateCollection("TesteColl")
+		ok, err := db.CreateCollection(TestCollectionName)
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		gomega.Expect(ok).Should(gomega.BeTrue())
 	}
