@@ -58,11 +58,10 @@ func (j *JsendMessage) MarshalJSON() ([]byte, error) {
 
 func (j *JsendMessage) UnmarshalJSON(data []byte) error {
 	aux := struct {
-		Status  *int16      `json:"status"`
+		Status  *string     `json:"status"`
 		Message *string     `json:"message"`
 		Data    interface{} `json:"data"`
 	}{
-		Status:  &j.status,
 		Message: &j.message,
 		Data:    j.data,
 	}

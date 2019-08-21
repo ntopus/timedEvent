@@ -20,15 +20,13 @@ func (coll *Collection) DefaultErrorHandler(err error) error {
 }
 
 func (coll *Collection) DeleteItem(keyList []string) ([]data_types.ArangoCloudEvent, error) {
-	var oldDocs []data_types.ArangoCloudEvent
-	ctx := driver.WithReturnOld(context.Background(), oldDocs)
 	for _, key := range keyList {
-		_, err := coll.collectionDriver.RemoveDocument(ctx, key)
+		_, err := coll.collectionDriver.RemoveDocument(nil, key)
 		if err != nil {
 			return nil, err
 		}
 	}
-	return oldDocs, nil
+	return nil, nil
 }
 
 func (coll *Collection) Insert(item *data_types.ArangoCloudEvent) (*data_types.ArangoCloudEvent, error) {

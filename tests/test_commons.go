@@ -7,11 +7,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ivanmeca/timedEvent/application/modules/config"
+	"github.com/ivanmeca/timedEvent/application/modules/routes"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
 	"github.com/streadway/amqp"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -98,6 +100,16 @@ func InitQueue(queueName string, counter *int, consume fnConsume) *queue.Queue {
 	})
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	return q
+}
+
+func ParseResp(resp *http.Response, dataContainer interface{}) *routes.JsendMessage {
+	buf, err := ioutil.ReadAll(resp.Body)
+	gomega.Expect(err).To(gomega.BeNil())
+	respBody := routes.JsendMessage{}
+	respBody.SetData(dataContainer)
+	err = json.Unmarshal(buf, &respBody)
+	gomega.Expect(err).To(gomega.BeNil())
+	return &respBody
 }
 
 func PurgeQueue(queue string) {
