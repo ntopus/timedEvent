@@ -39,7 +39,6 @@ func testSendValidCloudEventRequestAndCheckDbContent() {
 	})
 	defer q.Close()
 	const TEST_QTDE = 10000
-	horaAtual := time.Now().UTC()
 	for i := 0; i < TEST_QTDE; i++ {
 		h := make(map[string]string)
 		h[CONTENT_TYPE] = CONTENT_TYPE_CE
@@ -49,6 +48,7 @@ func testSendValidCloudEventRequestAndCheckDbContent() {
 			defer wg.Done()
 			delayToPublish := (ref % 8) + 10
 			//fmt.Println(i,delayToPublish)
+			horaAtual := time.Now().UTC()
 			mockReader, err := GetMockReader(getMockEvent(horaAtual.Add(time.Duration(delayToPublish)*time.Second), data_types.DataOnly, fmt.Sprintf("%d", ref)))
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 			resp, err := SendPostRequestWithHeaders(TEST_ENDPOINT, mockReader, h)

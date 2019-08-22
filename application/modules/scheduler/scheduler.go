@@ -117,7 +117,6 @@ func (es *EventScheduler) insertonTimerControl(eventID string, timer *time.Timer
 	if tc, ok := t.(time.Timer); ok {
 		tc.Stop()
 	}
-	es.eventTimerList.Delete(eventID)
 	es.eventTimerList.Store(eventID, t)
 }
 
@@ -128,22 +127,23 @@ func (es *EventScheduler) buildPublishFunc(event *data_types.EventMapper) FnTime
 			es.logger.ErrorPrintln(errors.Wrap(err, "event check fail").Error())
 			return
 		}
-		if data.ArangoRev == event.EventRevision {
-			es.logger.DebugPrintln("Publicar ID " + event.EventID)
-			var dataToPublish interface{}
-			if event.Event.PublishType == data_types.DataOnly {
-				dataToPublish = event.Event.CloudEvent.Data
-			} else {
-				dataToPublish = event.Event.CloudEvent
-			}
-			if queue_publisher.QueuePublisher().PublishInQueue(data.PublishQueue, dataToPublish) {
-				_, err := collection_managment.NewEventCollection().DeleteItem([]string{event.EventID})
-				if err != nil {
-					es.logger.NoticePrintln(errors.Wrap(err, "falha ao excluir ID: "+event.EventID).Error())
-				}
-				es.logger.DebugPrintln("ID excluido: " + event.EventID)
-			}
+		if data.ArangoRev != event.EventRevision {
+			es.logger.DebugPrintln(errors.Wrap(err, "event rev check fail").Error())
+			return
 		}
-		return
+		es.logger.DebugPrintln("Publicar ID " + event.EventID)
+		var dataToPublish interface{}
+		if event.Event.PublishType == data_types.DataOnly {
+			dataToPublish = event.Event.CloudEvent.Data
+		} else {
+			dataToPublish = event.Event.CloudEvent
+		}
+		if queue_publisher.QueuePublisher().PublishInQueue(data.PublishQueue, dataToPublish) {
+			_, err := collection_managment.NewEventCollection().DeleteItem([]string{event.EventID})
+			if err != nil {
+				es.logger.NoticePrintln(errors.Wrap(err, "falha ao excluir ID: "+event.EventID).Error())
+			}
+			es.logger.DebugPrintln("ID excluido: " + event.EventID)
+		}
 	}
 }

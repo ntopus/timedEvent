@@ -91,7 +91,7 @@ func InitQueue(queueName string, counter *int, consume fnConsume) *queue.Queue {
 	mu.Lock()
 	*counter = 0
 	mu.Unlock()
-	q := GetQueue(queueName, 200)
+	q := GetQueue(queueName, 5000)
 	err := q.StartConsume(func(queueName string, msg []byte) bool {
 		mu.Lock()
 		defer mu.Unlock()
