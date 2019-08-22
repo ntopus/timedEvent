@@ -47,7 +47,7 @@ func testSendValidCloudEventRequestAndCheckDbContent() {
 		go func(ref int) {
 			defer ginkgo.GinkgoRecover()
 			defer wg.Done()
-			delayToPublish := ref % 8
+			delayToPublish := (ref % 8) + 10
 			//fmt.Println(i,delayToPublish)
 			mockReader, err := GetMockReader(getMockEvent(horaAtual.Add(time.Duration(delayToPublish)*time.Second), data_types.DataOnly, fmt.Sprintf("%d", ref)))
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
@@ -66,7 +66,7 @@ func testSendValidCloudEventRequestAndCheckDbContent() {
 		mu.Lock()
 		defer mu.Unlock()
 		return count
-	}, 10).Should(gomega.BeEquivalentTo(TEST_QTDE))
+	}, 25).Should(gomega.BeEquivalentTo(TEST_QTDE))
 }
 
 func readDocument(id string) *data_types.ArangoCloudEvent {

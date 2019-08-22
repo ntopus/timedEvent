@@ -5,7 +5,7 @@
   "ControlTime": 100,
   "ExpirationTime": 2592000000,
   "DataBase": {
-    "ServerHost": "http://127.0.0.1",
+    "ServerHost": "http://localhost",
     "ServerPort": "8529",
     "ServerUser": "testUser",
     "ServerPassword": "123456",
@@ -13,7 +13,7 @@
   },
   "PublishQueue": [
     {
-      "ServerHost": "127.0.0.1",
+      "ServerHost": "localhost",
       "ServerVHost": "/timed",
       "ServerPort": "5672",
       "ServerUser": "randomUser",

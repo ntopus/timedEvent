@@ -23,7 +23,7 @@ func (coll *Collection) DeleteItem(keyList []string) ([]data_types.ArangoCloudEv
 	for _, key := range keyList {
 		_, err := coll.collectionDriver.RemoveDocument(nil, key)
 		if err != nil {
-			return nil, err
+			return nil, coll.DefaultErrorHandler(err)
 		}
 	}
 	return nil, nil

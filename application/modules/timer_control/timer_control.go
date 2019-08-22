@@ -7,6 +7,7 @@ import (
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
 	"github.com/ivanmeca/timedEvent/application/modules/logger"
 	"github.com/ivanmeca/timedEvent/application/modules/queue_publisher"
+	"github.com/pkg/errors"
 	"sync"
 	"time"
 )
@@ -31,7 +32,7 @@ func (tc *TimerControl) Run(ctx context.Context) {
 			case <-ctx.Done():
 				return
 			default:
-				tc.processList()
+				//tc.processList()
 			}
 		}
 	}()
@@ -56,36 +57,40 @@ func (tc *TimerControl) processList() {
 				tc.logger.DebugPrintln("ID excluido: " + event.EventID)
 			} else {
 				if timeDiffInSecond >= 0 {
-					data, err := collection_managment.NewEventCollection().ReadItem(event.EventID)
+					err := tc.publishEvent(event)
 					if err != nil {
-						tc.logger.ErrorPrintln("event check fail: " + err.Error())
-						tc.list.Delete(key)
-						return true
+						tc.logger.ErrorPrintln(err.Error())
 					}
-					if data.ArangoRev == event.EventRevision {
-						tc.logger.DebugPrintln("Publicar ID " + event.EventID)
-						var dataToPublish interface{}
-						if event.Event.PublishType == data_types.DataOnly {
-							dataToPublish = event.Event.CloudEvent.Data
-						} else {
-							dataToPublish = event.Event.CloudEvent
-						}
-						go func() {
-							if queue_publisher.QueuePublisher().PublishInQueue(data.PublishQueue, dataToPublish) {
-								_, err := collection_managment.NewEventCollection().DeleteItem([]string{event.EventID})
-								if err != nil {
-									tc.logger.NoticePrintln("falha ao excluir ID: " + event.EventID)
-								}
-								tc.list.Delete(key)
-								tc.logger.DebugPrintln("ID excluido: " + event.EventID)
-							}
-						}()
-					} else {
-						tc.list.Delete(key)
-					}
+					tc.list.Delete(key)
 				}
 			}
 		}
 		return true
 	})
+}
+
+func (tc *TimerControl) publishEvent(event data_types.EventMapper) error {
+	data, err := collection_managment.NewEventCollection().ReadItem(event.EventID)
+	if err != nil {
+		return errors.Wrap(err, "event check fail")
+	}
+	if data.ArangoRev == event.EventRevision {
+		tc.logger.DebugPrintln("Publicar ID " + event.EventID)
+		var dataToPublish interface{}
+		if event.Event.PublishType == data_types.DataOnly {
+			dataToPublish = event.Event.CloudEvent.Data
+		} else {
+			dataToPublish = event.Event.CloudEvent
+		}
+		go func() {
+			if queue_publisher.QueuePublisher().PublishInQueue(data.PublishQueue, dataToPublish) {
+				_, err := collection_managment.NewEventCollection().DeleteItem([]string{event.EventID})
+				if err != nil {
+					tc.logger.NoticePrintln("falha ao excluir ID: " + event.EventID)
+				}
+				tc.logger.DebugPrintln("ID excluido: " + event.EventID)
+			}
+		}()
+	}
+	return nil
 }

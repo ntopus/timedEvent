@@ -6,7 +6,9 @@ import (
 	"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
 	"github.com/ivanmeca/timedEvent/application/modules/logger"
+	"github.com/ivanmeca/timedEvent/application/modules/queue_publisher"
 	"github.com/ivanmeca/timedEvent/application/modules/timer_control"
+	"github.com/pkg/errors"
 	"sync"
 	"time"
 )
@@ -17,6 +19,8 @@ type Scheduler interface {
 }
 
 var instance *EventScheduler
+
+type FnTimer func()
 
 func GetScheduler() Scheduler {
 	return instance
@@ -29,11 +33,12 @@ func NewScheduler(pollTime int, controlTime int, expirationTime int) Scheduler {
 }
 
 type EventScheduler struct {
-	controlTime time.Duration
-	poolTime    time.Duration
-	eventList   sync.Map
-	tc          *timer_control.TimerControl
-	logger      *logger.StdLogger
+	controlTime    time.Duration
+	poolTime       time.Duration
+	eventList      sync.Map
+	eventTimerList sync.Map
+	tc             *timer_control.TimerControl
+	logger         *logger.StdLogger
 }
 
 func (es *EventScheduler) Run(ctx context.Context) {
@@ -49,7 +54,7 @@ func (es *EventScheduler) Run(ctx context.Context) {
 		}
 	}()
 	es.logger = logger.GetLogger()
-	es.tc.Run(ctx)
+	//es.tc.Run(ctx)
 }
 
 func (es *EventScheduler) CheckEvent(event *data_types.ArangoCloudEvent) {
@@ -68,7 +73,7 @@ func (es *EventScheduler) CheckEvent(event *data_types.ArangoCloudEvent) {
 		ev.Event = *event
 		ev.EventRevision = event.ArangoRev
 		ev.EventID = event.ArangoKey
-		es.eventList.Store(event.ID, ev)
+		es.scheduleEvent(&ev)
 	}
 }
 
@@ -91,7 +96,53 @@ func (es *EventScheduler) pooler() {
 		ev.Event = value
 		ev.EventRevision = value.ArangoRev
 		ev.EventID = value.ArangoKey
-		es.eventList.Store(value.ID, ev)
+		es.scheduleEvent(&ev)
 	}
 	return
+}
+
+func (es *EventScheduler) scheduleEvent(event *data_types.EventMapper) {
+	horaAtual := time.Now().UTC()
+	timeDiff := event.PublishDate.Sub(horaAtual)
+	t := time.AfterFunc(timeDiff, es.buildPublishFunc(event))
+	es.insertonTimerControl(event.EventID, t)
+
+}
+
+func (es *EventScheduler) insertonTimerControl(eventID string, timer *time.Timer) {
+	t, ok := es.eventTimerList.LoadOrStore(eventID, timer)
+	if !ok {
+		return
+	}
+	if tc, ok := t.(time.Timer); ok {
+		tc.Stop()
+	}
+	es.eventTimerList.Delete(eventID)
+	es.eventTimerList.Store(eventID, t)
+}
+
+func (es *EventScheduler) buildPublishFunc(event *data_types.EventMapper) FnTimer {
+	return func() {
+		data, err := collection_managment.NewEventCollection().ReadItem(event.EventID)
+		if err != nil {
+			es.logger.ErrorPrintln(errors.Wrap(err, "event check fail").Error())
+		}
+		if data.ArangoRev == event.EventRevision {
+			es.logger.DebugPrintln("Publicar ID " + event.EventID)
+			var dataToPublish interface{}
+			if event.Event.PublishType == data_types.DataOnly {
+				dataToPublish = event.Event.CloudEvent.Data
+			} else {
+				dataToPublish = event.Event.CloudEvent
+			}
+			if queue_publisher.QueuePublisher().PublishInQueue(data.PublishQueue, dataToPublish) {
+				_, err := collection_managment.NewEventCollection().DeleteItem([]string{event.EventID})
+				if err != nil {
+					es.logger.NoticePrintln("falha ao excluir ID: " + event.EventID)
+				}
+				es.logger.DebugPrintln("ID excluido: " + event.EventID)
+			}
+		}
+		return
+	}
 }
