@@ -126,6 +126,7 @@ func (es *EventScheduler) buildPublishFunc(event *data_types.EventMapper) FnTime
 		data, err := collection_managment.NewEventCollection().ReadItem(event.EventID)
 		if err != nil {
 			es.logger.ErrorPrintln(errors.Wrap(err, "event check fail").Error())
+			return
 		}
 		if data.ArangoRev == event.EventRevision {
 			es.logger.DebugPrintln("Publicar ID " + event.EventID)
@@ -138,7 +139,7 @@ func (es *EventScheduler) buildPublishFunc(event *data_types.EventMapper) FnTime
 			if queue_publisher.QueuePublisher().PublishInQueue(data.PublishQueue, dataToPublish) {
 				_, err := collection_managment.NewEventCollection().DeleteItem([]string{event.EventID})
 				if err != nil {
-					es.logger.NoticePrintln("falha ao excluir ID: " + event.EventID)
+					es.logger.NoticePrintln(errors.Wrap(err, "falha ao excluir ID: "+event.EventID).Error())
 				}
 				es.logger.DebugPrintln("ID excluido: " + event.EventID)
 			}

@@ -14,6 +14,9 @@ type HttpServer struct {
 }
 
 func NewHttpServer(port string, debugMode bool) *HttpServer {
+	if !debugMode {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	engine := gin.Default()
 	engine.HandleMethodNotAllowed = true
 	srv := &http.Server{
@@ -23,9 +26,6 @@ func NewHttpServer(port string, debugMode bool) *HttpServer {
 	httpServer := &HttpServer{
 		server: srv,
 		engine: engine,
-	}
-	if !debugMode {
-		gin.SetMode(gin.ReleaseMode)
 	}
 	return httpServer
 }

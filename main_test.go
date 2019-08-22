@@ -21,14 +21,14 @@ var App *gexec.Session
 
 var _ = ginkgo.Describe("main_test_suite", func() {
 	ginkgo.BeforeSuite(func() {
-		tests.BuildApplication()
-		tests.SaveConfigFile()
-		App = tests.RunApp()
+		//tests.BuildApplication()
+		//tests.SaveConfigFile()
+		//App = tests.RunApp()
 		time.Sleep(time.Second)
 	})
 	ginkgo.AfterSuite(func() {
 		fmt.Println("Killing application")
-		App.Kill()
+		//App.Kill()
 	})
 	ginkgo.BeforeEach(func() {
 		tests.PurgeQueue(tests.TEST_PUBLISH_QUEUE)
