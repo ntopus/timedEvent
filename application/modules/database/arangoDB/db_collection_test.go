@@ -91,7 +91,7 @@ func TestAsyncUpsertDocument(test *testing.T) {
 	duration := make(chan time.Duration, 100)
 	maxDuration := time.Duration(0)
 	wg := sync.WaitGroup{}
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 8000; i++ {
 		wg.Add(1)
 		go func(ref int) {
 			defer wg.Done()
@@ -135,7 +135,7 @@ func TestSyncInsertMultipleDocuments(test *testing.T) {
 	maxDuration := time.Duration(0)
 	coll := getTestCollectionInstance("testeCollection")
 	horaAtual := time.Now().UTC()
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 8000; i++ {
 		data := fmt.Sprintf(`"Teste data %d"`, i)
 		event, err := data_types.NewArangoCloudEventV02("TestEvent", data, nil)
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
@@ -164,7 +164,7 @@ func TestAsyncInsertMultipleDocuments(test *testing.T) {
 	duration := make(chan time.Duration, 100)
 	maxDuration := time.Duration(0)
 	wg := sync.WaitGroup{}
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 8000; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()

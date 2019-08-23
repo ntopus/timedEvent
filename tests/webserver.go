@@ -84,8 +84,8 @@ func testSendValidCloudEventRequest() {
 		var mock MockEvent
 		err := json.Unmarshal(msg, &mock)
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-		fmt.Println(fmt.Sprintf("cnt=%d, %s", counter, msg))
-		fmt.Println(mock)
+		//fmt.Println(fmt.Sprintf("cnt=%d, %s", counter, msg))
+		//fmt.Println(mock)
 		return true
 	})
 	defer q.Close()
@@ -119,7 +119,7 @@ func testSendInvalidCloudEventRequest() {
 	count := 0
 	mu.Unlock()
 	q := InitQueue(TEST_PUBLISH_QUEUE, &count, func(queueName string, msg []byte, counter int) bool {
-		fmt.Println(fmt.Sprintf("cnt=%d, %s", counter, msg))
+		//fmt.Println(fmt.Sprintf("cnt=%d, %s", counter, msg))
 		return true
 	})
 	defer q.Close()
@@ -157,8 +157,8 @@ func testSendValidJsonRequest() {
 		var mock MockData
 		err := json.Unmarshal(msg, &mock)
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-		fmt.Println(fmt.Sprintf("cnt=%d, %s", counter, msg))
-		fmt.Println(mock)
+		//fmt.Println(fmt.Sprintf("cnt=%d, %s", counter, msg))
+		//fmt.Println(mock)
 		return true
 	})
 	defer q.Close()
@@ -190,7 +190,7 @@ func testSendValidCloudEventDataOnlyRequest() {
 	count := 0
 	mu.Unlock()
 	q := InitQueue(TEST_PUBLISH_QUEUE, &count, func(queueName string, msg []byte, counter int) bool {
-		fmt.Println(fmt.Sprintf("cnt=%d, %s", counter, msg))
+		//fmt.Println(fmt.Sprintf("cnt=%d, %s", counter, msg))
 		return true
 	})
 	defer q.Close()
@@ -224,7 +224,7 @@ func testSendInvalidCloudEventDataOnlyRequest() {
 	count := 0
 	mu.Unlock()
 	q := InitQueue(TEST_PUBLISH_QUEUE, &count, func(queueName string, msg []byte, counter int) bool {
-		fmt.Println(fmt.Sprintf("cnt=%d, %s", counter, msg))
+		//fmt.Println(fmt.Sprintf("cnt=%d, %s", counter, msg))
 		return true
 	})
 	defer q.Close()
