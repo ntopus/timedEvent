@@ -41,20 +41,28 @@ func (coll *Collection) Insert(item *data_types.ArangoCloudEvent) (*data_types.A
 
 func (coll *Collection) Upsert(item *data_types.ArangoCloudEvent) (*data_types.ArangoCloudEvent, error) {
 	var newDoc data_types.ArangoCloudEvent
+	var cursor driver.Cursor
+	var err error
 	ctx := driver.WithReturnNew(context.Background(), &newDoc)
 	bindVars := map[string]interface{}{}
 	bindVars["item"] = item
-	//query := fmt.Sprintf(`UPSERT {_key:'%s'} INSERT @item REPLACE @item in %s OPTIONS { exclusive: true } RETURN NEW `, item.ArangoKey, coll.collection)
 	query := fmt.Sprintf(`INSERT @item INTO %s OPTIONS { overwrite: true, exclusive: true } RETURN NEW `, coll.collection)
-	cursor, err := coll.db.Query(ctx, query, bindVars)
+	for retries := 0; retries < 3; retries++ {
+		cursor, err = coll.db.Query(ctx, query, bindVars)
+		if err == nil {
+			break
+		}
+	}
+	defer cursor.Close()
 	if err != nil {
 		return nil, coll.DefaultErrorHandler(err)
 	}
-	defer cursor.Close()
-	for cursor.HasMore() == true {
-		_, err = cursor.ReadDocument(nil, &newDoc)
-		if err != nil {
-			return nil, coll.DefaultErrorHandler(err)
+	if cursor != nil {
+		for cursor.HasMore() == true {
+			_, err := cursor.ReadDocument(nil, &newDoc)
+			if err != nil {
+				return nil, coll.DefaultErrorHandler(err)
+			}
 		}
 	}
 	return &newDoc, nil

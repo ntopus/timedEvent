@@ -41,7 +41,7 @@ func testSendMultiplesValidCloudEventRequest() {
 		var mock MockEvent
 		err := json.Unmarshal(msg, &mock)
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-		fmt.Println(fmt.Sprintf("cnt=%d", counter))
+		//fmt.Println(fmt.Sprintf("cnt=%d", counter))
 		//fmt.Println(mock)
 		return true
 	})
