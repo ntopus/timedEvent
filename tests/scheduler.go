@@ -32,7 +32,7 @@ func testSendValidCloudEventRequestAndCheckDbContent() {
 		publishedDate, err := time.Parse("2006-01-02 15:04:05Z", mock.PublishDate)
 		timeDiff := time.Now().UTC().Sub(publishedDate)
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-		fmt.Println(fmt.Sprintf("cnt=%d\tactualTime:%s\teventTime:%s\ttimeDiff: %v", counter, time.Now().UTC().Format("15:04:05Z"), publishedDate.Format("15:04:05Z"), timeDiff))
+		fmt.Println(fmt.Sprintf("ref=%s,cnt=%d\tactualTime:%s\teventTime:%s\ttimeDiff: %v", mock.Ref, counter, time.Now().UTC().Format("15:04:05Z"), publishedDate.Format("15:04:05Z"), timeDiff))
 		gomega.Expect(timeDiff).To(gomega.BeNumerically(">", 0))
 		gomega.Expect(timeDiff).To(gomega.BeNumerically("<", 3000*time.Millisecond))
 		return true
@@ -56,9 +56,9 @@ func testSendValidCloudEventRequestAndCheckDbContent() {
 			ParseResp(resp, &MockEvent)
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 			gomega.Expect(resp.StatusCode).To(gomega.Equal(201))
-			//publishdDate, err := time.Parse("2006-01-02 15:04:05Z", MockEvent.PublishDate)
-			//gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-			//fmt.Println(fmt.Sprintf("Actual time:%s\tEvent time:%s",time.Now().UTC().Format("15:04:05Z"),publishdDate.Format("15:04:05Z")))
+			publishdDate, err := time.Parse("2006-01-02 15:04:05Z", MockEvent.PublishDate)
+			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+			fmt.Println(fmt.Sprintf("Actual time:%s\tEvent time:%s", time.Now().UTC().Format("15:04:05Z"), publishdDate.Format("15:04:05Z")))
 		}(i)
 	}
 	wg.Wait()
