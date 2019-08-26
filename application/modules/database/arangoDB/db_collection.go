@@ -7,6 +7,7 @@ import (
 	"github.com/ivanmeca/timedEvent/application/modules/database"
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
 	"github.com/pkg/errors"
+	"time"
 )
 
 type Collection struct {
@@ -52,6 +53,7 @@ func (coll *Collection) Upsert(item *data_types.ArangoCloudEvent) (*data_types.A
 		if err == nil {
 			break
 		}
+		time.Sleep(time.Millisecond)
 	}
 	defer cursor.Close()
 	if err != nil {
