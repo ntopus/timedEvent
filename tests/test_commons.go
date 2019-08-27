@@ -178,7 +178,7 @@ func SendPostRequestWithHeaders(url string, body io.Reader, headers map[string]s
 	return client.Do(req)
 }
 
-func getMockEvent(publihsDate time.Time, publishType string, ref string) MockEvent {
+func GetMockEvent(publihsDate time.Time, publishType string, ref string) MockEvent {
 	return MockEvent{
 		SpecVersion:  "0.2",
 		Type:         "TestEvent",

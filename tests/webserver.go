@@ -19,6 +19,9 @@ func CreateEventTester() {
 	ginkgo.It("Valid CloudEvent multiple msg", func() {
 		testSendMultiplesValidCloudEventRequest()
 	})
+	ginkgo.FIt("Valid CloudEvent multiple update", func() {
+		testSendMultiplesValidCloudEventUpdate()
+	})
 	ginkgo.It("Valid CloudEvent (dataOnly) msg", func() {
 		testSendValidCloudEventDataOnlyRequest()
 	})
@@ -54,7 +57,7 @@ func testSendMultiplesValidCloudEventRequest() {
 		go func(ref string) {
 			defer ginkgo.GinkgoRecover()
 			defer wg.Done()
-			mockReader, err := GetMockReader(getMockEvent(time.Now().UTC(), "CE", ref))
+			mockReader, err := GetMockReader(GetMockEvent(time.Now().UTC(), "CE", ref))
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 			resp, err := SendPostRequestWithHeaders(TEST_ENDPOINT, mockReader, h)
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
@@ -69,10 +72,42 @@ func testSendMultiplesValidCloudEventRequest() {
 	}, 10).Should(gomega.BeEquivalentTo(TEST_QTDE))
 }
 
+func testSendMultiplesValidCloudEventUpdate() {
+	fmt.Println("Sending a valid CloudEvent data")
+	wg := sync.WaitGroup{}
+	mu := sync.Mutex{}
+	mu.Lock()
+	count := 0
+	mu.Unlock()
+	const TEST_QTDE = 1000
+	for i := 0; i < TEST_QTDE; i++ {
+		for ref := 0; ref < 10; ref++ {
+			h := make(map[string]string)
+			h[CONTENT_TYPE] = CONTENT_TYPE_CE
+			wg.Add(1)
+			go func(ref string) {
+				defer ginkgo.GinkgoRecover()
+				defer wg.Done()
+				mockReader, err := GetMockReader(GetMockEvent(time.Now().UTC().Add(50*time.Second), "CE", ref))
+				gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+				resp, err := SendPostRequestWithHeaders(TEST_ENDPOINT, mockReader, h)
+				gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+				gomega.Expect(resp.StatusCode).To(gomega.Equal(201))
+			}(fmt.Sprintf("%d", ref))
+		}
+	}
+	wg.Wait()
+	gomega.Eventually(func() int {
+		mu.Lock()
+		defer mu.Unlock()
+		return count
+	}, 10).Should(gomega.BeEquivalentTo(TEST_QTDE))
+}
+
 func testSendValidCloudEventRequest() {
 	fmt.Println("Sending a valid CloudEvent data")
 	wg := sync.WaitGroup{}
-	mockReader, err := GetMockReader(getMockEvent(time.Now().UTC(), "CE", "1"))
+	mockReader, err := GetMockReader(GetMockEvent(time.Now().UTC(), "CE", "1"))
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	h := make(map[string]string)
 	h[CONTENT_TYPE] = CONTENT_TYPE_CE
@@ -108,7 +143,7 @@ func testSendValidCloudEventRequest() {
 func testSendInvalidCloudEventRequest() {
 	fmt.Println("Sending an invalid CloudEvent data")
 	wg := sync.WaitGroup{}
-	mockEvent := getMockEvent(time.Now().UTC(), "CE", "1")
+	mockEvent := GetMockEvent(time.Now().UTC(), "CE", "1")
 	mockEvent.PublishQueue = "dummy_queue"
 	mockReader, err := GetMockReader(mockEvent)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
@@ -181,7 +216,7 @@ func testSendValidJsonRequest() {
 func testSendValidCloudEventDataOnlyRequest() {
 	fmt.Println("Sending a valid CloudEvent (dataOnly) data")
 	wg := sync.WaitGroup{}
-	mockReader, err := GetMockReader(getMockEvent(time.Now().UTC(), TEST_PUBLISH_TYPE, "2"))
+	mockReader, err := GetMockReader(GetMockEvent(time.Now().UTC(), TEST_PUBLISH_TYPE, "2"))
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	h := make(map[string]string)
 	h[CONTENT_TYPE] = CONTENT_TYPE_CE
@@ -213,7 +248,7 @@ func testSendValidCloudEventDataOnlyRequest() {
 func testSendInvalidCloudEventDataOnlyRequest() {
 	fmt.Println("Sending an invalid CloudEvent (dataOnly) data")
 	wg := sync.WaitGroup{}
-	mockEvent := getMockEvent(time.Now().UTC(), "CE", "1")
+	mockEvent := GetMockEvent(time.Now().UTC(), "CE", "1")
 	mockEvent.PublishQueue = "dummy_queue"
 	mockReader, err := GetMockReader(mockEvent)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())

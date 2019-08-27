@@ -33,6 +33,6 @@ var _ = ginkgo.Describe("main_test_suite", func() {
 	ginkgo.BeforeEach(func() {
 		tests.PurgeQueue(tests.TEST_PUBLISH_QUEUE)
 	})
-	ginkgo.Context("Test webserver", tests.CreateEventTester)
-	ginkgo.FContext("Test scheduler", tests.SchedulerTester)
+	ginkgo.FContext("Test webserver", tests.CreateEventTester)
+	ginkgo.Context("Test scheduler", tests.SchedulerTester)
 })

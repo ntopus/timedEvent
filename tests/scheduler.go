@@ -49,7 +49,7 @@ func testSendValidCloudEventRequestAndCheckDbContent() {
 			delayToPublish := (ref % 8) + 10
 			//fmt.Println(i,delayToPublish)
 			horaAtual := time.Now().UTC()
-			mockReader, err := GetMockReader(getMockEvent(horaAtual.Add(time.Duration(delayToPublish)*time.Second), data_types.DataOnly, fmt.Sprintf("%d", ref)))
+			mockReader, err := GetMockReader(GetMockEvent(horaAtual.Add(time.Duration(delayToPublish)*time.Second), data_types.DataOnly, fmt.Sprintf("%d", ref)))
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 			resp, err := SendPostRequestWithHeaders(TEST_ENDPOINT, mockReader, h)
 			var MockEvent MockEvent

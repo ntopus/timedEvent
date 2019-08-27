@@ -4,8 +4,10 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/ivanmeca/timedEvent/application/modules/routes/event"
+	"io"
 	"log"
 	"net/http"
+	"os"
 )
 
 type HttpServer struct {
@@ -16,6 +18,8 @@ type HttpServer struct {
 func NewHttpServer(port string, debugMode bool) *HttpServer {
 	if !debugMode {
 		gin.SetMode(gin.ReleaseMode)
+		f, _ := os.Create("gin.log")
+		gin.DefaultWriter = io.MultiWriter(f)
 	}
 	engine := gin.Default()
 	engine.HandleMethodNotAllowed = true
