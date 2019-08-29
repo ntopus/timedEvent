@@ -208,6 +208,16 @@ func GetMockEvent(publihsDate time.Time, publishType string, ref string) MockEve
 	}
 }
 
+func ClearDB() {
+	data, err := collection_managment.NewEventCollection().Read(nil)
+	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+
+	for _, item := range data {
+		_, err := collection_managment.NewEventCollection().DeleteItem([]string{item.ArangoId})
+		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+	}
+}
+
 func ReadDocument(id string) *data_types.ArangoCloudEvent {
 	data, err := collection_managment.NewEventCollection().ReadItem(id)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())

@@ -12,6 +12,7 @@ import (
 
 func SchedulerTester() {
 	ginkgo.It("Test expired event", func() {
+		ClearDB()
 		testSendValidCloudEventRequestAndCheckDbContent()
 	})
 }
@@ -33,7 +34,7 @@ func testSendValidCloudEventRequestAndCheckDbContent() {
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		fmt.Println(fmt.Sprintf("ref=%s,cnt=%d\tactualTime:%s\teventTime:%s\ttimeDiff: %v", mock.Ref, counter, time.Now().UTC().Format("15:04:05Z"), publishedDate.Format("15:04:05Z"), timeDiff))
 		gomega.Expect(timeDiff).To(gomega.BeNumerically(">", 0))
-		gomega.Expect(timeDiff).To(gomega.BeNumerically("<", 500*time.Millisecond))
+		gomega.Expect(timeDiff).To(gomega.BeNumerically("<", time.Second))
 		return true
 	})
 	defer q.Close()
