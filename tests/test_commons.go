@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"github.com/ivanmeca/timedEvent/application"
 	"github.com/ivanmeca/timedEvent/application/modules/config"
+	"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
+	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
 	"github.com/ivanmeca/timedEvent/application/modules/routes"
 	"github.com/onsi/gomega"
 	"github.com/streadway/amqp"
@@ -204,4 +206,10 @@ func GetMockEvent(publihsDate time.Time, publishType string, ref string) MockEve
 		PublishType:  publishType,
 		Data:         MockData{Ref: ref, PublishDate: publihsDate.Format(DATE_FORMAT)},
 	}
+}
+
+func ReadDocument(id string) *data_types.ArangoCloudEvent {
+	data, err := collection_managment.NewEventCollection().ReadItem(id)
+	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+	return data
 }

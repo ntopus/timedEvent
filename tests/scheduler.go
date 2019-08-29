@@ -3,7 +3,6 @@ package tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ivanmeca/timedEvent/application/modules/database/collection_managment"
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
@@ -47,7 +46,6 @@ func testSendValidCloudEventRequestAndCheckDbContent() {
 			defer ginkgo.GinkgoRecover()
 			defer wg.Done()
 			delayToPublish := ref
-			//fmt.Println(i,delayToPublish)
 			horaAtual := time.Now().UTC()
 			mockReader, err := GetMockReader(GetMockEvent(horaAtual.Add(time.Duration(delayToPublish)*time.Second), data_types.DataOnly, fmt.Sprintf("%d", ref)))
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
