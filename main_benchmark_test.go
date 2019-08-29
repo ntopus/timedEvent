@@ -16,7 +16,7 @@ func BenchmarkWebServer(b *testing.B) {
 	tests.BuildApplication()
 	tests.SaveConfigFile()
 	ctx := context.Background()
-	appMan := application.NewApplicationManager("./config.json")
+	appMan := application.NewApplicationManager(tests.GetConfigPath())
 	err := appMan.RunApplication(ctx)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	time.Sleep(time.Second)
