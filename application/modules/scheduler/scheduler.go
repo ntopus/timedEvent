@@ -7,9 +7,7 @@ import (
 	"github.com/ivanmeca/timedEvent/application/modules/database/data_types"
 	"github.com/ivanmeca/timedEvent/application/modules/logger"
 	"github.com/ivanmeca/timedEvent/application/modules/queue_publisher"
-	"github.com/ivanmeca/timedEvent/application/modules/timer_control"
 	"github.com/pkg/errors"
-	"sync"
 	"time"
 )
 
@@ -18,6 +16,7 @@ type Scheduler interface {
 	CheckEvent(event *data_types.ArangoCloudEvent)
 }
 
+const TimerControlUnit = time.Millisecond
 var instance *EventScheduler
 
 type FnTimer func()
@@ -28,16 +27,12 @@ func GetScheduler() Scheduler {
 
 func NewScheduler(pollTime int, controlTime int, expirationTime int) Scheduler {
 	instance = &EventScheduler{poolTime: time.Duration(pollTime)}
-	instance.tc = timer_control.NewTimerControl(controlTime, expirationTime, &instance.eventList)
 	return instance
 }
 
 type EventScheduler struct {
-	controlTime    time.Duration
 	poolTime       time.Duration
-	eventList      sync.Map
-	eventTimerList sync.Map
-	tc             *timer_control.TimerControl
+	eventTimerList map[string]data_types.EventMapper
 	logger         *logger.StdLogger
 }
 
@@ -48,13 +43,12 @@ func (es *EventScheduler) Run(ctx context.Context) {
 			case <-ctx.Done():
 				return
 			default:
-				time.Sleep(es.poolTime * timer_control.TimerControlUnit)
+				time.Sleep(es.poolTime * TimerControlUnit)
 				es.pooler()
 			}
 		}
 	}()
 	es.logger = logger.GetLogger()
-	//es.tc.Run(ctx)
 }
 
 func (es *EventScheduler) CheckEvent(event *data_types.ArangoCloudEvent) {
@@ -65,7 +59,7 @@ func (es *EventScheduler) CheckEvent(event *data_types.ArangoCloudEvent) {
 		return
 	}
 	timeDiffInSecond := horaAtual.Sub(publishDate)
-	timeDiffInSecond /= timer_control.TimerControlUnit
+	timeDiffInSecond /= TimerControlUnit
 
 	if timeDiffInSecond >= (es.poolTime * -1) {
 		ev := data_types.EventMapper{}
@@ -79,7 +73,7 @@ func (es *EventScheduler) CheckEvent(event *data_types.ArangoCloudEvent) {
 
 func (es *EventScheduler) pooler() {
 	horaAtual := time.Now().UTC()
-	horaLimite := horaAtual.Add(es.poolTime * timer_control.TimerControlUnit).Format("2006-01-02 15:04:05Z")
+	horaLimite := horaAtual.Add(es.poolTime * TimerControlUnit).Format("2006-01-02 15:04:05Z")
 	es.logger.DebugPrintln("Scheduler:" + horaAtual.Format("2006-01-02 15:04:05Z") + " timeLimit:" + horaLimite)
 	data, err := collection_managment.NewEventCollection().Read([]database.AQLComparator{{Field: "publishdate", Comparator: "<=", Value: horaLimite}})
 	if err != nil {
@@ -102,6 +96,12 @@ func (es *EventScheduler) pooler() {
 }
 
 func (es *EventScheduler) scheduleEvent(event *data_types.EventMapper) {
+	t, ok := es.eventTimerList.Load(event.EventID)
+	if !ok {
+		return
+	}
+
+
 	horaAtual := time.Now().UTC()
 	timeDiff := event.PublishDate.Sub(horaAtual)
 	t := time.AfterFunc(timeDiff, es.buildPublishFunc(event))
@@ -122,7 +122,7 @@ func (es *EventScheduler) insertonTimerControl(eventID string, timer *time.Timer
 
 func (es *EventScheduler) buildPublishFunc(event *data_types.EventMapper) FnTimer {
 	return func() {
-		defer es.eventTimerList.Delete(event.EventID)
+		defer delete(es.eventTimerList,event.EventID)  es.eventTimerList.Delete(event.EventID)
 		data, err := collection_managment.NewEventCollection().ReadItem(event.EventID)
 		if err != nil || data == nil {
 			es.logger.ErrorPrintln(errors.Wrap(err, "event check fail").Error())

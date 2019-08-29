@@ -7,4 +7,5 @@ type EventMapper struct {
 	EventRevision string
 	EventID       string
 	Event         ArangoCloudEvent
+	ControlTimer  time.Timer
 }

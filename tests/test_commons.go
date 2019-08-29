@@ -213,8 +213,7 @@ func ClearDB() {
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 
 	for _, item := range data {
-		_, err := collection_managment.NewEventCollection().DeleteItem([]string{item.ArangoId})
-		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+		collection_managment.NewEventCollection().DeleteItem([]string{item.ArangoId})
 	}
 }
 
