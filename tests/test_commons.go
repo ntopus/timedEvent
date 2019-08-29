@@ -2,15 +2,15 @@ package tests
 
 import (
 	"bytes"
+	"context"
 	"devgit.kf.com.br/core/lib-queue/queue"
 	"devgit.kf.com.br/core/lib-queue/queue_repository"
 	"encoding/json"
 	"fmt"
+	"github.com/ivanmeca/timedEvent/application"
 	"github.com/ivanmeca/timedEvent/application/modules/config"
 	"github.com/ivanmeca/timedEvent/application/modules/routes"
-	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
-	"github.com/onsi/gomega/gexec"
 	"github.com/streadway/amqp"
 	"io"
 	"io/ioutil"
@@ -132,6 +132,7 @@ func GetMockReader(mockData interface{}) (io.Reader, error) {
 	return buff, nil
 }
 
+/*
 func RunApp() *gexec.Session {
 	appPath := filepath.Join(GetBinPath(), APP_NAME)
 	command := exec.Command(appPath, "-c="+GetConfigPath())
@@ -141,6 +142,20 @@ func RunApp() *gexec.Session {
 	fmt.Println("Application is running")
 	return session
 }
+/*/
+func RunApp() context.Context {
+	ctx := context.Background()
+	appMan := application.NewApplicationManager(GetConfigPath())
+	err := appMan.RunApplication(ctx)
+	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+	defer func() {
+		fmt.Println("Killing application")
+		ctx.Done()
+	}()
+	time.Sleep(500 * time.Millisecond)
+	fmt.Println("Application is running")
+	return ctx
+} //*/
 
 func SaveConfigFile() {
 	err := config.ConfigSample(GetConfigPath())

@@ -122,13 +122,14 @@ func (es *EventScheduler) insertonTimerControl(eventID string, timer *time.Timer
 
 func (es *EventScheduler) buildPublishFunc(event *data_types.EventMapper) FnTimer {
 	return func() {
+		defer es.eventTimerList.Delete(event.EventID)
 		data, err := collection_managment.NewEventCollection().ReadItem(event.EventID)
-		if err != nil {
+		if err != nil || data == nil {
 			es.logger.ErrorPrintln(errors.Wrap(err, "event check fail").Error())
 			return
 		}
 		if data.ArangoRev != event.EventRevision {
-			es.logger.DebugPrintln(errors.Wrap(err, "event rev check fail").Error())
+			es.logger.DebugPrintln("event rev check fail")
 			return
 		}
 		es.logger.DebugPrintln("Publicar ID " + event.EventID)

@@ -16,12 +16,6 @@ func CreateEventTester() {
 	ginkgo.It("InValid CloudEvent msg", func() {
 		testSendInvalidCloudEventRequest()
 	})
-	ginkgo.It("Valid CloudEvent multiple msg", func() {
-		testSendMultiplesValidCloudEventRequest()
-	})
-	ginkgo.FIt("Valid CloudEvent multiple update", func() {
-		testSendMultiplesValidCloudEventUpdate()
-	})
 	ginkgo.It("Valid CloudEvent (dataOnly) msg", func() {
 		testSendValidCloudEventDataOnlyRequest()
 	})
@@ -119,8 +113,8 @@ func testSendValidCloudEventRequest() {
 		var mock MockEvent
 		err := json.Unmarshal(msg, &mock)
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-		//fmt.Println(fmt.Sprintf("cnt=%d, %s", counter, msg))
-		//fmt.Println(mock)
+		fmt.Println(fmt.Sprintf("cnt=%d, %s", counter, msg))
+		fmt.Println(mock)
 		return true
 	})
 	defer q.Close()

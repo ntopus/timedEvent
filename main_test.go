@@ -1,11 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/ivanmeca/timedEvent/tests"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
-	"github.com/onsi/gomega/gexec"
 	"testing"
 	"time"
 )
@@ -17,7 +17,7 @@ func TestApplication(t *testing.T) {
 	ginkgo.RunSpecs(t, "main_test_suite")
 }
 
-var App *gexec.Session
+var App context.Context
 
 var _ = ginkgo.Describe("main_test_suite", func() {
 	ginkgo.BeforeSuite(func() {
@@ -28,11 +28,11 @@ var _ = ginkgo.Describe("main_test_suite", func() {
 	})
 	ginkgo.AfterSuite(func() {
 		fmt.Println("Killing application")
-		App.Kill()
+		App.Done()
 	})
 	ginkgo.BeforeEach(func() {
 		tests.PurgeQueue(tests.TEST_PUBLISH_QUEUE)
 	})
-	ginkgo.FContext("Test webserver", tests.CreateEventTester)
+	ginkgo.Context("Test webserver", tests.CreateEventTester)
 	ginkgo.Context("Test scheduler", tests.SchedulerTester)
 })

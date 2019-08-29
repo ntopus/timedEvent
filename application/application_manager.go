@@ -4,9 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/ivanmeca/timedEvent/application/modules/config"
+	"github.com/ivanmeca/timedEvent/application/modules/logger"
 	"github.com/ivanmeca/timedEvent/application/modules/queue_publisher"
 	"github.com/ivanmeca/timedEvent/application/modules/scheduler"
 	"github.com/ivanmeca/timedEvent/application/modules/server"
+	"github.com/pkg/errors"
+	"os"
 	"strconv"
 )
 
@@ -20,6 +23,12 @@ func NewApplicationManager(configPath string) *ApplicationManager {
 	}
 }
 func (app *ApplicationManager) RunApplication(ctx context.Context) error {
+	err := app.verifyConfig(app.configPath)
+	if err != nil {
+		println("Erro:", err.Error())
+		os.Exit(1)
+	}
+	app.initializeLogger()
 	fmt.Println("Initialize API")
 	cancelServer := app.initializeServer()
 	cancelScheduler := app.initializeScheduler()
@@ -30,6 +39,12 @@ func (app *ApplicationManager) RunApplication(ctx context.Context) error {
 		cancelScheduler()
 	}()
 	return nil
+}
+
+func (app *ApplicationManager) initializeLogger() {
+	AppLogger := logger.GetLogger()
+	LogLevel := config.GetConfig().LogLevel
+	AppLogger.SetLogLevel(LogLevel)
 }
 
 func (app *ApplicationManager) initializeServer() context.CancelFunc {
@@ -46,4 +61,12 @@ func (app *ApplicationManager) initializeScheduler() context.CancelFunc {
 	ctxServer, cancelServer := context.WithCancel(ctxServer)
 	s.Run(ctxServer)
 	return cancelServer
+}
+
+func (app *ApplicationManager) verifyConfig(configFile string) error {
+	if len(configFile) < 3 {
+		return errors.New("Could not get config file")
+	}
+	config.InitConfig(configFile)
+	return nil
 }

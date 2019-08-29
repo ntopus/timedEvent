@@ -34,11 +34,11 @@ func testSendValidCloudEventRequestAndCheckDbContent() {
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		fmt.Println(fmt.Sprintf("ref=%s,cnt=%d\tactualTime:%s\teventTime:%s\ttimeDiff: %v", mock.Ref, counter, time.Now().UTC().Format("15:04:05Z"), publishedDate.Format("15:04:05Z"), timeDiff))
 		gomega.Expect(timeDiff).To(gomega.BeNumerically(">", 0))
-		gomega.Expect(timeDiff).To(gomega.BeNumerically("<", 3000*time.Millisecond))
+		gomega.Expect(timeDiff).To(gomega.BeNumerically("<", 500*time.Millisecond))
 		return true
 	})
 	defer q.Close()
-	const TEST_QTDE = 100
+	const TEST_QTDE = 10
 	for i := 0; i < TEST_QTDE; i++ {
 		h := make(map[string]string)
 		h[CONTENT_TYPE] = CONTENT_TYPE_CE
@@ -46,7 +46,7 @@ func testSendValidCloudEventRequestAndCheckDbContent() {
 		go func(ref int) {
 			defer ginkgo.GinkgoRecover()
 			defer wg.Done()
-			delayToPublish := (ref % 8) + 10
+			delayToPublish := ref
 			//fmt.Println(i,delayToPublish)
 			horaAtual := time.Now().UTC()
 			mockReader, err := GetMockReader(GetMockEvent(horaAtual.Add(time.Duration(delayToPublish)*time.Second), data_types.DataOnly, fmt.Sprintf("%d", ref)))
@@ -66,11 +66,5 @@ func testSendValidCloudEventRequestAndCheckDbContent() {
 		mu.Lock()
 		defer mu.Unlock()
 		return count
-	}, 25).Should(gomega.BeEquivalentTo(TEST_QTDE))
-}
-
-func readDocument(id string) *data_types.ArangoCloudEvent {
-	data, err := collection_managment.NewEventCollection().ReadItem(id)
-	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-	return data
+	}, 10).Should(gomega.BeEquivalentTo(TEST_QTDE))
 }

@@ -2,10 +2,8 @@ package main
 
 import (
 	"context"
-	"errors"
 	"github.com/ivanmeca/timedEvent/application"
 	"github.com/ivanmeca/timedEvent/application/modules/config"
-	"github.com/ivanmeca/timedEvent/application/modules/logger"
 	"github.com/urfave/cli"
 	"log"
 	"os"
@@ -17,19 +15,10 @@ const flagConfig = "config"
 const configFilePathDefault = "./config.json"
 
 func runApplication(cli *cli.Context) error {
-	err := verifyConfig(cli)
-	if err != nil {
-		println("Erro:", err.Error())
-		os.Exit(1)
-	}
-	AppLogger := logger.GetLogger()
-	LogLevel := config.GetConfig().LogLevel
-	AppLogger.SetLogLevel(LogLevel)
-
 	c := context.Background()
 	ctx, cancel := context.WithCancel(c)
 	appMan := application.NewApplicationManager(cli.String(flagConfig))
-	err = appMan.RunApplication(ctx)
+	err := appMan.RunApplication(ctx)
 	if err != nil {
 		return err
 	}
@@ -40,15 +29,6 @@ func runApplication(cli *cli.Context) error {
 		cancel()
 		return nil
 	}
-}
-
-func verifyConfig(cli *cli.Context) error {
-	configFile := cli.String("config")
-	if len(configFile) < 3 {
-		return errors.New("Could not get config file")
-	}
-	config.InitConfig(configFile)
-	return nil
 }
 
 func generateConfig(cli *cli.Context) error {
