@@ -7,7 +7,7 @@ type ConfigData struct {
 	ControlTime    int           `json:"controlTime"`
 	ExpirationTime int           `json:"expirationTime"`
 	DataBase       ConfigDB      `json:"dataBase"`
-	PublishQueue   []ConfigQueue `json:"loglevel"`
+	PublishQueue   []ConfigQueue `json:"publishQueue"`
 }
 
 type ConfigQueue struct {

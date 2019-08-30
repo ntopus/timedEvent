@@ -1,7 +1,7 @@
 version: "2"
 services:
   go:
-    image: gcr.io/ntopus-1379/timed-event:0.3.0.156718756
+    image: gcr.io/ntopus-1379/timed-event:0.3.1.156719501
     command: ["-c=./config/config.json"]
     networks:
       - back
