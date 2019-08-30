@@ -4,10 +4,8 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/ivanmeca/timedEvent/application/modules/routes/event"
-	"io"
 	"log"
 	"net/http"
-	"os"
 )
 
 type HttpServer struct {
