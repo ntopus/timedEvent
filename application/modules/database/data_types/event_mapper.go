@@ -13,6 +13,12 @@ type EventMapperEntry struct {
 	ControlTimer  *time.Timer
 }
 
+func NewEventMapper() EventMapper {
+	return EventMapper{
+		list: make(map[string]EventMapperEntry),
+	}
+}
+
 type EventMapper struct {
 	list map[string]EventMapperEntry
 	sync.Mutex

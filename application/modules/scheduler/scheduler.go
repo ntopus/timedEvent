@@ -28,7 +28,8 @@ func GetScheduler() Scheduler {
 
 func NewScheduler(pollTime int, controlTime int, expirationTime int) Scheduler {
 	instance = &EventScheduler{
-		poolTime: time.Duration(pollTime),
+		poolTime:       time.Duration(pollTime),
+		eventTimerList: data_types.NewEventMapper(),
 	}
 	return instance
 }
