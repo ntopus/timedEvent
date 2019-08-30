@@ -2,7 +2,6 @@ package event
 
 import (
 	"encoding/json"
-	"errors"
 	"github.com/cloudevents/sdk-go/pkg/cloudevents"
 	"github.com/gin-gonic/gin"
 	"github.com/ivanmeca/timedEvent/application/modules/database"
@@ -12,6 +11,7 @@ import (
 	"github.com/ivanmeca/timedEvent/application/modules/routes"
 	"github.com/ivanmeca/timedEvent/application/modules/scheduler"
 	"github.com/pborman/uuid"
+	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -37,20 +37,20 @@ func bindQueryFilterParams(context *gin.Context) []database.AQLComparator {
 func ceHttpCreate(context *gin.Context) (*data_types.CloudEvent, error) {
 	data, err := ioutil.ReadAll(context.Request.Body)
 	if err != nil {
-		return nil, errors.New("could not read request data: " + err.Error())
+		return nil, errors.Wrap(err, "could not read request data")
 	}
 	event := data_types.CloudEvent{}
 	err = json.Unmarshal(data, &event)
 	if err != nil {
-		return nil, errors.New("could not parse request data: " + err.Error())
+		return nil, errors.Wrap(err, "could not parse request data")
 	}
 	validationError := event.Validate()
 	if validationError != nil {
-		return nil, errors.New("could not read validate data: " + validationError.Error())
+		return nil, errors.Wrap(validationError, "could not read validate data")
 	}
 	eventValidation := validateEvent(&event)
 	if eventValidation != nil {
-		return nil, errors.New("could not validate event: " + eventValidation.Error())
+		return nil, errors.Wrap(eventValidation, "could not validate event")
 	}
 	return &event, nil
 }
