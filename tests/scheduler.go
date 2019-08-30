@@ -38,7 +38,7 @@ func testSendValidCloudEventRequestAndCheckDbContent() {
 		return true
 	})
 	defer q.Close()
-	const TEST_QTDE = 10
+	const TEST_QTDE = 1000
 	for i := 0; i < TEST_QTDE; i++ {
 		h := make(map[string]string)
 		h[CONTENT_TYPE] = CONTENT_TYPE_CE
