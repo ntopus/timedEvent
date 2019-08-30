@@ -18,8 +18,8 @@ type HttpServer struct {
 func NewHttpServer(port string, debugMode bool) *HttpServer {
 	if !debugMode {
 		gin.SetMode(gin.ReleaseMode)
-		f, _ := os.Create("gin.log")
-		gin.DefaultWriter = io.MultiWriter(f)
+		//f, _ := os.Create("gin.log")
+		//gin.DefaultWriter = io.MultiWriter(f)
 	}
 	engine := gin.Default()
 	engine.HandleMethodNotAllowed = true
