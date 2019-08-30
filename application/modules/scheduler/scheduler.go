@@ -17,6 +17,7 @@ type Scheduler interface {
 }
 
 const TimerControlUnit = time.Millisecond
+
 var instance *EventScheduler
 
 type FnTimer func()
@@ -26,13 +27,15 @@ func GetScheduler() Scheduler {
 }
 
 func NewScheduler(pollTime int, controlTime int, expirationTime int) Scheduler {
-	instance = &EventScheduler{poolTime: time.Duration(pollTime)}
+	instance = &EventScheduler{
+		poolTime: time.Duration(pollTime),
+	}
 	return instance
 }
 
 type EventScheduler struct {
 	poolTime       time.Duration
-	eventTimerList map[string]data_types.EventMapper
+	eventTimerList data_types.EventMapper
 	logger         *logger.StdLogger
 }
 
@@ -62,7 +65,7 @@ func (es *EventScheduler) CheckEvent(event *data_types.ArangoCloudEvent) {
 	timeDiffInSecond /= TimerControlUnit
 
 	if timeDiffInSecond >= (es.poolTime * -1) {
-		ev := data_types.EventMapper{}
+		ev := data_types.EventMapperEntry{}
 		ev.PublishDate = publishDate
 		ev.Event = *event
 		ev.EventRevision = event.ArangoRev
@@ -80,7 +83,7 @@ func (es *EventScheduler) pooler() {
 		return
 	}
 	for _, value := range data {
-		ev := data_types.EventMapper{}
+		ev := data_types.EventMapperEntry{}
 		publishDate, err := time.Parse("2006-01-02 15:04:05Z", value.PublishDate)
 		if err != nil {
 			es.logger.ErrorPrintln("error on date parsing (value.PublishDate,event id: " + value.ArangoKey + ") : " + err.Error())
@@ -95,34 +98,23 @@ func (es *EventScheduler) pooler() {
 	return
 }
 
-func (es *EventScheduler) scheduleEvent(event *data_types.EventMapper) {
-	t, ok := es.eventTimerList.Load(event.EventID)
-	if !ok {
-		return
+func (es *EventScheduler) scheduleEvent(event *data_types.EventMapperEntry) {
+	listEntry, ok := es.eventTimerList.Load(event.EventID)
+	if ok {
+		if listEntry.EventRevision == event.EventRevision {
+			return
+		}
+		listEntry.ControlTimer.Stop()
 	}
-
-
 	horaAtual := time.Now().UTC()
 	timeDiff := event.PublishDate.Sub(horaAtual)
-	t := time.AfterFunc(timeDiff, es.buildPublishFunc(event))
-	es.insertonTimerControl(event.EventID, t)
-
+	event.ControlTimer = time.AfterFunc(timeDiff, es.buildPublishFunc(event))
+	es.eventTimerList.Store(event.EventID, *event)
 }
 
-func (es *EventScheduler) insertonTimerControl(eventID string, timer *time.Timer) {
-	t, ok := es.eventTimerList.LoadOrStore(eventID, timer)
-	if !ok {
-		return
-	}
-	if tc, ok := t.(time.Timer); ok {
-		tc.Stop()
-	}
-	es.eventTimerList.Store(eventID, t)
-}
-
-func (es *EventScheduler) buildPublishFunc(event *data_types.EventMapper) FnTimer {
+func (es *EventScheduler) buildPublishFunc(event *data_types.EventMapperEntry) FnTimer {
 	return func() {
-		defer delete(es.eventTimerList,event.EventID)  es.eventTimerList.Delete(event.EventID)
+		defer es.eventTimerList.Delete(event.EventID)
 		data, err := collection_managment.NewEventCollection().ReadItem(event.EventID)
 		if err != nil || data == nil {
 			es.logger.ErrorPrintln(errors.Wrap(err, "event check fail").Error())
