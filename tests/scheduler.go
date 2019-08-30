@@ -34,11 +34,11 @@ func testSendValidCloudEventRequestAndCheckDbContent() {
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		fmt.Println(fmt.Sprintf("ref=%s,cnt=%d\tactualTime:%s\teventTime:%s\ttimeDiff: %v", mock.Ref, counter, time.Now().UTC().Format("15:04:05Z"), publishedDate.Format("15:04:05Z"), timeDiff))
 		gomega.Expect(timeDiff).To(gomega.BeNumerically(">", 0))
-		gomega.Expect(timeDiff).To(gomega.BeNumerically("<", time.Second))
+		gomega.Expect(timeDiff).To(gomega.BeNumerically("<", 1500*time.Millisecond))
 		return true
 	})
 	defer q.Close()
-	const TEST_QTDE = 1000
+	const TEST_QTDE = 100
 	for i := 0; i < TEST_QTDE; i++ {
 		h := make(map[string]string)
 		h[CONTENT_TYPE] = CONTENT_TYPE_CE
@@ -48,7 +48,7 @@ func testSendValidCloudEventRequestAndCheckDbContent() {
 			defer wg.Done()
 			delayToPublish := ref
 			horaAtual := time.Now().UTC()
-			mockReader, err := GetMockReader(GetMockEvent(horaAtual.Add(time.Duration(delayToPublish)*time.Second), data_types.DataOnly, fmt.Sprintf("%d", ref)))
+			mockReader, err := GetMockReader(GetMockEvent(horaAtual.Add(time.Duration(delayToPublish)*time.Millisecond), data_types.DataOnly, fmt.Sprintf("%d", ref)))
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 			resp, err := SendPostRequestWithHeaders(TEST_ENDPOINT, mockReader, h)
 			var MockEvent MockEvent
