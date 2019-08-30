@@ -36,7 +36,7 @@ func BenchmarkWebServer(b *testing.B) {
 					defer wg.Done()
 					h := make(map[string]string)
 					h[tests.CONTENT_TYPE] = tests.CONTENT_TYPE_CE
-					mockReader, err := tests.GetMockReader(tests.GetMockEvent(time.Now().UTC().Add(50*time.Second), "CE", "teste"))
+					mockReader, err := tests.GetMockReader(tests.GetMockEvent(time.Now().UTC().Add(1*time.Second), "CE", "teste"))
 					gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 					resp, err := tests.SendPostRequestWithHeaders(tests.TEST_ENDPOINT, mockReader, h)
 					gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
@@ -58,7 +58,7 @@ func BenchmarkWebServer(b *testing.B) {
 					defer wg.Done()
 					h := make(map[string]string)
 					h[tests.CONTENT_TYPE] = tests.CONTENT_TYPE_CE
-					mockReader, err := tests.GetMockReader(tests.GetMockEvent(time.Now().UTC().Add(50*time.Second), "CE", fmt.Sprintf("%d", ref)))
+					mockReader, err := tests.GetMockReader(tests.GetMockEvent(time.Now().UTC().Add(1*time.Second), "CE", fmt.Sprintf("%d", ref)))
 					gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 					resp, err := tests.SendPostRequestWithHeaders(tests.TEST_ENDPOINT, mockReader, h)
 					gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
