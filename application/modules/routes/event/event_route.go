@@ -174,10 +174,8 @@ func validateEvent(event *data_types.CloudEvent) error {
 	}
 	searchRegx := `([^\w\_\-\:\.\@\(\)\+\,\=\;\$\!\*\'\%]+)`
 	regEx := regexp.MustCompile(searchRegx)
-	validId := regEx.ReplaceAllString(event.ID, "")
-	err = event.SetID(validId)
-	if err != nil {
-		return errors.New(`could not validate event ID`)
+	if regEx.MatchString(event.ID) {
+		return errors.New(`invalid document key: ` + event.GetID())
 	}
 	return nil
 }
