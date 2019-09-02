@@ -55,10 +55,10 @@ func (coll *Collection) Upsert(item *data_types.ArangoCloudEvent) (*data_types.A
 		}
 		time.Sleep(time.Millisecond)
 	}
-	defer cursor.Close()
 	if err != nil {
 		return nil, coll.DefaultErrorHandler(err)
 	}
+	defer cursor.Close()
 	if cursor != nil {
 		for cursor.HasMore() == true {
 			_, err := cursor.ReadDocument(nil, &newDoc)
