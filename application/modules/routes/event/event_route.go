@@ -14,6 +14,7 @@ import (
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 	"time"
 )
 
@@ -170,6 +171,13 @@ func validateEvent(event *data_types.CloudEvent) error {
 	}
 	if event.PublishType != data_types.DataOnly {
 		event.PublishType = data_types.EntireCloudEvent
+	}
+	searchRegx := `([^\w\_\-\:\.\@\(\)\+\,\=\;\$\!\*\'\%]+)`
+	regEx := regexp.MustCompile(searchRegx)
+	validId := regEx.ReplaceAllString(event.ID, "")
+	err = event.SetID(validId)
+	if err != nil {
+		return errors.New(`could not validate event ID`)
 	}
 	return nil
 }

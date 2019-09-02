@@ -58,8 +58,8 @@ func (coll *Collection) Upsert(item *data_types.ArangoCloudEvent) (*data_types.A
 	if err != nil {
 		return nil, coll.DefaultErrorHandler(err)
 	}
-	defer cursor.Close()
 	if cursor != nil {
+		defer cursor.Close()
 		for cursor.HasMore() == true {
 			_, err := cursor.ReadDocument(nil, &newDoc)
 			if err != nil {
@@ -96,10 +96,10 @@ func (coll *Collection) Read(filters []database.AQLComparator) ([]data_types.Ara
 	}
 	query += fmt.Sprintf(" SORT item.time DESC RETURN item")
 	cursor, err := coll.db.Query(nil, query, bindVars)
-	defer cursor.Close()
 	if err != nil {
 		return nil, coll.DefaultErrorHandler(err)
 	}
+	defer cursor.Close()
 	for cursor.HasMore() == true {
 		_, err = cursor.ReadDocument(nil, &item)
 		if err != nil {
