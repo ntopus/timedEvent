@@ -77,7 +77,7 @@ func GetConfigPath() string {
 }
 
 func GetQueue(queueName string, threadLimit int) *queue.Queue {
-	params := queue_repository.NewQueueRepositoryParams("randomUser", "randomPass", "srvqueue.module.ntopus.com.br", 5672)
+	params := queue_repository.NewQueueRepositoryParams("randomUser", "randomPass", "127.0.0.1", 5672)
 	params.SetVHost("/timed")
 	qr, err := queue_repository.NewQueueRepository(params)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
@@ -115,7 +115,7 @@ func ParseResp(resp *http.Response, dataContainer interface{}) *routes.JsendMess
 }
 
 func PurgeQueue(queue string) {
-	conn, err := amqp.Dial("amqp://randomUser:randomPass@srvqueue.module.ntopus.com.br:5672/timed")
+	conn, err := amqp.Dial("amqp://randomUser:randomPass@127.0.0.1:5672/timed")
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	ch, err := conn.Channel()
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
