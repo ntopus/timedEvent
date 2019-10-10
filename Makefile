@@ -82,15 +82,15 @@ docker-build: build-native-production
 	sudo docker build -t ${APPLICATION_NAME}:${BASE_VERSION} ./
 
 docker-push:
-#	sudo docker tag ${APPLICATION_NAME}:${BASE_VERSION} internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:${BASE_VERSION}
-#	sudo docker tag ${APPLICATION_NAME}:${BASE_VERSION} internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:${VERSION}
-#	sudo docker tag ${APPLICATION_NAME}:${BASE_VERSION} internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:latest
+	sudo docker tag ${APPLICATION_NAME}:${BASE_VERSION} internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:${BASE_VERSION}
+	sudo docker tag ${APPLICATION_NAME}:${BASE_VERSION} internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:${VERSION}
+	sudo docker tag ${APPLICATION_NAME}:${BASE_VERSION} internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:latest
 	sudo docker tag ${APPLICATION_NAME}:${BASE_VERSION} gcr.io/ntopus-1379/${APPLICATION_NAME}:${BASE_VERSION}
 	sudo docker tag ${APPLICATION_NAME}:${BASE_VERSION} gcr.io/ntopus-1379/${APPLICATION_NAME}:${VERSION}
 	sudo docker tag ${APPLICATION_NAME}:${BASE_VERSION} gcr.io/ntopus-1379/${APPLICATION_NAME}:latest
-#	sudo docker push internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:${BASE_VERSION}
-#	sudo docker push internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:${VERSION}
-#	sudo docker push internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:latest
+	sudo docker push internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:${BASE_VERSION}
+	sudo docker push internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:${VERSION}
+	sudo docker push internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:latest
 	sudo docker push gcr.io/ntopus-1379/${APPLICATION_NAME}:${BASE_VERSION}
 	sudo docker push gcr.io/ntopus-1379/${APPLICATION_NAME}:${VERSION}
 	sudo docker push gcr.io/ntopus-1379/${APPLICATION_NAME}:latest

@@ -9,10 +9,7 @@ import:
   version: v0.7.0
   subpackages:
   - v02
-- package: github.com/micro/go-config
-  version: v1.1.0
-  subpackages:
-  - source/file
+- package: github.com/micro/go-micro/config
 - package: github.com/pborman/uuid
   version: v1.2
 - package: github.com/urfave/cli
