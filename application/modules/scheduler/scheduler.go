@@ -8,6 +8,7 @@ import (
 	"github.com/ivanmeca/timedEvent/application/modules/logger"
 	"github.com/ivanmeca/timedEvent/application/modules/queue_publisher"
 	"github.com/pkg/errors"
+	"sync"
 	"time"
 )
 
@@ -38,6 +39,7 @@ type EventScheduler struct {
 	poolTime       time.Duration
 	eventTimerList data_types.EventMapper
 	logger         *logger.StdLogger
+	mu             sync.Mutex
 }
 
 func (es *EventScheduler) Run(ctx context.Context) {
@@ -115,6 +117,8 @@ func (es *EventScheduler) scheduleEvent(event *data_types.EventMapperEntry) {
 
 func (es *EventScheduler) buildPublishFunc(event *data_types.EventMapperEntry) FnTimer {
 	return func() {
+		es.mu.Lock()
+		defer es.mu.Unlock()
 		defer es.eventTimerList.Delete(event.EventID)
 		data, err := collection_managment.NewEventCollection().ReadItem(event.EventID)
 		if err != nil || data == nil {
@@ -135,7 +139,7 @@ func (es *EventScheduler) buildPublishFunc(event *data_types.EventMapperEntry) F
 		if queue_publisher.QueuePublisher().PublishInQueue(data.PublishQueue, dataToPublish) {
 			_, err := collection_managment.NewEventCollection().DeleteItem([]string{event.EventID})
 			if err != nil {
-				es.logger.ErrorPrintln(errors.Wrap(err, "falha ao excluir ID: "+event.EventID).Error())
+				es.logger.ErrorPrintln(errors.Wrap(err, "falha ao excluir ID (PublishOK): "+event.EventID).Error())
 			}
 			es.logger.DebugPrintln("ID excluido: " + event.EventID)
 		}
