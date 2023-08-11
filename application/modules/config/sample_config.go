@@ -9,7 +9,7 @@ import (
 func configSample() *ConfigData {
 	var config ConfigData
 
-	config.LogLevel = logger.LogNotice
+	config.LogLevel = logger.LogDebug
 	config.ControlTime = 100
 	config.PoolTime = 10000
 	config.ExpirationTime = 2592000000
@@ -23,7 +23,7 @@ func configSample() *ConfigData {
 
 	var pqueueconf ConfigQueue
 	pqueueconf.ServerHost = "localhost"
-	pqueueconf.ServerVHost = "/timed"
+	pqueueconf.ServerVHost = "/"
 	pqueueconf.ServerPort = "5672"
 	pqueueconf.ServerUser = "randomUser"
 	pqueueconf.ServerPassword = "randomPass"

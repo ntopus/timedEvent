@@ -3,8 +3,6 @@ package tests
 import (
 	"bytes"
 	"context"
-	"devgit.kf.com.br/core/lib-queue/queue"
-	"devgit.kf.com.br/core/lib-queue/queue_repository"
 	"encoding/json"
 	"fmt"
 	"github.com/ivanmeca/timedEvent/application"
@@ -14,6 +12,8 @@ import (
 	"github.com/ivanmeca/timedEvent/application/modules/routes"
 	"github.com/onsi/gomega"
 	"github.com/streadway/amqp"
+	"gitlab-internal.ntopus.com.br/core/lib-queue/queue"
+	"gitlab-internal.ntopus.com.br/core/lib-queue/queue_repository"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -78,7 +78,7 @@ func GetConfigPath() string {
 
 func GetQueue(queueName string, threadLimit int) *queue.Queue {
 	params := queue_repository.NewQueueRepositoryParams("randomUser", "randomPass", "127.0.0.1", 5672)
-	params.SetVHost("/timed")
+	params.SetVHost("/")
 	qr, err := queue_repository.NewQueueRepository(params)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	qParam := queue.NewQueueParams(queueName)
@@ -95,11 +95,11 @@ func InitQueue(queueName string, counter *int, consume fnConsume) *queue.Queue {
 	mu.Unlock()
 	q := GetQueue(queueName, 5000)
 	err := q.StartConsume(func(queueName string, msg []byte) bool {
-		mu.Lock()
-		defer mu.Unlock()
-		*counter++
-		return consume(queueName, msg, *counter)
-	})
+			mu.Lock()
+			defer mu.Unlock()
+			*counter++
+			return consume(queueName, msg, *counter)
+		})
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	return q
 }
@@ -115,7 +115,12 @@ func ParseResp(resp *http.Response, dataContainer interface{}) *routes.JsendMess
 }
 
 func PurgeQueue(queue string) {
-	conn, err := amqp.Dial("amqp://randomUser:randomPass@127.0.0.1:5672/timed")
+	publisher := config.GetConfig().PublishQueue[0]
+	url := fmt.Sprintf(
+		"amqp://%s:%s@%s:%s%s", publisher.ServerUser, publisher.ServerPassword, publisher.ServerHost,
+		publisher.ServerPort, publisher.ServerVHost,
+	)
+	conn, err := amqp.Dial(url)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	ch, err := conn.Channel()
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())

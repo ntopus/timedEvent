@@ -47,7 +47,9 @@ func (coll *Collection) Upsert(item *data_types.ArangoCloudEvent) (*data_types.A
 	ctx := driver.WithReturnNew(context.Background(), &newDoc)
 	bindVars := map[string]interface{}{}
 	bindVars["item"] = item
-	query := fmt.Sprintf(`INSERT @item INTO %s OPTIONS { overwrite: true, exclusive: true } RETURN NEW `, coll.collection)
+	query := fmt.Sprintf(
+		`INSERT @item INTO %s OPTIONS { overwrite: true, exclusive: false } RETURN NEW `, coll.collection,
+	)
 	for retries := 0; retries < 3; retries++ {
 		cursor, err = coll.db.Query(ctx, query, bindVars)
 		if err == nil {

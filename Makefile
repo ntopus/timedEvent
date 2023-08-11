@@ -98,6 +98,11 @@ docker-push:
 clean:
 	@test ! -e bin/${BIN_NAME} || rm bin/${BIN_NAME}
 
+run-dev:
+	docker compose up -d
+	sleep 15
+	docker exec timedevent_arango sh /opt/tools/init.sh
+
 run-test:
 	mkdir -p ./test/cover
 	go test -race -coverpkg= ./... -coverprofile=./test/cover/cover.out

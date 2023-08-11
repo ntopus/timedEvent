@@ -17,6 +17,7 @@ services:
 #    restart: on-failure
   arango:
     image: arangodb:3.4.7
+    container_name: timedevent_arango
     ports:
       - "8529:8529"
     networks:
@@ -25,11 +26,14 @@ services:
           - "timedEvent.db.ivanmeca.com.br"
     volumes:
       - ./docker-data/arangodb:/var/lib/arangodb
+      - ./docker/arangodb:/opt/tools
     environment:
       ARANGO_ROOT_PASSWORD: "rootpass"
       ARANGO_STORAGE_ENGINE: rocksdb
+    #entrypoint: "/opt/tools/init.sh"
   rabbitmq:
-    image: rabbitmq:management
+    image: rabbitmq:3.7-management
+    container_name: timedevent_rabbitmq
     networks:
       back:
         aliases:

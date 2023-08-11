@@ -1,10 +1,10 @@
 package queue_publisher
 
 import (
-	"devgit.kf.com.br/core/lib-queue/queue"
-	"devgit.kf.com.br/core/lib-queue/queue_repository"
 	"github.com/ivanmeca/timedEvent/application/modules/config"
 	"github.com/ivanmeca/timedEvent/application/modules/logger"
+	"gitlab-internal.ntopus.com.br/core/lib-queue/queue"
+	"gitlab-internal.ntopus.com.br/core/lib-queue/queue_repository"
 	"os"
 	"strconv"
 	"sync"
@@ -35,7 +35,9 @@ func (qp *queue_publisher) init() {
 			AppLogger.ErrorPrintln("could not get queue port on queue " + qConf.QueueName)
 			os.Exit(1)
 		}
-		params := queue_repository.NewQueueRepositoryParams(qConf.ServerUser, qConf.ServerPassword, qConf.ServerHost, port)
+		params := queue_repository.NewQueueRepositoryParams(
+			qConf.ServerUser, qConf.ServerPassword, qConf.ServerHost, port,
+		)
 		params.SetVHost(qConf.ServerVHost)
 		qr, err := queue_repository.NewQueueRepository(params)
 		if err != nil {
