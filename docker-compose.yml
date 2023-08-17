@@ -46,7 +46,7 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: randomUser
       RABBITMQ_DEFAULT_PASS: randomPass
-      RABBITMQ_DEFAULT_VHOST: /
+      RABBITMQ_DEFAULT_VHOST: /timed
     volumes:
       - ./docker-data/rabbitmq/data:/var/lib/rabbitmq
 

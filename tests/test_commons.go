@@ -78,7 +78,7 @@ func GetConfigPath() string {
 
 func GetQueue(queueName string, threadLimit int) *queue.Queue {
 	params := queue_repository.NewQueueRepositoryParams("randomUser", "randomPass", "127.0.0.1", 5672)
-	params.SetVHost("/")
+	params.SetVHost("/" + config.GetConfig().PublishQueue[0].ServerVHost)
 	qr, err := queue_repository.NewQueueRepository(params)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	qParam := queue.NewQueueParams(queueName)
@@ -94,12 +94,12 @@ func InitQueue(queueName string, counter *int, consume fnConsume) *queue.Queue {
 	*counter = 0
 	mu.Unlock()
 	q := GetQueue(queueName, 5000)
-	err := q.StartConsume(func(queueName string, msg []byte) bool {
-			mu.Lock()
-			defer mu.Unlock()
-			*counter++
-			return consume(queueName, msg, *counter)
-		})
+	err := q.StartConsume(		func(queueName string, msg []byte) bool {
+		mu.Lock()
+		defer mu.Unlock()
+		*counter++
+		return consume(queueName, msg, *counter)
+	})
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	return q
 }
@@ -117,11 +117,11 @@ func ParseResp(resp *http.Response, dataContainer interface{}) *routes.JsendMess
 func PurgeQueue(queue string) {
 	publisher := config.GetConfig().PublishQueue[0]
 	url := fmt.Sprintf(
-		"amqp://%s:%s@%s:%s%s", publisher.ServerUser, publisher.ServerPassword, publisher.ServerHost,
+		"amqp://%s:%s@%s:%s/%s", publisher.ServerUser, publisher.ServerPassword, publisher.ServerHost,
 		publisher.ServerPort, publisher.ServerVHost,
 	)
 	conn, err := amqp.Dial(url)
-	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+	gomega.Expect(err).ShouldNot(gomega.HaveOccurred(), "connection url: "+url)
 	ch, err := conn.Channel()
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	_, err = ch.QueueInspect(queue)
@@ -140,16 +140,18 @@ func GetMockReader(mockData interface{}) (io.Reader, error) {
 }
 
 /*
-func RunApp() *gexec.Session {
-	appPath := filepath.Join(GetBinPath(), APP_NAME)
-	command := exec.Command(appPath, "-c="+GetConfigPath())
-	session, err := gexec.Start(command, ginkgo.GinkgoWriter, ginkgo.GinkgoWriter)
-	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-	time.Sleep(400 * time.Millisecond)
-	fmt.Println("Application is running")
-	return session
-}
-/*/
+	func RunApp() *gexec.Session {
+		appPath := filepath.Join(GetBinPath(), APP_NAME)
+		command := exec.Command(appPath, "-c="+GetConfigPath())
+		session, err := gexec.Start(command, ginkgo.GinkgoWriter, ginkgo.GinkgoWriter)
+		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+		time.Sleep(400 * time.Millisecond)
+		fmt.Println("Application is running")
+		return session
+	}
+
+/
+*/
 func RunApp() context.Context {
 	ctx := context.Background()
 	appMan := application.NewApplicationManager(GetConfigPath())
@@ -190,7 +192,9 @@ func SendPostRequest(url string, body io.Reader) (resp *http.Response, err error
 	return SendPostRequestWithHeaders(url, body, Headers)
 }
 
-func SendPostRequestWithHeaders(url string, body io.Reader, headers map[string]string) (resp *http.Response, err error) {
+func SendPostRequestWithHeaders(url string, body io.Reader, headers map[string]string) (
+	resp *http.Response, err error,
+) {
 	client := http.Client{}
 	req, err := http.NewRequest(http.MethodPost, url, body)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())

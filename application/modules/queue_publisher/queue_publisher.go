@@ -38,7 +38,7 @@ func (qp *queue_publisher) init() {
 		params := queue_repository.NewQueueRepositoryParams(
 			qConf.ServerUser, qConf.ServerPassword, qConf.ServerHost, port,
 		)
-		params.SetVHost(qConf.ServerVHost)
+		params.SetVHost("/" + qConf.ServerVHost)
 		qr, err := queue_repository.NewQueueRepository(params)
 		if err != nil {
 			AppLogger.ErrorPrintln("could not init queue repository on queue " + qConf.QueueName)

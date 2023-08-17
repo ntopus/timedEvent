@@ -100,8 +100,10 @@ clean:
 
 run-dev:
 	docker compose up -d
-	sleep 15
 	docker exec timedevent_arango sh /opt/tools/init.sh
+
+stop-dev:
+	docker compose down -v
 
 run-test:
 	mkdir -p ./test/cover

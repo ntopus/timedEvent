@@ -18,20 +18,18 @@ var DBInstance database.DataBaseManagment
 func GetDBSession() database.DataBaseManagment {
 	once.Do(func() {
 		var err error
-
-			appConfig := config.GetConfig()
-			dbConn, err := arangoDB.NewDBClient(&appConfig.DataBase)
-			if err != nil {
-				fmt.Println(err)
-				panic(err)
-			}
-			DBInstance, err = dbConn.GetDatabase(appConfig.DataBase.DbName, false)
-			if err != nil {
-				fmt.Println(err)
-				panic(err)
-			}
-		},
-	)
+		appConfig := config.GetConfig()
+		dbConn, err := arangoDB.NewDBClient(&appConfig.DataBase)
+		if err != nil {
+			fmt.Println(err)
+			panic(err)
+		}
+		DBInstance, err = dbConn.GetDatabase(appConfig.DataBase.DbName, false)
+		if err != nil {
+			fmt.Println(err)
+			panic(err)
+		}
+	})
 	return DBInstance
 }
 
