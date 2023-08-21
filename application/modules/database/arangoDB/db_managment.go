@@ -3,6 +3,7 @@ package arangoDB
 import (
 	"github.com/arangodb/go-driver"
 	"github.com/ivanmeca/timedEvent/application/modules/database"
+	"github.com/pkg/errors"
 )
 
 type Manager struct {
@@ -34,7 +35,22 @@ func (dbm *Manager) DropCollection(collectionName string) (bool, error) {
 func (dbm *Manager) GetCollection(collectionName string) (database.CollectionManagment, error) {
 	coll, err := dbm.db.Collection(nil, collectionName)
 	if err != nil {
-		return nil, err
+		exists, collectionExistsError := dbm.db.CollectionExists(nil, collectionName)
+		if collectionExistsError != nil {
+			return nil, errors.Wrap(collectionExistsError, errors.Wrap(err, "cant open collection").Error())
+		}
+		if exists {
+			return nil, errors.Wrap(err, "cant open collection")
+		}
+		_, collectionCreateError := dbm.db.CreateCollection(nil, collectionName, &driver.CreateCollectionOptions{
+			KeyOptions: &driver.CollectionKeyOptions{
+				AllowUserKeys:    true,
+				Type:             driver.KeyGeneratorTraditional,
+			},
+		})
+		if collectionCreateError != nil {
+			return nil, errors.Wrap(collectionCreateError, errors.Wrap(err, "cant open collection").Error())
+		}
 	}
 	return &Collection{
 		db:               dbm.db,

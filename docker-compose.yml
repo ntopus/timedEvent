@@ -30,7 +30,6 @@ services:
     environment:
       ARANGO_ROOT_PASSWORD: "rootpass"
       ARANGO_STORAGE_ENGINE: rocksdb
-    #entrypoint: "/opt/tools/init.sh"
   rabbitmq:
     image: rabbitmq:3.7-management
     container_name: timedevent_rabbitmq
