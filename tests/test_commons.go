@@ -117,7 +117,7 @@ func ParseResp(resp *http.Response, dataContainer interface{}) *routes.JsendMess
 func PurgeQueue(queue string) {
 	publisher := config.GetConfig().PublishQueue[0]
 	url := fmt.Sprintf(
-		"amqp://%s:%s@%s:%s/%s", publisher.ServerUser, publisher.ServerPassword, publisher.ServerHost,
+		"amqp://%s:%s@%s:%s%s", publisher.ServerUser, publisher.ServerPassword, publisher.ServerHost,
 		publisher.ServerPort, publisher.ServerVHost,
 	)
 	conn, err := amqp.Dial(url)
