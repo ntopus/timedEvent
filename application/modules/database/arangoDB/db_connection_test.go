@@ -57,8 +57,8 @@ func GetTestDatabase() *config.ConfigDB {
 	return &config.ConfigDB{
 		ServerHost:     "tcp://localhost",
 		ServerPort:     "8529",
-		ServerUser:     "testUser",
-		ServerPassword: "123456",
+		ServerUser:     "root",
+		ServerPassword: "rootpass",
 		DbName:         "testDb",
 	}
 }
