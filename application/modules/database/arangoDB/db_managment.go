@@ -35,20 +35,19 @@ func (dbm *Manager) DropCollection(collectionName string) (bool, error) {
 func (dbm *Manager) GetCollection(collectionName string) (database.CollectionManagment, error) {
 	coll, err := dbm.db.Collection(nil, collectionName)
 	if err != nil {
-		if driver.IsNotFoundGeneral(err) {
-			var collectionCreateError error 
-			coll, collectionCreateError = dbm.db.CreateCollection(nil, collectionName, &driver.CreateCollectionOptions{
-				KeyOptions: &driver.CollectionKeyOptions{
-					AllowUserKeys:    true,
-					Type:             driver.KeyGeneratorTraditional,
-				},
-			})
-			if collectionCreateError != nil {
-				return nil, errors.Wrap(collectionCreateError, errors.Wrap(err, "cant open collection").Error())
-			}
-			err = nil
+		if !driver.IsNotFoundGeneral(err) {
+			return nil, errors.Wrap(err, "cant open collection")
 		}
-		return nil, errors.Wrap(err, "cant open collection")
+		var collectionCreateError error 
+		coll, collectionCreateError = dbm.db.CreateCollection(nil, collectionName, &driver.CreateCollectionOptions{
+			KeyOptions: &driver.CollectionKeyOptions{
+				AllowUserKeys:    true,
+				Type:             driver.KeyGeneratorTraditional,
+			},
+		})
+		if collectionCreateError != nil {
+			return nil, errors.Wrap(collectionCreateError, errors.Wrap(err, "cant open collection").Error())
+		}
 	}
 	return &Collection{
 		db:               dbm.db,
