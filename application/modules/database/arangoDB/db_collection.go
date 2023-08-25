@@ -91,8 +91,8 @@ func (coll *Collection) Read(filters []database.AQLComparator) ([]data_types.Ara
 	glueStr := "FILTER"
 	bindVarsNames := 0
 	for _, filter := range filters {
-		bindVars[string('A'+bindVarsNames)] = filter.Value
-		query += fmt.Sprintf(" %s item.%s %s @%s", glueStr, filter.Field, filter.Comparator, string('A'+bindVarsNames))
+		bindVars[fmt.Sprintf("A%d",bindVarsNames)] = filter.Value
+		query += fmt.Sprintf(" %s item.%s %s @%s", glueStr, filter.Field, filter.Comparator, fmt.Sprintf("A%d",bindVarsNames))
 		glueStr = "AND"
 		bindVarsNames++
 	}
