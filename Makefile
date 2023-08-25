@@ -100,7 +100,6 @@ clean:
 
 run-dev:
 	docker compose up -d
-	docker exec timedevent_arango sh /opt/tools/init.sh
 
 stop-dev:
 	docker compose down -v

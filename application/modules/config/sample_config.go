@@ -18,8 +18,8 @@ func configSample() *ConfigData {
 	config.DataBase.DbName = "testDb"
 	config.DataBase.ServerHost = "http://localhost"
 	config.DataBase.ServerPort = "8529"
-	config.DataBase.ServerUser = "testUser"
-	config.DataBase.ServerPassword = "123456"
+	config.DataBase.ServerUser = "root"
+	config.DataBase.ServerPassword = "rootpass"
 
 	var pqueueconf ConfigQueue
 	pqueueconf.ServerHost = "localhost"

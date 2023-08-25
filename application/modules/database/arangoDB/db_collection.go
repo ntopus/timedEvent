@@ -91,8 +91,9 @@ func (coll *Collection) Read(filters []database.AQLComparator) ([]data_types.Ara
 	glueStr := "FILTER"
 	bindVarsNames := 0
 	for _, filter := range filters {
-		bindVars[string('A'+bindVarsNames)] = filter.Value
-		query += fmt.Sprintf(" %s item.%s %s @%s", glueStr, filter.Field, filter.Comparator, string('A'+bindVarsNames))
+		name := fmt.Sprintf("A%d", bindVarsNames)
+		bindVars[name] = filter.Value
+		query += fmt.Sprintf(" %s item.%s %s @%s", glueStr, filter.Field, filter.Comparator, name)
 		glueStr = "AND"
 		bindVarsNames++
 	}
@@ -102,10 +103,14 @@ func (coll *Collection) Read(filters []database.AQLComparator) ([]data_types.Ara
 		return nil, coll.DefaultErrorHandler(err)
 	}
 	defer cursor.Close()
+	for cursor.HasMore() {
+		fmt.Println("Has More")
+		meta, err := cursor.ReadDocument(nil, &item)
 	for cursor.HasMore() == true {
 
 		_, err = cursor.ReadDocument(nil, &item)
 		if err != nil {
+			fmt.Println("ERROR:", err)
 
 			return nil, coll.DefaultErrorHandler(err)
 		}

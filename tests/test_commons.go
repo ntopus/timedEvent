@@ -78,7 +78,7 @@ func GetConfigPath() string {
 
 func GetQueue(queueName string, threadLimit int) *queue.Queue {
 	params := queue_repository.NewQueueRepositoryParams("randomUser", "randomPass", "127.0.0.1", 5672)
-	params.SetVHost("/" + config.GetConfig().PublishQueue[0].ServerVHost)
+	params.SetVHost(config.GetConfig().PublishQueue[0].ServerVHost)
 	qr, err := queue_repository.NewQueueRepository(params)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	qParam := queue.NewQueueParams(queueName)
@@ -117,7 +117,7 @@ func ParseResp(resp *http.Response, dataContainer interface{}) *routes.JsendMess
 func PurgeQueue(queue string) {
 	publisher := config.GetConfig().PublishQueue[0]
 	url := fmt.Sprintf(
-		"amqp://%s:%s@%s:%s/%s", publisher.ServerUser, publisher.ServerPassword, publisher.ServerHost,
+		"amqp://%s:%s@%s:%s%s", publisher.ServerUser, publisher.ServerPassword, publisher.ServerHost,
 		publisher.ServerPort, publisher.ServerVHost,
 	)
 	conn, err := amqp.Dial(url)

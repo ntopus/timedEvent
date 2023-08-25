@@ -24,7 +24,7 @@ func GetDBSession() database.DataBaseManagment {
 			fmt.Println(err)
 			panic(err)
 		}
-		DBInstance, err = dbConn.GetDatabase(appConfig.DataBase.DbName, false)
+		DBInstance, err = dbConn.GetDatabase(appConfig.DataBase.DbName, true)
 		if err != nil {
 			fmt.Println(err)
 			panic(err)
