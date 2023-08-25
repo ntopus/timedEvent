@@ -103,8 +103,10 @@ func (coll *Collection) Read(filters []database.AQLComparator) ([]data_types.Ara
 	}
 	defer cursor.Close()
 	for cursor.HasMore() == true {
+
 		_, err = cursor.ReadDocument(nil, &item)
 		if err != nil {
+
 			return nil, coll.DefaultErrorHandler(err)
 		}
 		list = append(list, item)

@@ -79,21 +79,21 @@ up-deps:
 	glide up
 
 docker-build: build-native-production
-	sudo docker build -t ${APPLICATION_NAME}:${BASE_VERSION} ./
+	docker build -t ${APPLICATION_NAME}:${BASE_VERSION} ./
 
 docker-push:
-	sudo docker tag ${APPLICATION_NAME}:${BASE_VERSION} internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:${BASE_VERSION}
-	sudo docker tag ${APPLICATION_NAME}:${BASE_VERSION} internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:${VERSION}
-	sudo docker tag ${APPLICATION_NAME}:${BASE_VERSION} internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:latest
-	sudo docker tag ${APPLICATION_NAME}:${BASE_VERSION} gcr.io/ntopus-1379/${APPLICATION_NAME}:${BASE_VERSION}
-	sudo docker tag ${APPLICATION_NAME}:${BASE_VERSION} gcr.io/ntopus-1379/${APPLICATION_NAME}:${VERSION}
-	sudo docker tag ${APPLICATION_NAME}:${BASE_VERSION} gcr.io/ntopus-1379/${APPLICATION_NAME}:latest
-	sudo docker push internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:${BASE_VERSION}
-	sudo docker push internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:${VERSION}
-	sudo docker push internal-registry.ntopus.com.br/internal/${APPLICATION_NAME}:latest
-	sudo docker push gcr.io/ntopus-1379/${APPLICATION_NAME}:${BASE_VERSION}
-	sudo docker push gcr.io/ntopus-1379/${APPLICATION_NAME}:${VERSION}
-	sudo docker push gcr.io/ntopus-1379/${APPLICATION_NAME}:latest
+	docker tag ${APPLICATION_NAME}:${BASE_VERSION} registry-internal.ntopus.com.br/external/${APPLICATION_NAME}:${BASE_VERSION}
+	docker tag ${APPLICATION_NAME}:${BASE_VERSION} registry-internal.ntopus.com.br/external/${APPLICATION_NAME}:${VERSION}
+	docker tag ${APPLICATION_NAME}:${BASE_VERSION} registry-internal.ntopus.com.br/external/${APPLICATION_NAME}:latest
+	docker tag ${APPLICATION_NAME}:${BASE_VERSION} gcr.io/ntopus-1379/${APPLICATION_NAME}:${BASE_VERSION}
+	docker tag ${APPLICATION_NAME}:${BASE_VERSION} gcr.io/ntopus-1379/${APPLICATION_NAME}:${VERSION}
+	docker tag ${APPLICATION_NAME}:${BASE_VERSION} gcr.io/ntopus-1379/${APPLICATION_NAME}:latest
+	docker push registry-internal.ntopus.com.br/external/${APPLICATION_NAME}:${BASE_VERSION}
+	docker push registry-internal.ntopus.com.br/external/${APPLICATION_NAME}:${VERSION}
+	docker push registry-internal.ntopus.com.br/external/${APPLICATION_NAME}:latest
+	docker push gcr.io/ntopus-1379/${APPLICATION_NAME}:${BASE_VERSION}
+	docker push gcr.io/ntopus-1379/${APPLICATION_NAME}:${VERSION}
+	docker push gcr.io/ntopus-1379/${APPLICATION_NAME}:latest
 
 clean:
 	@test ! -e bin/${BIN_NAME} || rm bin/${BIN_NAME}
