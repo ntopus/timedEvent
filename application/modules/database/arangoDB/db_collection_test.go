@@ -247,6 +247,8 @@ func getTestCollectionInstance(collName string) database.CollectionManagment {
 		ok, err := db.CreateCollection(TestCollectionName)
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		gomega.Expect(ok).Should(gomega.BeTrue())
+		coll, err = db.GetCollection(TestCollectionName)
+		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 	}
 
 	return coll

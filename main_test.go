@@ -19,20 +19,28 @@ func TestApplication(t *testing.T) {
 
 var App context.Context
 
-var _ = ginkgo.Describe("main_test_suite", func() {
-	ginkgo.BeforeSuite(func() {
-		tests.BuildApplication()
-		tests.SaveConfigFile()
-		App = tests.RunApp()
-		time.Sleep(time.Second)
-	})
-	ginkgo.AfterSuite(func() {
-		fmt.Println("Killing application")
-		App.Done()
-	})
-	ginkgo.BeforeEach(func() {
-		tests.PurgeQueue(tests.TEST_PUBLISH_QUEUE)
-	})
-	ginkgo.Context("Test webserver", tests.CreateEventTester)
-	ginkgo.Context("Test scheduler", tests.SchedulerTester)
-})
+var _ = ginkgo.Describe(
+	"main_test_suite", func() {
+		ginkgo.BeforeSuite(
+			func() {
+				tests.BuildApplication()
+				tests.SaveConfigFile()
+				App = tests.RunApp()
+				time.Sleep(time.Second)
+			},
+		)
+		ginkgo.AfterSuite(
+			func() {
+				fmt.Println("Killing application")
+				App.Done()
+			},
+		)
+		ginkgo.BeforeEach(
+			func() {
+				tests.PurgeQueue(tests.TEST_PUBLISH_QUEUE)
+			},
+		)
+		ginkgo.Context("Test webserver", tests.CreateEventTester)
+		ginkgo.Context("Test scheduler", tests.SchedulerTester)
+	},
+)

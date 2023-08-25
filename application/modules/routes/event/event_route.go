@@ -12,6 +12,7 @@ import (
 	"github.com/ivanmeca/timedEvent/application/modules/scheduler"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
+	"go-micro.dev/v4/logger"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -192,6 +193,7 @@ func HTTPCreateEvent(context *gin.Context) {
 		event, err := ceHttpCreate(context)
 		if err != nil {
 			response = collection_managment.DefaultErrorHandler(err)
+			logger.Debug(err)
 			context.JSON(int(response.Status()), &response)
 			return
 		}

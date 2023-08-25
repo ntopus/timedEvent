@@ -15,6 +15,7 @@ services:
 #      - arango
 #      - rabbitmq
 #    restart: on-failure
+
   arango:
     image: arangodb:3.4.7
     ports:
@@ -25,11 +26,13 @@ services:
           - "timedEvent.db.ivanmeca.com.br"
     volumes:
       - ./docker-data/arangodb:/var/lib/arangodb
+      - ./docker/arangodb:/opt/tools
     environment:
       ARANGO_ROOT_PASSWORD: "rootpass"
       ARANGO_STORAGE_ENGINE: rocksdb
+
   rabbitmq:
-    image: rabbitmq:management
+    image: rabbitmq:3.7-management
     networks:
       back:
         aliases:
@@ -42,7 +45,7 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: randomUser
       RABBITMQ_DEFAULT_PASS: randomPass
-      RABBITMQ_DEFAULT_VHOST: /
+      RABBITMQ_DEFAULT_VHOST: timed
     volumes:
       - ./docker-data/rabbitmq/data:/var/lib/rabbitmq
 

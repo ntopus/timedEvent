@@ -47,7 +47,9 @@ func (coll *Collection) Upsert(item *data_types.ArangoCloudEvent) (*data_types.A
 	ctx := driver.WithReturnNew(context.Background(), &newDoc)
 	bindVars := map[string]interface{}{}
 	bindVars["item"] = item
-	query := fmt.Sprintf(`INSERT @item INTO %s OPTIONS { overwrite: true, exclusive: true } RETURN NEW `, coll.collection)
+	query := fmt.Sprintf(
+		`INSERT @item INTO %s OPTIONS { overwrite: true, exclusive: false } RETURN NEW `, coll.collection,
+	)
 	for retries := 0; retries < 3; retries++ {
 		cursor, err = coll.db.Query(ctx, query, bindVars)
 		if err == nil {
@@ -89,8 +91,9 @@ func (coll *Collection) Read(filters []database.AQLComparator) ([]data_types.Ara
 	glueStr := "FILTER"
 	bindVarsNames := 0
 	for _, filter := range filters {
-		bindVars[string('A'+bindVarsNames)] = filter.Value
-		query += fmt.Sprintf(" %s item.%s %s @%s", glueStr, filter.Field, filter.Comparator, string('A'+bindVarsNames))
+		name := fmt.Sprintf("A%d", bindVarsNames)
+		bindVars[name] = filter.Value
+		query += fmt.Sprintf(" %s item.%s %s @%s", glueStr, filter.Field, filter.Comparator, name)
 		glueStr = "AND"
 		bindVarsNames++
 	}
@@ -100,7 +103,7 @@ func (coll *Collection) Read(filters []database.AQLComparator) ([]data_types.Ara
 		return nil, coll.DefaultErrorHandler(err)
 	}
 	defer cursor.Close()
-	for cursor.HasMore() == true {
+	for cursor.HasMore() {
 		_, err = cursor.ReadDocument(nil, &item)
 		if err != nil {
 			return nil, coll.DefaultErrorHandler(err)

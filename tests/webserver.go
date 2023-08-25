@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
+	"io"
 	"sync"
 	"time"
 )
@@ -52,6 +53,8 @@ func testSendValidCloudEventRequest() {
 		defer ginkgo.GinkgoRecover()
 		defer wg.Done()
 		resp, err := SendPostRequestWithHeaders(TEST_ENDPOINT, mockReader, h)
+		bodyStr, _ := io.ReadAll(resp.Body)
+		println(string(bodyStr))
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		gomega.Expect(resp.StatusCode).To(gomega.Equal(201))
 	}()

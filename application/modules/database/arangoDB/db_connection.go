@@ -37,7 +37,7 @@ type ArangoDBConnector struct {
 func (db *ArangoDBConnector) GetDatabase(databaseName string, createIfNotExists bool) (database.DataBaseManagment, error) {
 	exist, err := db.client.DatabaseExists(nil, databaseName)
 	if err != nil {
-		return nil, errors.New("could not create database: " + err.Error())
+		return nil, errors.New("could not check if database exists: " + err.Error())
 	}
 	if !exist && createIfNotExists {
 		_, err := db.client.CreateDatabase(nil, databaseName, nil)
@@ -47,7 +47,7 @@ func (db *ArangoDBConnector) GetDatabase(databaseName string, createIfNotExists 
 	}
 	d, err := db.client.Database(nil, databaseName)
 	if err != nil {
-		return nil, errors.New("could not create database: " + err.Error())
+		return nil, errors.New("could not access database : " + err.Error())
 	}
 	return &Manager{
 		client: db.client,

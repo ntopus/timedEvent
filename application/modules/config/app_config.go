@@ -1,8 +1,8 @@
 package config
 
 import (
-	"github.com/micro/go-micro/config"
-	"github.com/micro/go-micro/config/source/file"
+	"go-micro.dev/v4/config"
+	"go-micro.dev/v4/config/source/file"
 	"log"
 )
 

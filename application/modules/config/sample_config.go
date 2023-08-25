@@ -9,7 +9,7 @@ import (
 func configSample() *ConfigData {
 	var config ConfigData
 
-	config.LogLevel = logger.LogNotice
+	config.LogLevel = logger.LogDebug
 	config.ControlTime = 100
 	config.PoolTime = 10000
 	config.ExpirationTime = 2592000000
@@ -18,8 +18,8 @@ func configSample() *ConfigData {
 	config.DataBase.DbName = "testDb"
 	config.DataBase.ServerHost = "http://localhost"
 	config.DataBase.ServerPort = "8529"
-	config.DataBase.ServerUser = "testUser"
-	config.DataBase.ServerPassword = "123456"
+	config.DataBase.ServerUser = "root"
+	config.DataBase.ServerPassword = "rootpass"
 
 	var pqueueconf ConfigQueue
 	pqueueconf.ServerHost = "localhost"
